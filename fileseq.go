@@ -28,6 +28,7 @@ var (
 	padding       map[string]int
 	rangePatterns []*regexp.Regexp
 	splitPattern  *regexp.Regexp
+	stripSpace    *regexp.Regexp
 )
 
 func init() {
@@ -36,14 +37,19 @@ func init() {
 		"@": 1,
 	}
 
+	stripSpace = regexp.MustCompile(`(\s+)`)
+
 	// Regular expression patterns for matching frame set strings.
 	// Examples:
 	//     1-100
 	//     100
 	//     1-100x5
 	rangePatterns = []*regexp.Regexp{
+		// Frame range:  1-10
 		regexp.MustCompile(`^(\-?[0-9]+)\-(\-?[0-9]+)$`),
+		// Single frame:  10
 		regexp.MustCompile(`^(\-?[0-9]+)$`),
+		// Complex range:  1-10x2
 		regexp.MustCompile(`^(\-?[0-9]+)\-(\-?[0-9]+)([:xy]{1})([0-9]+)$`),
 	}
 
@@ -72,13 +78,20 @@ func NewFrameSet(frange string) (*FrameSet, error) {
 		matched bool
 	)
 
-	frameSet := &FrameSet{}
-	frameSet.frames = []int{}
-	frameSet.set = map[int]struct{}{}
+	frange = stripSpace.ReplaceAllLiteralString(frange, "")
 
+	frameSet := &FrameSet{
+		frange: frange,
+		frames: []int{},
+		set:    map[int]struct{}{},
+	}
+
+	// For each comma-sep component, we will parse a frame range
 	for _, part := range strings.Split(frange, ",") {
 
 		matched = false
+
+		// Build up frames for all comma-sep components
 		for _, rx = range rangePatterns {
 			if match = rx.FindStringSubmatch(part); match == nil {
 				continue
@@ -89,6 +102,9 @@ func NewFrameSet(frange string) (*FrameSet, error) {
 			}
 			break
 		}
+
+		// If any component of the comma-sep frame range fails to
+		// parse, we bail out
 		if !matched {
 			err = fmt.Errorf("Failed to parse frame range: %s on part %q", frange, part)
 			return nil, err
@@ -98,10 +114,12 @@ func NewFrameSet(frange string) (*FrameSet, error) {
 	return frameSet, nil
 }
 
+// Process a rangePattern match group
 func (s *FrameSet) handleMatch(match []string) error {
 	var parsed []int
 
 	switch len(match) {
+
 	case 1:
 		f, err := parseInt(match[0])
 		if err != nil {
@@ -118,8 +136,7 @@ func (s *FrameSet) handleMatch(match []string) error {
 		if err != nil {
 			return err
 		}
-		end++
-		size := end - start
+		size := (end + 1) - start
 		parsed = make([]int, size, size)
 		for i := range parsed {
 			parsed[i] = start
@@ -181,6 +198,17 @@ func (s *FrameSet) handleMatch(match []string) error {
 	return nil
 }
 
+// String implements Stringer, by returning the frame
+// range string
+func (s *FrameSet) String() string {
+	return s.FrameRange()
+}
+
+// Len returns the number of frames in the set
+func (s *FrameSet) Len() int {
+	return len(s.frames)
+}
+
 // Adds a slice of frame numbers to the internal
 // array, only if they have not yet been added.
 func (s *FrameSet) addFrames(frames []int) {
@@ -192,6 +220,128 @@ func (s *FrameSet) addFrames(frames []int) {
 		s.set[f] = struct{}{}
 		s.frames = append(s.frames, f)
 	}
+}
+
+// Index returns the index position of the frame value
+// within the frame set.
+// If the given frame does not exist, then return -1
+func (s *FrameSet) Index(frame int) int {
+	for i, v := range s.frames {
+		if v == frame {
+			return i
+		}
+	}
+	return -1
+}
+
+// Frame returns the frame number value for a given index into
+// the frame set.
+// If the index is outside the bounds of the frame set range,
+// then an error is returned.
+func (s *FrameSet) Frame(index int) (int, error) {
+	if index < 0 || index >= len(s.frames) {
+		return 0, fmt.Errorf("index %d is outside the bounds of the frame set 0-%d",
+			index, len(s.frames))
+	}
+	return s.frames[index], nil
+}
+
+// HasFrame returns true if the frameset contains the given
+// frame value.
+func (s *FrameSet) HasFrame(frame int) bool {
+	if s.Index(frame) == -1 {
+		return false
+	}
+	return true
+}
+
+// Start returns the first frame in the frame set
+func (s *FrameSet) Start() int {
+	if len(s.frames) == 0 {
+		return 0
+	}
+	return s.frames[0]
+}
+
+// End returns the last frame in the frame set
+func (s *FrameSet) End() int {
+	if len(s.frames) == 0 {
+		return 0
+	}
+	return s.frames[len(s.frames)-1]
+}
+
+// FrameRange returns the range string that was used
+// to initialize the FrameSet
+func (s *FrameSet) FrameRange() string {
+	return s.frange
+}
+
+// FrameRangePadded returns the range string that was used
+// to initialize the FrameSet, with each number padded out
+// with zeros to a given width
+func (s *FrameSet) FrameRangePadded(pad int) string {
+	// We don't need to do anything if they gave us
+	// an invalid pad number
+	if pad < 2 {
+		return s.frange
+	}
+
+	size := strings.Count(s.frange, ",") + 1
+	parts := make([]string, size, size)
+
+	for i, part := range strings.Split(s.frange, ",") {
+
+		didMatch := false
+
+		for _, rx := range rangePatterns {
+			matched := rx.FindStringSubmatch(part)
+			if len(matched) == 0 {
+				continue
+			}
+			matched = matched[1:]
+			size = len(matched)
+			switch size {
+			case 1:
+				parts[i] = zfill(matched[0], pad)
+			case 2:
+				parts[i] = fmt.Sprintf("%s-%s", zfill(matched[0], pad), zfill(matched[1], pad))
+			case 4:
+				parts[i] = fmt.Sprintf("%s-%s%s%s",
+					zfill(matched[0], pad), zfill(matched[1], pad),
+					matched[2], matched[3])
+			default:
+				// No match. Try the next pattern
+				continue
+			}
+			// If we got here, we matched a case and can stop
+			// checking the rest of the patterns
+			didMatch = true
+			break
+		}
+		// If we didn't match one of our expected patterns
+		// then just take the original part and add it unmodified
+		if !didMatch {
+			parts = append(parts, part)
+		}
+	}
+	return strings.Join(parts, ",")
+}
+
+// Left pads a string to a given with, using "0".
+// If the string begins with a negative "-" character, then
+// padding is inserted between the "-" and the remaining characters.
+func zfill(src string, z int) string {
+	size := len(src)
+	if size >= z {
+		return src
+	}
+
+	fill := strings.Repeat("0", z-size)
+	if strings.HasPrefix(src, "-") {
+		return fmt.Sprintf("-%s%s", fill, src[1:])
+	}
+	return fmt.Sprintf("%s%s", fill, src)
 }
 
 // Expands a start, end, and stepping value
