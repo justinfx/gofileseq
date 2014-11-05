@@ -36,8 +36,8 @@ func TestNewFrameSet(t *testing.T) {
 		if size != len(tt.expected) {
 			t.Errorf("Expected Len to be %d, got %d", len(tt.expected), size)
 		}
-		if !reflect.DeepEqual(s.frames, tt.expected) {
-			t.Errorf("While parsing %q, got %v, expected %v", tt.frange, s.frames, tt.expected)
+		if !reflect.DeepEqual(s.Frames(), tt.expected) {
+			t.Errorf("While parsing %q, got %v, expected %v", tt.frange, s.Frames(), tt.expected)
 		}
 	}
 }
@@ -62,9 +62,9 @@ func TestFrameSetLookup(t *testing.T) {
 			t.Fatalf("Expected End frame to be %d, got %d", end, actual)
 		}
 
-		for idx, val := range s.frames {
+		for idx, val := range s.Frames() {
 			if !s.HasFrame(val) {
-				t.Errorf("Expected frame %d to be in frames %v", val, s.frames)
+				t.Errorf("Expected frame %d to be in frames %v", val, s.Frames())
 			}
 			actualIdx := s.Index(val)
 			if actualIdx != idx {
@@ -72,7 +72,7 @@ func TestFrameSetLookup(t *testing.T) {
 			}
 			actualVal, err := s.Frame(idx)
 			if err != nil {
-				t.Fatalf("Did not find valid frame for idx %s in frames %v", idx, s.frames)
+				t.Fatalf("Did not find valid frame for idx %s in frames %v", idx, s.Frames())
 			}
 			if actualVal != val {
 				t.Errorf("Expected value for index %d to be %d, got %d", idx, val, actualVal)

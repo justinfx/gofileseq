@@ -246,6 +246,12 @@ func (s *FrameSet) Frame(index int) (int, error) {
 	return s.frames[index], nil
 }
 
+// Frames returns a slice of the frame numbers that were parsed
+// from the original frame range string
+func (s *FrameSet) Frames() []int {
+	return s.frames
+}
+
 // HasFrame returns true if the frameset contains the given
 // frame value.
 func (s *FrameSet) HasFrame(frame int) bool {
