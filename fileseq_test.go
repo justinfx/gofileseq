@@ -113,6 +113,68 @@ func TestFrameSetPadding(t *testing.T) {
 	}
 }
 
+func TestFrameSetNormalize(t *testing.T) {
+	var table = []struct {
+		input  string
+		output string
+	}{
+		{"1,2,3,4,5", "1-5"},
+		{"1-5,6,7,8,9,10,11-20", "1-20"},
+	}
+
+	for _, tt := range table {
+		s, err := NewFrameSet(tt.input)
+		if err != nil {
+			t.Fatalf("Failed to parse %q: %s", tt.input, err.Error())
+		}
+		actual := s.Normalize().FrameRange()
+		if actual != tt.output {
+			t.Errorf("Expected %s, got %s", tt.output, actual)
+		}
+	}
+}
+
+func TestFramesToFrameRange(t *testing.T) {
+	var table = []struct {
+		frames   []int
+		sorted   bool
+		zfill    int
+		expected string
+	}{
+		{[]int{1, 2, 3, 4, 5}, true, 0, "1-5"},
+
+		{[]int{1, 3, 5, 7, 9}, true, 0, "1-9x2"},
+
+		{
+			[]int{1, 2, 3, 4, 5, 20, 30, 40, 41, 42, 43, 44, 50, 60, 62, 64, 66},
+			true,
+			0,
+			"1-5,20-40x10,41-44,50,60-66x2",
+		},
+
+		{
+			[]int{1, 3, 6, 9, 12, 20, 22, 24, 28, 32},
+			true,
+			0,
+			"1,3-12x3,20-24x2,28,32",
+		},
+
+		{
+			[]int{1, 11, 21, 31, 41, 51, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 18},
+			false,
+			2,
+			"01-51x10,02-10,12-18x3",
+		},
+	}
+
+	for _, tt := range table {
+		actual := FramesToFrameRange(tt.frames, tt.sorted, tt.zfill)
+		if actual != tt.expected {
+			t.Errorf("Expected range %q, got %q", tt.expected, actual)
+		}
+	}
+}
+
 func TestToRange(t *testing.T) {
 	var table = []struct {
 		expected         []int

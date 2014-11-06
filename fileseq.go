@@ -6,338 +6,122 @@ Frame Range Shorthand
 
 Support for:
 
-	Standard: 1-10
-	Comma Delimted: 1-10,10-20
-	Chunked: 1-100x5
-	Filled: 1-100y5
-	Staggered: 1-100:3 (1-100x3, 1-100x2, 1-100)
-	Negative frame numbers: -10-100
-	Padding: #=4 padded, @=single pad
+    Standard: 1-10
+    Comma Delimted: 1-10,10-20
+    Chunked: 1-100x5
+    Filled: 1-100y5
+    Staggered: 1-100:3 (1-100x3, 1-100x2, 1-100)
+    Negative frame numbers: -10-100
+    Padding: #=4 padded, @=single pad
 
 */
 package fileseq
 
 import (
+	"bytes"
 	"fmt"
-	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
 
-var (
-	padding       map[string]int
-	rangePatterns []*regexp.Regexp
-	splitPattern  *regexp.Regexp
-	stripSpace    *regexp.Regexp
-)
-
-func init() {
-	padding = map[string]int{
-		"#": 4,
-		"@": 1,
+// FramesToFrameRange takes a slice of frame numbers and
+// compresses them into a frame range string.
+//
+// If sorted == true, pre-sort the frames instead of respecting
+// their current order in the range.
+//
+// If zfill > 1, then pad out each number with "0" to the given
+// total width.
+func FramesToFrameRange(frames []int, sorted bool, zfill int) string {
+	count := len(frames)
+	if count == 0 {
+		return ""
+	}
+	if count == 1 {
+		return strconv.Itoa(frames[0])
 	}
 
-	stripSpace = regexp.MustCompile(`(\s+)`)
-
-	// Regular expression patterns for matching frame set strings.
-	// Examples:
-	//     1-100
-	//     100
-	//     1-100x5
-	rangePatterns = []*regexp.Regexp{
-		// Frame range:  1-10
-		regexp.MustCompile(`^(\-?[0-9]+)\-(\-?[0-9]+)$`),
-		// Single frame:  10
-		regexp.MustCompile(`^(\-?[0-9]+)$`),
-		// Complex range:  1-10x2
-		regexp.MustCompile(`^(\-?[0-9]+)\-(\-?[0-9]+)([:xy]{1})([0-9]+)$`),
+	if sorted {
+		sort.Ints(frames)
 	}
 
-	// Regular expression for matching a file sequence string.
-	// Example:
-	//     /film/shot/renders/hero_bty.1-100#.exr
-	splitPattern = regexp.MustCompile(`([\:xy\-0-9,]*)([\#\@]+)`)
-}
+	zf := zfillString
 
-// FrameSet wraps a sequence of frames in container that
-// exposes array-like operations and queries, after parsing
-// the given frame range string.
-type FrameSet struct {
-	frange string
-	frames []int
-	set    map[int]struct{}
-}
+	var i, frame, step int
+	var start, end string
+	var buf bytes.Buffer
 
-// Create a new FrameSet from a given frame range string
-// Returns an error if the frame range could not be parsed.
-func NewFrameSet(frange string) (*FrameSet, error) {
-	var (
-		match   []string
-		rx      *regexp.Regexp
-		err     error
-		matched bool
-	)
-
-	frange = stripSpace.ReplaceAllLiteralString(frange, "")
-
-	frameSet := &FrameSet{
-		frange: frange,
-		frames: []int{},
-		set:    map[int]struct{}{},
-	}
-
-	// For each comma-sep component, we will parse a frame range
-	for _, part := range strings.Split(frange, ",") {
-
-		matched = false
-
-		// Build up frames for all comma-sep components
-		for _, rx = range rangePatterns {
-			if match = rx.FindStringSubmatch(part); match == nil {
-				continue
-			}
-			matched = true
-			if err = frameSet.handleMatch(match[1:]); err != nil {
-				return nil, err
+	// Keep looping until all frames are consumed
+	for len(frames) > 0 {
+		count = len(frames)
+		// If we get to the last element, just write it
+		// and end
+		if count <= 2 {
+			for i, frame = range frames {
+				if buf.Len() > 0 {
+					buf.WriteString(",")
+				}
+				buf.WriteString(zf(strconv.Itoa(frame), zfill))
 			}
 			break
 		}
-
-		// If any component of the comma-sep frame range fails to
-		// parse, we bail out
-		if !matched {
-			err = fmt.Errorf("Failed to parse frame range: %s on part %q", frange, part)
-			return nil, err
-		}
-	}
-
-	return frameSet, nil
-}
-
-// Process a rangePattern match group
-func (s *FrameSet) handleMatch(match []string) error {
-	var parsed []int
-
-	switch len(match) {
-
-	case 1:
-		f, err := parseInt(match[0])
-		if err != nil {
-			return err
-		}
-		parsed = []int{f}
-
-	case 2:
-		start, err := parseInt(match[0])
-		if err != nil {
-			return err
-		}
-		end, err := parseInt(match[1])
-		if err != nil {
-			return err
-		}
-		size := (end + 1) - start
-		parsed = make([]int, size, size)
-		for i := range parsed {
-			parsed[i] = start
-			start++
-		}
-
-	case 4:
-		var (
-			err               error
-			mod               string
-			start, end, chunk int
-		)
-		chunk, err = parseInt(match[3])
-		if err != nil {
-			return err
-		}
-		if chunk == 0 {
-			return fmt.Errorf("Failed to parse part of range %v. "+
-				"Encountered invalid 0 value", match[3])
-		}
-		if start, err = parseInt(match[0]); err != nil {
-			return err
-		}
-		if end, err = parseInt(match[1]); err != nil {
-			return err
-		}
-		if mod = match[2]; !isModifier(mod) {
-			return fmt.Errorf("%q is not one of the valid modifier 'xy:'", mod)
-		}
-
-		switch mod {
-		case `x`:
-			parsed = toRange(start, end, chunk)
-
-		case `y`:
-			parsed = []int{}
-			skip := start
-			for _, val := range toRange(start, end, 1) {
-				if val == skip {
-					skip += chunk
-					continue
-				}
-				parsed = append(parsed, val)
-			}
-
-		case `:`:
-			parsed = []int{}
-			for ; chunk >= 0; chunk-- {
-				staggered := toRange(start, end, chunk)
-				parsed = append(parsed, staggered...)
+		// At this point, we have 3 or more frames to check.
+		// Scan the current window of the slice to see how
+		// many frames we can consume into a group
+		step = frames[1] - frames[0]
+		for i = 0; i < len(frames)-1; i++ {
+			// We have scanned as many frames as we can
+			// for this group. Now write them and stop
+			// looping on this window
+			if (frames[i+1] - frames[i]) != step {
+				break
 			}
 		}
 
-	default:
-		return fmt.Errorf("Unexpected match []string size: %v", match)
-	}
+		// Subsequent groups are comma-separated
+		if buf.Len() > 0 {
+			buf.WriteString(",")
+		}
 
-	s.addFrames(parsed)
-	return nil
-}
-
-// String implements Stringer, by returning the frame
-// range string
-func (s *FrameSet) String() string {
-	return s.FrameRange()
-}
-
-// Len returns the number of frames in the set
-func (s *FrameSet) Len() int {
-	return len(s.frames)
-}
-
-// Adds a slice of frame numbers to the internal
-// array, only if they have not yet been added.
-func (s *FrameSet) addFrames(frames []int) {
-	var exists bool
-	for _, f := range frames {
-		if _, exists = s.set[f]; exists {
+		// We only have a single frame to write for this group
+		if i == 0 {
+			buf.WriteString(zf(strconv.Itoa(frames[0]), zfill))
+			frames = frames[1:]
 			continue
 		}
-		s.set[f] = struct{}{}
-		s.frames = append(s.frames, f)
-	}
-}
 
-// Index returns the index position of the frame value
-// within the frame set.
-// If the given frame does not exist, then return -1
-func (s *FrameSet) Index(frame int) int {
-	for i, v := range s.frames {
-		if v == frame {
-			return i
-		}
-	}
-	return -1
-}
-
-// Frame returns the frame number value for a given index into
-// the frame set.
-// If the index is outside the bounds of the frame set range,
-// then an error is returned.
-func (s *FrameSet) Frame(index int) (int, error) {
-	if index < 0 || index >= len(s.frames) {
-		return 0, fmt.Errorf("index %d is outside the bounds of the frame set 0-%d",
-			index, len(s.frames))
-	}
-	return s.frames[index], nil
-}
-
-// Frames returns a slice of the frame numbers that were parsed
-// from the original frame range string
-func (s *FrameSet) Frames() []int {
-	return s.frames
-}
-
-// HasFrame returns true if the frameset contains the given
-// frame value.
-func (s *FrameSet) HasFrame(frame int) bool {
-	if s.Index(frame) == -1 {
-		return false
-	}
-	return true
-}
-
-// Start returns the first frame in the frame set
-func (s *FrameSet) Start() int {
-	if len(s.frames) == 0 {
-		return 0
-	}
-	return s.frames[0]
-}
-
-// End returns the last frame in the frame set
-func (s *FrameSet) End() int {
-	if len(s.frames) == 0 {
-		return 0
-	}
-	return s.frames[len(s.frames)-1]
-}
-
-// FrameRange returns the range string that was used
-// to initialize the FrameSet
-func (s *FrameSet) FrameRange() string {
-	return s.frange
-}
-
-// FrameRangePadded returns the range string that was used
-// to initialize the FrameSet, with each number padded out
-// with zeros to a given width
-func (s *FrameSet) FrameRangePadded(pad int) string {
-	// We don't need to do anything if they gave us
-	// an invalid pad number
-	if pad < 2 {
-		return s.frange
-	}
-
-	size := strings.Count(s.frange, ",") + 1
-	parts := make([]string, size, size)
-
-	for i, part := range strings.Split(s.frange, ",") {
-
-		didMatch := false
-
-		for _, rx := range rangePatterns {
-			matched := rx.FindStringSubmatch(part)
-			if len(matched) == 0 {
+		// First do a check to see if we could have gotten a larger range
+		// out of subsequent values with a different step size
+		if i == 1 && count > 3 {
+			// Check if the next two pairwise frames have the same step.
+			// If so, then it is better than our current grouping.
+			if (frames[2] - frames[1]) == (frames[3] - frames[2]) {
+				// Just consume the first frame, and allow the next
+				// loop to scan the new stepping
+				buf.WriteString(zf(strconv.Itoa(frames[0]), zfill))
+				frames = frames[1:]
 				continue
 			}
-			matched = matched[1:]
-			size = len(matched)
-			switch size {
-			case 1:
-				parts[i] = zfill(matched[0], pad)
-			case 2:
-				parts[i] = fmt.Sprintf("%s-%s", zfill(matched[0], pad), zfill(matched[1], pad))
-			case 4:
-				parts[i] = fmt.Sprintf("%s-%s%s%s",
-					zfill(matched[0], pad), zfill(matched[1], pad),
-					matched[2], matched[3])
-			default:
-				// No match. Try the next pattern
-				continue
-			}
-			// If we got here, we matched a case and can stop
-			// checking the rest of the patterns
-			didMatch = true
-			break
 		}
-		// If we didn't match one of our expected patterns
-		// then just take the original part and add it unmodified
-		if !didMatch {
-			parts = append(parts, part)
+
+		// Otherwise write out this step range
+		start = zf(strconv.Itoa(frames[0]), zfill)
+		end = zf(strconv.Itoa(frames[i]), zfill)
+		buf.WriteString(fmt.Sprintf("%s-%s", start, end))
+		if step > 1 {
+			buf.WriteString(fmt.Sprintf("x%d", step))
 		}
+		frames = frames[i+1:]
 	}
-	return strings.Join(parts, ",")
+
+	return buf.String()
 }
 
 // Left pads a string to a given with, using "0".
 // If the string begins with a negative "-" character, then
 // padding is inserted between the "-" and the remaining characters.
-func zfill(src string, z int) string {
+func zfillString(src string, z int) string {
 	size := len(src)
 	if size >= z {
 		return src
