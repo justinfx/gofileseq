@@ -8,12 +8,17 @@ Ported from the original fileseq Python library:
 https://github.com/sqlboy/fileseq
 
 Status
-======
+------
 
 Work in progress
 
+Documentation
+-------------
+
+http://godoc.org/github.com/justinfx/gofileseq
+
 Frame Range Shorthand
-=====================
+---------------------
 
 Support for:
 
@@ -25,7 +30,4 @@ Support for:
 * Negative frame numbers: -10-100
 * Padding: #=4 padded, @=single pad
 
-Documentation
-=============
 
-http://godoc.org/github.com/justinfx/gofileseq
