@@ -165,6 +165,59 @@ func FramesToFrameRange(frames []int, sorted bool, zfill int) string {
 	return buf.String()
 }
 
+// PadFrameRange takes a frame range string and returns a
+// new range with each number padded out with zeros to a given width
+func PadFrameRange(frange string, pad int) string {
+	// We don't need to do anything if they gave us
+	// an invalid pad number
+	if pad < 2 {
+		return frange
+	}
+
+	size := strings.Count(frange, ",") + 1
+	parts := make([]string, size, size)
+
+	for i, part := range strings.Split(frange, ",") {
+
+		didMatch := false
+
+		for _, rx := range rangePatterns {
+			matched := rx.FindStringSubmatch(part)
+			if len(matched) == 0 {
+				continue
+			}
+			matched = matched[1:]
+			size = len(matched)
+			switch size {
+			case 1:
+				parts[i] = zfillString(matched[0], pad)
+			case 2:
+				parts[i] = fmt.Sprintf("%s-%s",
+					zfillString(matched[0], pad),
+					zfillString(matched[1], pad))
+			case 4:
+				parts[i] = fmt.Sprintf("%s-%s%s%s",
+					zfillString(matched[0], pad),
+					zfillString(matched[1], pad),
+					matched[2], matched[3])
+			default:
+				// No match. Try the next pattern
+				continue
+			}
+			// If we got here, we matched a case and can stop
+			// checking the rest of the patterns
+			didMatch = true
+			break
+		}
+		// If we didn't match one of our expected patterns
+		// then just take the original part and add it unmodified
+		if !didMatch {
+			parts = append(parts, part)
+		}
+	}
+	return strings.Join(parts, ",")
+}
+
 // frameRangeMatches breaks down the string frame range
 // into groups of range matches, for further processing.
 func frameRangeMatches(frange string) ([][]string, error) {

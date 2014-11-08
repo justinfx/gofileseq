@@ -1,9 +1,6 @@
 package fileseq
 
-import (
-	"fmt"
-	"strings"
-)
+import "fmt"
 
 // FrameSet wraps a sequence of frames in container that
 // exposes array-like operations and queries, after parsing
@@ -217,54 +214,7 @@ func (s *FrameSet) FrameRange() string {
 // to initialize the FrameSet, with each number padded out
 // with zeros to a given width
 func (s *FrameSet) FrameRangePadded(pad int) string {
-	// We don't need to do anything if they gave us
-	// an invalid pad number
-	if pad < 2 {
-		return s.frange
-	}
-
-	size := strings.Count(s.frange, ",") + 1
-	parts := make([]string, size, size)
-
-	for i, part := range strings.Split(s.frange, ",") {
-
-		didMatch := false
-
-		for _, rx := range rangePatterns {
-			matched := rx.FindStringSubmatch(part)
-			if len(matched) == 0 {
-				continue
-			}
-			matched = matched[1:]
-			size = len(matched)
-			switch size {
-			case 1:
-				parts[i] = zfillString(matched[0], pad)
-			case 2:
-				parts[i] = fmt.Sprintf("%s-%s",
-					zfillString(matched[0], pad),
-					zfillString(matched[1], pad))
-			case 4:
-				parts[i] = fmt.Sprintf("%s-%s%s%s",
-					zfillString(matched[0], pad),
-					zfillString(matched[1], pad),
-					matched[2], matched[3])
-			default:
-				// No match. Try the next pattern
-				continue
-			}
-			// If we got here, we matched a case and can stop
-			// checking the rest of the patterns
-			didMatch = true
-			break
-		}
-		// If we didn't match one of our expected patterns
-		// then just take the original part and add it unmodified
-		if !didMatch {
-			parts = append(parts, part)
-		}
-	}
-	return strings.Join(parts, ",")
+	return PadFrameRange(s.frange, pad)
 }
 
 // InvertedFrameRange returns a new frame range that represented
