@@ -218,6 +218,19 @@ func PadFrameRange(frange string, pad int) string {
 	return strings.Join(parts, ",")
 }
 
+// PaddingChars returns the proper padding characters,
+// given an amount of padding.
+func PaddingChars(pad int) string {
+	switch {
+	case pad <= 0:
+		return "@"
+	case pad%4 == 0:
+		return strings.Repeat("#", pad/4)
+	default:
+		return strings.Repeat("@", pad)
+	}
+}
+
 // frameRangeMatches breaks down the string frame range
 // into groups of range matches, for further processing.
 func frameRangeMatches(frange string) ([][]string, error) {

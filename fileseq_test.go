@@ -198,6 +198,22 @@ func TestFramesToFrameRange(t *testing.T) {
 	}
 }
 
+func TestPaddingChars(t *testing.T) {
+	var table = []struct {
+		pad      int
+		padChars string
+	}{
+		{-1, "@"}, {0, "@"}, {1, "@"}, {2, "@@"}, {3, "@@@"},
+		{4, "#"}, {5, "@@@@@"}, {8, "##"}, {12, "###"}}
+
+	for _, tt := range table {
+		actual := PaddingChars(tt.pad)
+		if actual != tt.padChars {
+			t.Errorf("Expected %s for padding %d, got %s", tt.padChars, tt.pad, actual)
+		}
+	}
+}
+
 func TestToRange(t *testing.T) {
 	var table = []struct {
 		expected         []int
