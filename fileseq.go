@@ -20,10 +20,56 @@ package fileseq
 import (
 	"bytes"
 	"fmt"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 )
+
+var (
+	padding       map[string]int
+	rangePatterns []*regexp.Regexp
+	splitPattern  *regexp.Regexp
+	stripSpace    *regexp.Regexp
+)
+
+func init() {
+	padding = map[string]int{
+		"#": 4,
+		"@": 1,
+	}
+
+	stripSpace = regexp.MustCompile(`(\s+)`)
+
+	// Regular expression patterns for matching frame set strings.
+	// Examples:
+	//     1-100
+	//     100
+	//     1-100x5
+	rangePatterns = []*regexp.Regexp{
+		// Frame range:  1-10
+		regexp.MustCompile(`^(\-?[0-9]+)\-(\-?[0-9]+)$`),
+		// Single frame:  10
+		regexp.MustCompile(`^(\-?[0-9]+)$`),
+		// Complex range:  1-10x2
+		regexp.MustCompile(`^(\-?[0-9]+)\-(\-?[0-9]+)([:xy]{1})([0-9]+)$`),
+	}
+
+	// Regular expression for matching a file sequence string.
+	// Example:
+	//     /film/shot/renders/hero_bty.1-100#.exr
+	splitPattern = regexp.MustCompile(`([\:xy\-0-9,]*)([\#\@]+)`)
+}
+
+// IsFrameRange returns true if the given string is a valid frame
+// range format.  Any padding characters, such as '#' and '@' are ignored.
+func IsFrameRange(frange string) bool {
+	_, err := frameRangeMatches(frange)
+	if err == nil {
+		return true
+	}
+	return false
+}
 
 // FramesToFrameRange takes a slice of frame numbers and
 // compresses them into a frame range string.
@@ -38,15 +84,16 @@ func FramesToFrameRange(frames []int, sorted bool, zfill int) string {
 	if count == 0 {
 		return ""
 	}
+
+	zf := zfillString
+
 	if count == 1 {
-		return strconv.Itoa(frames[0])
+		return zf(strconv.Itoa(frames[0]), zfill)
 	}
 
 	if sorted {
 		sort.Ints(frames)
 	}
-
-	zf := zfillString
 
 	var i, frame, step int
 	var start, end string
@@ -118,6 +165,50 @@ func FramesToFrameRange(frames []int, sorted bool, zfill int) string {
 	return buf.String()
 }
 
+// frameRangeMatches breaks down the string frame range
+// into groups of range matches, for further processing.
+func frameRangeMatches(frange string) ([][]string, error) {
+	for k := range padding {
+		frange = strings.Replace(frange, k, "", -1)
+	}
+
+	var (
+		matched bool
+		match   []string
+		rx      *regexp.Regexp
+	)
+
+	frange = stripSpace.ReplaceAllLiteralString(frange, "")
+
+	// For each comma-sep component, we will parse a frame range
+	parts := strings.Split(frange, ",")
+	size := len(parts)
+	matches := make([][]string, size, size)
+
+	for i, part := range parts {
+
+		matched = false
+
+		// Build up frames for all comma-sep components
+		for _, rx = range rangePatterns {
+			if match = rx.FindStringSubmatch(part); match == nil {
+				continue
+			}
+			matched = true
+			matches[i] = match[1:]
+		}
+
+		// If any component of the comma-sep frame range fails to
+		// parse, we bail out
+		if !matched {
+			err := fmt.Errorf("Failed to parse frame range: %s on part %q", frange, part)
+			return nil, err
+		}
+	}
+
+	return matches, nil
+}
+
 // Left pads a string to a given with, using "0".
 // If the string begins with a negative "-" character, then
 // padding is inserted between the "-" and the remaining characters.
@@ -165,4 +256,13 @@ func parseInt(s string) (int, error) {
 // range string is a valid modifier symbol
 func isModifier(s string) bool {
 	return len(s) == 1 && strings.ContainsAny(s, "xy:")
+}
+
+// Return the min/max frames from an unsorted list
+func minMaxFrame(frames []int) (int, int) {
+	srcframes := make([]int, len(frames), len(frames))
+	copy(srcframes, frames)
+	sort.Ints(srcframes)
+	min, max := srcframes[0], srcframes[len(srcframes)-1]
+	return min, max
 }

@@ -2,44 +2,8 @@ package fileseq
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 )
-
-var (
-	padding       map[string]int
-	rangePatterns []*regexp.Regexp
-	splitPattern  *regexp.Regexp
-	stripSpace    *regexp.Regexp
-)
-
-func init() {
-	padding = map[string]int{
-		"#": 4,
-		"@": 1,
-	}
-
-	stripSpace = regexp.MustCompile(`(\s+)`)
-
-	// Regular expression patterns for matching frame set strings.
-	// Examples:
-	//     1-100
-	//     100
-	//     1-100x5
-	rangePatterns = []*regexp.Regexp{
-		// Frame range:  1-10
-		regexp.MustCompile(`^(\-?[0-9]+)\-(\-?[0-9]+)$`),
-		// Single frame:  10
-		regexp.MustCompile(`^(\-?[0-9]+)$`),
-		// Complex range:  1-10x2
-		regexp.MustCompile(`^(\-?[0-9]+)\-(\-?[0-9]+)([:xy]{1})([0-9]+)$`),
-	}
-
-	// Regular expression for matching a file sequence string.
-	// Example:
-	//     /film/shot/renders/hero_bty.1-100#.exr
-	splitPattern = regexp.MustCompile(`([\:xy\-0-9,]*)([\#\@]+)`)
-}
 
 // FrameSet wraps a sequence of frames in container that
 // exposes array-like operations and queries, after parsing
@@ -53,14 +17,7 @@ type FrameSet struct {
 // Create a new FrameSet from a given frame range string
 // Returns an error if the frame range could not be parsed.
 func NewFrameSet(frange string) (*FrameSet, error) {
-	var (
-		match   []string
-		rx      *regexp.Regexp
-		err     error
-		matched bool
-	)
-
-	frange = stripSpace.ReplaceAllLiteralString(frange, "")
+	var err error
 
 	frameSet := &FrameSet{
 		frange: frange,
@@ -68,27 +25,15 @@ func NewFrameSet(frange string) (*FrameSet, error) {
 		set:    map[int]struct{}{},
 	}
 
-	// For each comma-sep component, we will parse a frame range
-	for _, part := range strings.Split(frange, ",") {
+	// Process the frame range and get a slice of match slices
+	matches, err := frameRangeMatches(frange)
+	if err != nil {
+		return nil, err
+	}
 
-		matched = false
-
-		// Build up frames for all comma-sep components
-		for _, rx = range rangePatterns {
-			if match = rx.FindStringSubmatch(part); match == nil {
-				continue
-			}
-			matched = true
-			if err = frameSet.handleMatch(match[1:]); err != nil {
-				return nil, err
-			}
-			break
-		}
-
-		// If any component of the comma-sep frame range fails to
-		// parse, we bail out
-		if !matched {
-			err = fmt.Errorf("Failed to parse frame range: %s on part %q", frange, part)
+	// Process each slice match and add it to the frame set
+	for _, match := range matches {
+		if err = frameSet.handleMatch(match); err != nil {
 			return nil, err
 		}
 	}
@@ -102,6 +47,7 @@ func (s *FrameSet) handleMatch(match []string) error {
 
 	switch len(match) {
 
+	// Single frame match
 	case 1:
 		f, err := parseInt(match[0])
 		if err != nil {
@@ -109,6 +55,7 @@ func (s *FrameSet) handleMatch(match []string) error {
 		}
 		parsed = []int{f}
 
+	// Simple frame range
 	case 2:
 		start, err := parseInt(match[0])
 		if err != nil {
@@ -125,6 +72,7 @@ func (s *FrameSet) handleMatch(match []string) error {
 			start++
 		}
 
+	// Complex frame range
 	case 4:
 		var (
 			err               error
@@ -317,6 +265,39 @@ func (s *FrameSet) FrameRangePadded(pad int) string {
 		}
 	}
 	return strings.Join(parts, ",")
+}
+
+// InvertedFrameRange returns a new frame range that represented
+// all frames *not* within the current frame range. That is, it
+// will create a range that "fills in" the current one.
+func (s *FrameSet) InvertedFrameRange(zfill int) string {
+	size := len(s.frames)
+	if size < 2 {
+		return ""
+	}
+
+	min, max := minMaxFrame(s.frames)
+	if max-min <= 1 {
+		return ""
+	}
+
+	// Compute how big our result set will be
+	size = (max - min + 1) - size
+	if size < 1 {
+		return ""
+	}
+
+	frames := make([]int, size, size)
+	var idx int
+	var exists bool
+	for val := min + 1; val < max; val++ {
+		if _, exists = s.set[val]; exists {
+			continue
+		}
+		frames[idx] = val
+		idx++
+	}
+	return FramesToFrameRange(frames, false, zfill)
 }
 
 // Normalize returns a new sorted and compacted FrameSet

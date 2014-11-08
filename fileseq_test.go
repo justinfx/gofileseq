@@ -25,6 +25,10 @@ var stringRangeTable = []struct {
 
 func TestNewFrameSet(t *testing.T) {
 	for _, tt := range stringRangeTable {
+		if !IsFrameRange(tt.frange) {
+			t.Fatalf("%q did not validate as a frame range", tt.frange)
+		}
+
 		s, err := NewFrameSet(tt.frange)
 		if err != nil {
 			t.Fatalf("Failed to parse %q: %s", tt.frange, err.Error())
@@ -32,10 +36,12 @@ func TestNewFrameSet(t *testing.T) {
 		if s.frange == "" {
 			t.Fatal("Got an empty frange field on FrameSet")
 		}
+
 		size := s.Len()
 		if size != len(tt.expected) {
 			t.Errorf("Expected Len to be %d, got %d", len(tt.expected), size)
 		}
+
 		if !reflect.DeepEqual(s.Frames(), tt.expected) {
 			t.Errorf("While parsing %q, got %v, expected %v", tt.frange, s.Frames(), tt.expected)
 		}
@@ -134,6 +140,32 @@ func TestFrameSetNormalize(t *testing.T) {
 	}
 }
 
+func TestFrameSetInverted(t *testing.T) {
+	var table = []struct {
+		frange, expected string
+		zfill            int
+	}{
+		{"1-5,7-10", "6", 0},
+		{"1-5,7-10", "0006", 4},
+		{"-10--5,5-10", "-4-4", 0},
+		{"-10--5,5-10", "-004-0004", 4},
+		{"1-10x2", "2-8x2", 0},
+		{"1-10x2", "002-008x2", 3},
+		{"1-10y2", "3-9x2", 0},
+		{"1-10y2", "00003-00009x2", 5},
+		{"1-10:4", "", 0},
+		{" 1 - 10x2, 50, 60 - 62, 70 - 74x2 ", "2-10x2,11-49,51-59,63-69,71,73", 0},
+	}
+
+	for _, tt := range table {
+		s, _ := NewFrameSet(tt.frange)
+		actual := s.InvertedFrameRange(tt.zfill)
+		if actual != tt.expected {
+			t.Errorf("Expected range %q, got %q", tt.expected, actual)
+		}
+	}
+}
+
 func TestFramesToFrameRange(t *testing.T) {
 	var table = []struct {
 		frames   []int
@@ -141,29 +173,20 @@ func TestFramesToFrameRange(t *testing.T) {
 		zfill    int
 		expected string
 	}{
+		{[]int{-10}, false, 4, "-010"},
 		{[]int{1, 2, 3, 4, 5}, true, 0, "1-5"},
-
 		{[]int{1, 3, 5, 7, 9}, true, 0, "1-9x2"},
-
 		{
 			[]int{1, 2, 3, 4, 5, 20, 30, 40, 41, 42, 43, 44, 50, 60, 62, 64, 66},
-			true,
-			0,
-			"1-5,20-40x10,41-44,50,60-66x2",
+			true, 0, "1-5,20-40x10,41-44,50,60-66x2",
 		},
-
 		{
 			[]int{1, 3, 6, 9, 12, 20, 22, 24, 28, 32},
-			true,
-			0,
-			"1,3-12x3,20-24x2,28,32",
+			true, 0, "1,3-12x3,20-24x2,28,32",
 		},
-
 		{
 			[]int{1, 11, 21, 31, 41, 51, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 18},
-			false,
-			2,
-			"01-51x10,02-10,12-18x3",
+			false, 2, "01-51x10,02-10,12-18x3",
 		},
 	}
 
