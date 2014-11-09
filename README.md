@@ -7,11 +7,6 @@ used in VFX and animation applications.
 Ported from the original fileseq Python library:
 https://github.com/sqlboy/fileseq
 
-Status
-------
-
-Work in progress
-
 Documentation
 -------------
 

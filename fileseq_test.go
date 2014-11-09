@@ -2,6 +2,7 @@ package fileseq
 
 import (
 	"fmt"
+	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -399,6 +400,37 @@ func TestToRange(t *testing.T) {
 		actual := toRange(tt.start, tt.end, tt.step)
 		if !reflect.DeepEqual(actual, tt.expected) {
 			t.Errorf("Got %v, expected %v", actual, tt.expected)
+		}
+	}
+}
+
+func TestFindSequencesOnDisk(t *testing.T) {
+	expected := map[string]int{
+		"seqC.-5-2,4-10,20-21,27-30@@.tif": 0,
+		"seqB.5-14,16-18,20#.jpg":          0,
+		"seqA.1,3-6,8-10#.exr":             0,
+	}
+
+	seqs, err := FindSequencesOnDisk("testdata")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(seqs) != len(expected) {
+		t.Fatalf("Expected %d seqs ; got %d", len(expected), len(seqs))
+	}
+
+	for _, s := range seqs {
+		name := filepath.Base(s.String())
+		if _, ok := expected[name]; !ok {
+			t.Fatalf("Parsed seq %q not in expected list", name)
+		}
+		expected[name]++
+	}
+
+	for name, count := range expected {
+		if count != 1 {
+			t.Errorf("Got # of matchs %d instead of 1, for seq %q", count, name)
 		}
 	}
 }

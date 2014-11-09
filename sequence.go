@@ -3,6 +3,7 @@ package fileseq
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -420,17 +421,96 @@ func (s *FileSequence) String() string {
 	if s.frameSet != nil {
 		fs = s.frameSet.String()
 	}
-	var buf bytes.Buffer
+	buf := bytes.NewBufferString(s.dir)
 	buf.WriteString(s.basename)
 	buf.WriteString(fs)
 	buf.WriteString(s.padChar)
 	buf.WriteString(s.ext)
-	out := filepath.Join(s.dir, buf.String())
-	return out
+	return buf.String()
 }
 
 // Copy returns a copy of the FileSequence
 func (s *FileSequence) Copy() *FileSequence {
 	seq, _ := NewFileSequence(s.String())
 	return seq
+}
+
+// FindSequencesOnDisk searches a given directory path and
+// sorts all valid sequence-compatible files into a list of
+// FileSequences
+// If there are any errors reading the directory or the files,
+// a non-nil error will be returned.
+func FindSequencesOnDisk(path string) ([]*FileSequence, error) {
+	root, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer root.Close()
+
+	infos, err := root.Readdir(-1)
+	if err != nil {
+		return nil, err
+	}
+
+	var match []string
+	seqs := make(map[[2]string][]int)
+	padMap := make(map[[2]string]string)
+
+	// Read dir and sort files into groups
+	for _, info := range infos {
+		if info.IsDir() {
+			continue
+		}
+
+		name := info.Name()
+		match = singleFrame.FindStringSubmatch(name)
+		if len(match) == 0 {
+			continue
+		}
+
+		frame, _ := strconv.Atoi(match[2])
+		key := [2]string{match[1], match[3]}
+		frames, ok := seqs[key]
+		if !ok {
+			frames = []int{frame}
+			padMap[key] = PaddingChars(len(match[2]))
+		} else {
+			frames = append(frames, frame)
+		}
+		seqs[key] = frames
+	}
+
+	fseqs := make([]*FileSequence, len(seqs))
+
+	// Convert groups into sequences
+	path = filepath.Clean(path)
+	buf := bytes.NewBufferString(path)
+	if !strings.HasSuffix(path, string(filepath.Separator)) {
+		buf.WriteRune(filepath.Separator)
+	}
+
+	size := buf.Len()
+
+	var i int
+	for key, frames := range seqs {
+		name, ext := key[0], key[1]
+		frange := FramesToFrameRange(frames, true, 0)
+		pad := padMap[key]
+
+		buf.WriteString(name)
+		buf.WriteString(frange)
+		buf.WriteString(pad)
+		buf.WriteString(ext)
+
+		fs, err := NewFileSequence(buf.String())
+		if err != nil {
+			return nil, err
+		}
+		fseqs[i] = fs
+
+		buf.Truncate(size)
+		i++
+	}
+
+	return fseqs, nil
 }
