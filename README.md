@@ -25,4 +25,11 @@ Support for:
 * Negative frame numbers: -10-100
 * Padding: #=4 padded, @=single pad
 
+Sequence Formats
+----------------
 
+Sequences of files are expected to follow a pattern similar to:
+
+* /path/to/some/file_foo.0100.exr
+* /path/to/some/file_foo.1-100#.jpg
+* /path/to/some/file_foo.1-100@@@.tif
