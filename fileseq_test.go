@@ -166,6 +166,111 @@ func TestFrameSetInverted(t *testing.T) {
 	}
 }
 
+func TestNewFileSequence(t *testing.T) {
+	var table = []struct {
+		path              string
+		start, end, zfill int
+		frameCount        int
+	}{
+		{"/file_path.100.exr", 100, 100, 0, 1},
+		{"/dir/f.1-100#.jpeg", 1, 100, 4, 100},
+		{"/dir/f.1-100@@@.f", 1, 100, 3, 100},
+		{"/dir/f.1-10,50,60-90x2##.exr", 1, 90, 8, 27},
+		{"/dir/f.exr", 0, 0, 0, 1},
+	}
+	for _, tt := range table {
+		seq, err := NewFileSequence(tt.path)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		full := seq.String()
+		if full != tt.path {
+			t.Fatalf("%s != %s", full, tt.path)
+		}
+		if seq.Start() != tt.start {
+			t.Errorf("Expected start to be %d, got %d", tt.start, seq.Start())
+		}
+		if seq.End() != tt.end {
+			t.Errorf("Expected end to be %d, got %d", tt.end, seq.End())
+		}
+		if seq.ZFill() != tt.zfill {
+			t.Errorf("Expected zfill to be %d, got %d", tt.zfill, seq.ZFill())
+		}
+		if seq.Len() != tt.frameCount {
+			t.Errorf("Expected frame count to be %d, got %d", tt.frameCount, seq.Len())
+		}
+	}
+}
+
+func TestFileSequenceSplit(t *testing.T) {
+	var table = []struct {
+		path    string
+		franges []string
+	}{
+		{"/file_path.100.exr", []string{"100"}},
+		{"/file_path.-005.exr", []string{"-005"}},
+		{"/dir/f.-1-100#.jpeg", []string{"-1-100"}},
+		{"/dir/f.1-10,50,60-90x2##.exr", []string{"1-10", "50", "60-90x2"}},
+		{"/dir/f.exr", []string{""}},
+	}
+	for _, tt := range table {
+		seq, err := NewFileSequence(tt.path)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		actual := []string{}
+		for _, spl := range seq.Split() {
+			actual = append(actual, spl.FrameRange())
+		}
+		if !reflect.DeepEqual(tt.franges, actual) {
+			t.Errorf("Expected ranges %v ; Got %v", tt.franges, actual)
+		}
+	}
+}
+
+func TestFileSequenceFrameIndex(t *testing.T) {
+	var table = []struct {
+		path     string
+		size     int
+		idx      int
+		frame    int
+		expected string
+	}{
+		{"file.100.exr", 1, 0, 100, "file.100.exr"},
+		{"file.1-100#.exr", 100, 4, 5, "file.0005.exr"},
+		{"file.-10-30@@@.exr", 40, 25, 15, "file.015.exr"},
+		{"file.-10-30@@@.exr", 40, 5, -5, "file.-05.exr"},
+		{"file.1,3-12x3,20-24x2,28,32##.exr", 10, 8, 28, "file.00000028.exr"},
+	}
+	for _, tt := range table {
+		seq, err := NewFileSequence(tt.path)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		// Frame test
+		actual, err := seq.Frame(tt.frame)
+		if err != nil {
+			t.Fatalf("Unexpected error in Frame(%d) for %q: %s", tt.frame, tt.path, err.Error())
+		}
+		if actual != tt.expected {
+			t.Errorf("Expected %q for frame %d ; got %q", tt.expected, tt.frame, actual)
+		}
+		// Index test
+		actual = seq.Index(tt.idx)
+		if actual != tt.expected {
+			t.Errorf("Expected %q for index %d ; got %q", tt.expected, tt.idx, actual)
+		}
+		// Frame count test
+		for i := 0; i < tt.size; i++ {
+			path := seq.Index(i)
+			if path == "" {
+				t.Fatalf("Got an empty path string for index %d in %q", i, tt.path)
+			}
+		}
+
+	}
+}
+
 func TestFramesToFrameRange(t *testing.T) {
 	var table = []struct {
 		frames   []int
