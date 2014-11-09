@@ -203,6 +203,17 @@ func (s *FileSequence) InvertedFrameRange() string {
 	if s.frameSet == nil {
 		return ""
 	}
+	return s.frameSet.InvertedFrameRange(0)
+}
+
+// InvertedFrameRangePadded returns a new frame range that represents
+// all frames *not* within the current frame range. That is, it
+// will create a range that "fills in" the current one.
+// Frames are padded out to the zfill width.
+func (s *FileSequence) InvertedFrameRangePadded() string {
+	if s.frameSet == nil {
+		return ""
+	}
 	return s.frameSet.InvertedFrameRange(s.zfill)
 }
 
