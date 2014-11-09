@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"text/template"
 )
 
 // A FileSequence represents a path to a sequence of files,
@@ -94,7 +95,51 @@ func NewFileSequence(sequence string) (*FileSequence, error) {
 	return seq, nil
 }
 
-// func (s *FileSequence) Format(template string) string {}
+/*
+Format returns the file sequence as a formatted string according to
+the given template.
+
+Utilizes Go text/template format syntax.  Available variables include:
+    dir      - the directory name.
+    base     - the basename of the sequence (leading up to the frame range).
+    ext      - the file extension of the sequence including leading period.
+    start    - the start frame.
+    end      - the end frame.
+    len      - the length of the frame range.
+    pad      - the detecting amount of padding.
+    range    - the frame range.
+    inverted - the inverted frame range. (returns empty string if none)
+    zfill    - the int width of the frame padding
+
+Example:
+
+	{{.dir}}{{.base}}{{.range}}{{.pad}}{{.ext}}
+
+*/
+func (s *FileSequence) Format(tpl string) (string, error) {
+	c := map[string]interface{}{
+		"dir":      s.dir,
+		"base":     s.basename,
+		"ext":      s.ext,
+		"start":    s.Start(),
+		"end":      s.End(),
+		"len":      s.Len(),
+		"pad":      s.padChar,
+		"zfill":    s.zfill,
+		"range":    s.FrameRange(),
+		"inverted": s.InvertedFrameRange(),
+	}
+	t, err := template.New("sequence").Parse(tpl)
+	if err != nil {
+		return "", err
+	}
+	var buf bytes.Buffer
+	err = t.Execute(&buf, c)
+	if err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
 
 func (s *FileSequence) Split() []*FileSequence {
 	if s.frameSet == nil {

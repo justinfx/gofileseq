@@ -1,6 +1,7 @@
 package fileseq
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -268,6 +269,67 @@ func TestFileSequenceFrameIndex(t *testing.T) {
 			}
 		}
 
+	}
+}
+
+func TestFileSequenceSetDir(t *testing.T) {
+	var table = []struct {
+		src, newDir, newBase, newExt, newFrange, newPad, expected string
+	}{
+		{"/path/to/file.100.exr", "/other", "fileB.", "jpg", "200", "#",
+			"/other/fileB.200#.jpg"},
+		{"/path/to/file.1-100#.exr", "/other/subdir", "fileB", "f", "-10-5,20-30x2", "@@@",
+			"/other/subdir/fileB-10-5,20-30x2@@@.f"},
+	}
+
+	for _, tt := range table {
+		seq, err := NewFileSequence(tt.src)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		seq.SetDirname(tt.newDir)
+		seq.SetBasename(tt.newBase)
+		seq.SetExt(tt.newExt)
+		seq.SetPadding(tt.newPad)
+		seq.SetFrameRange(tt.newFrange)
+		actual := seq.String()
+		if actual != tt.expected {
+			t.Errorf("Expected %q ; got %q", tt.expected, actual)
+		}
+	}
+}
+
+func TestFileSequenceFormat(t *testing.T) {
+	seq, err := NewFileSequence("/a/path/to/the/file_foo.1-10,50,70-100x5#.ext")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	var table = []struct {
+		format   string
+		expected string
+	}{
+		{
+			"{{.dir}}{{.base}}{{.range}}{{.pad}}{{.ext}}",
+			seq.String(),
+		},
+		{
+			"{{.start}} {{.end}} {{.len}} {{.zfill}}",
+			fmt.Sprintf("%d %d %d %d", 1, 100, 18, 4),
+		},
+		{
+			"{{.base}}{{if .inverted}}{{.inverted}}{{else}}{{.range}}{{end}}{{.ext}}",
+			"file_foo.11-49,51-69,71-74,76-79,81-84,86-89,91-94,96-99.ext",
+		},
+	}
+
+	for _, tt := range table {
+		actual, err := seq.Format(tt.format)
+		if err != nil {
+			t.Fatalf("Error formatting %q: %s", tt.format, err.Error())
+		}
+		if actual != tt.expected {
+			t.Errorf("Expected %q ; got %q", tt.expected, actual)
+		}
 	}
 }
 
