@@ -99,37 +99,38 @@ func NewFileSequence(sequence string) (*FileSequence, error) {
 Format returns the file sequence as a formatted string according to
 the given template.
 
-Utilizes Go text/template format syntax.  Available variables include:
+Utilizes Go text/template format syntax.  Available functions include:
     dir      - the directory name.
     base     - the basename of the sequence (leading up to the frame range).
     ext      - the file extension of the sequence including leading period.
-    start    - the start frame.
-    end      - the end frame.
+    startf   - the start frame.
+    endf     - the end frame.
     len      - the length of the frame range.
     pad      - the detecting amount of padding.
-    range    - the frame range.
+    frange   - the frame range.
     inverted - the inverted frame range. (returns empty string if none)
     zfill    - the int width of the frame padding
 
 Example:
 
-	{{.dir}}{{.base}}{{.range}}{{.pad}}{{.ext}}
+	{{dir}}{{base}}{{frange}}{{pad}}{{ext}}
 
 */
 func (s *FileSequence) Format(tpl string) (string, error) {
 	c := map[string]interface{}{
-		"dir":      s.dir,
-		"base":     s.basename,
-		"ext":      s.ext,
-		"start":    s.Start(),
-		"end":      s.End(),
-		"len":      s.Len(),
-		"pad":      s.padChar,
-		"zfill":    s.zfill,
-		"range":    s.FrameRange(),
-		"inverted": s.InvertedFrameRange(),
+		"dir":      s.Dirname,
+		"base":     s.Basename,
+		"ext":      s.Ext,
+		"startf":   s.Start,
+		"endf":     s.End,
+		"len":      s.Len,
+		"pad":      s.Padding,
+		"zfill":    s.ZFill,
+		"frange":   s.FrameRange,
+		"inverted": s.InvertedFrameRange,
 	}
-	t, err := template.New("sequence").Parse(tpl)
+
+	t, err := template.New("sequence").Funcs(c).Parse(tpl)
 	if err != nil {
 		return "", err
 	}

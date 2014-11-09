@@ -309,15 +309,15 @@ func TestFileSequenceFormat(t *testing.T) {
 		expected string
 	}{
 		{
-			"{{.dir}}{{.base}}{{.range}}{{.pad}}{{.ext}}",
+			"{{dir}}{{base}}{{frange}}{{pad}}{{ext}}",
 			seq.String(),
 		},
 		{
-			"{{.start}} {{.end}} {{.len}} {{.zfill}}",
+			"{{startf}} {{endf}} {{len}} {{zfill}}",
 			fmt.Sprintf("%d %d %d %d", 1, 100, 18, 4),
 		},
 		{
-			"{{.base}}{{if .inverted}}{{.inverted}}{{else}}{{.range}}{{end}}{{.ext}}",
+			"{{base}}{{if inverted}}{{inverted}}{{else}}{{frange}}{{end}}{{ext}}",
 			"file_foo.11-49,51-69,71-74,76-79,81-84,86-89,91-94,96-99.ext",
 		},
 	}
