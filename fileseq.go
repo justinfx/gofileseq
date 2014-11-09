@@ -85,10 +85,8 @@ func FramesToFrameRange(frames []int, sorted bool, zfill int) string {
 		return ""
 	}
 
-	zf := zfillString
-
 	if count == 1 {
-		return zf(strconv.Itoa(frames[0]), zfill)
+		return zfillInt(frames[0], zfill)
 	}
 
 	if sorted {
@@ -109,7 +107,7 @@ func FramesToFrameRange(frames []int, sorted bool, zfill int) string {
 				if buf.Len() > 0 {
 					buf.WriteString(",")
 				}
-				buf.WriteString(zf(strconv.Itoa(frame), zfill))
+				buf.WriteString(zfillInt(frame, zfill))
 			}
 			break
 		}
@@ -133,7 +131,7 @@ func FramesToFrameRange(frames []int, sorted bool, zfill int) string {
 
 		// We only have a single frame to write for this group
 		if i == 0 {
-			buf.WriteString(zf(strconv.Itoa(frames[0]), zfill))
+			buf.WriteString(zfillInt(frames[0], zfill))
 			frames = frames[1:]
 			continue
 		}
@@ -146,15 +144,15 @@ func FramesToFrameRange(frames []int, sorted bool, zfill int) string {
 			if (frames[2] - frames[1]) == (frames[3] - frames[2]) {
 				// Just consume the first frame, and allow the next
 				// loop to scan the new stepping
-				buf.WriteString(zf(strconv.Itoa(frames[0]), zfill))
+				buf.WriteString(zfillInt(frames[0], zfill))
 				frames = frames[1:]
 				continue
 			}
 		}
 
 		// Otherwise write out this step range
-		start = zf(strconv.Itoa(frames[0]), zfill)
-		end = zf(strconv.Itoa(frames[i]), zfill)
+		start = zfillInt(frames[0], zfill)
+		end = zfillInt(frames[i], zfill)
 		buf.WriteString(fmt.Sprintf("%s-%s", start, end))
 		if step > 1 {
 			buf.WriteString(fmt.Sprintf("x%d", step))
@@ -291,6 +289,16 @@ func zfillString(src string, z int) string {
 	return fmt.Sprintf("%s%s", fill, src)
 }
 
+// Left pads an int to a given with, using "0".
+// If the string begins with a negative "-" character, then
+// padding is inserted between the "-" and the remaining characters.
+func zfillInt(src int, z int) string {
+	if z < 2 {
+		return strconv.Itoa(src)
+	}
+	return fmt.Sprintf(fmt.Sprintf("%%0%dd", z), src)
+}
+
 // Expands a start, end, and stepping value
 // into the full range of int values.
 func toRange(start, end, step int) []int {
@@ -311,7 +319,7 @@ func toRange(start, end, step int) []int {
 // Parse an int from a specific part of a frame
 // range string component
 func parseInt(s string) (int, error) {
-	val, err := strconv.ParseInt(s, 10, 0)
+	val, err := strconv.Atoi(s)
 	if err != nil {
 		return 0, fmt.Errorf("Failed to parse int from part of range %q", s)
 	}
