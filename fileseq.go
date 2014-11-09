@@ -48,11 +48,11 @@ func init() {
 	//     1-100x5
 	rangePatterns = []*regexp.Regexp{
 		// Frame range:  1-10
-		regexp.MustCompile(`^(\-?[0-9]+)\-(\-?[0-9]+)$`),
+		regexp.MustCompile(`^(-?\d+)-(-?\d+)$`),
 		// Single frame:  10
-		regexp.MustCompile(`^(\-?[0-9]+)$`),
+		regexp.MustCompile(`^(-?\d+)$`),
 		// Complex range:  1-10x2
-		regexp.MustCompile(`^(\-?[0-9]+)\-(\-?[0-9]+)([:xy]{1})([0-9]+)$`),
+		regexp.MustCompile(`^(-?\d+)-(-?\d+)([:xy])(\d+)$`),
 	}
 
 	// Regular expression for matching a file sequence string.
