@@ -30,7 +30,6 @@ var (
 	padding       map[string]int
 	rangePatterns []*regexp.Regexp
 	splitPattern  *regexp.Regexp
-	stripSpace    *regexp.Regexp
 	singleFrame   *regexp.Regexp
 )
 
@@ -39,8 +38,6 @@ func init() {
 		"#": 4,
 		"@": 1,
 	}
-
-	stripSpace = regexp.MustCompile(`(\s+)`)
 
 	// Regular expression patterns for matching frame set strings.
 	// Examples:
@@ -246,7 +243,7 @@ func frameRangeMatches(frange string) ([][]string, error) {
 		rx      *regexp.Regexp
 	)
 
-	frange = stripSpace.ReplaceAllLiteralString(frange, "")
+	frange = strings.Replace(frange, " ", "", -1)
 
 	// For each comma-sep component, we will parse a frame range
 	parts := strings.Split(frange, ",")
