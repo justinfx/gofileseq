@@ -33,3 +33,16 @@ Sequences of files are expected to follow a pattern similar to:
 * /path/to/some/file_foo.0100.exr
 * /path/to/some/file_foo.1-100#.jpg
 * /path/to/some/file_foo.1-100@@@.tif
+
+Install
+-------
+
+```bash
+go get github.com/justinfx/gofileseq
+```
+
+Also included is a `seqls` tool, which uses `gofileseq` to produce an executable, used for listing sequences on the filesystem:
+
+```bash
+go get github.com/justinfx/gofileseq/cmd/seqls
+```
