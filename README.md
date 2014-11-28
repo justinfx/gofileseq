@@ -45,4 +45,6 @@ Also included is a `seqls` tool, which uses `gofileseq` to produce an executable
 
 ```bash
 go get github.com/justinfx/gofileseq/cmd/seqls
+seql some/images
+# some/images/file_foo.1-100@@@.tif
 ```
