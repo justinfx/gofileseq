@@ -436,3 +436,34 @@ func TestFindSequencesOnDisk(t *testing.T) {
 		}
 	}
 }
+
+func TestFindSequenceOnDisk(t *testing.T) {
+	table := map[string]string{
+		"testdata/seqC.@@.tif":     "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
+		"testdata/seqC.0010.tif":   "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
+		"testdata/seqB.#.jpg":      "testdata/seqB.5-14,16-18,20#.jpg",
+		"testdata/seqB.16-18#.jpg": "testdata/seqB.5-14,16-18,20#.jpg",
+		"testdata/seqA.#.exr":      "testdata/seqA.1,3-6,8-10#.exr",
+		"testdata/seqA.@.exr":      "testdata/seqA.1,3-6,8-10#.exr",
+		"testdata/seqA.@.jpg":      "",
+	}
+
+	for pattern, expected := range table {
+		seq, err := FindSequenceOnDisk(pattern)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		if seq == nil && expected != "" {
+			t.Fatalf("Expected %q ; got a nil sequence", expected)
+		}
+
+		var actual string
+		if expected != "" {
+			actual = seq.String()
+		}
+
+		if actual != expected {
+			t.Fatalf("Expected %q ; got %q", expected, actual)
+		}
+	}
+}

@@ -514,3 +514,35 @@ func FindSequencesOnDisk(path string) ([]*FileSequence, error) {
 
 	return fseqs, nil
 }
+
+// FindSequenceOnDisk takes a string that is a compatible/parsible
+// FileSequence pattern, and finds a sequence on disk which matches
+// the Basename and Extension.
+// If no match is found, a nil FileSequence is returned.
+// If an error occurs while reading the filesystem, a non-nil error
+// is returned.
+func FindSequenceOnDisk(pattern string) (*FileSequence, error) {
+	fs, err := NewFileSequence(pattern)
+	if err != nil {
+		// Treat a bad pattern as a non-match
+		fmt.Println(err.Error())
+		return nil, nil
+	}
+
+	seqs, err := FindSequencesOnDisk(fs.Dirname())
+	if err != nil {
+		return nil, err
+	}
+
+	base := fs.Basename()
+	ext := fs.Ext()
+
+	for _, seq := range seqs {
+		// Find the first match and return it
+		if seq.Basename() == base && seq.Ext() == ext {
+			return seq, nil
+		}
+	}
+	// If we get this far, we didn't find a match
+	return nil, nil
+}
