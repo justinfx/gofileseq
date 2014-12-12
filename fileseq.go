@@ -56,7 +56,8 @@ func init() {
 	// Regular expression for matching a file sequence string.
 	// Example:
 	//     /film/shot/renders/hero_bty.1-100#.exr
-	splitPattern = regexp.MustCompile(`(.*?)([:xy\d,-]*)([#@]+)(.*)`)
+	//     /film/shot/renders/hero_bty.@@.exr
+	splitPattern = regexp.MustCompile(`^(.*?)([:xy\d,-]*)?([#@]+)(.*)$`)
 
 	// /film/shot/renders/hero_bty.100.exr
 	singleFrame = regexp.MustCompile(`^(.*?\.)(-?\d+)(\.[a-zA-Z0-9]+)$`)

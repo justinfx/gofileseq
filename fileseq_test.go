@@ -179,6 +179,8 @@ func TestNewFileSequence(t *testing.T) {
 		{"/dir/f.1-100@@@.f", 1, 100, 3, 100},
 		{"/dir/f.1-10,50,60-90x2##.exr", 1, 90, 8, 27},
 		{"/dir/f.exr", 0, 0, 0, 1},
+		{"/dir/f.@@.ext", 0, 0, 2, 1},
+		{"/dir/no_frames.ext", 0, 0, 0, 1},
 	}
 	for _, tt := range table {
 		seq, err := NewFileSequence(tt.path)

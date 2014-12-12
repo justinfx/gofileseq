@@ -82,7 +82,7 @@ func NewFileSequence(sequence string) (*FileSequence, error) {
 	} else {
 		frameSet, err = NewFrameSet(parts[2])
 		if err != nil {
-			return nil, fmt.Errorf("Failed to parse frame range from sequence: %s", sequence)
+			frameSet = nil
 		}
 
 		dir, basename = filepath.Split(parts[1])
