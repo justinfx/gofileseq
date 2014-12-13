@@ -438,6 +438,39 @@ func TestFindSequencesOnDisk(t *testing.T) {
 	}
 }
 
+func TestListFiles(t *testing.T) {
+	expected := map[string]int{
+		"seqC.-5-2,4-10,20-21,27-30@@.tif": 0,
+		"seqB.5-14,16-18,20#.jpg":          0,
+		"seqA.1,3-6,8-10#.exr":             0,
+		"aFile.ext":                        0,
+		"file_without_ext":                 0,
+	}
+
+	seqs, err := ListFiles("testdata")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(seqs) != len(expected) {
+		t.Fatalf("Expected %d seqs ; got %d", len(expected), len(seqs))
+	}
+
+	for _, s := range seqs {
+		name := filepath.Base(s.String())
+		if _, ok := expected[name]; !ok {
+			t.Fatalf("Parsed seq %q not in expected list", name)
+		}
+		expected[name]++
+	}
+
+	for name, count := range expected {
+		if count != 1 {
+			t.Errorf("Got # of matchs %d instead of 1, for seq/file %q", count, name)
+		}
+	}
+}
+
 func TestFindSequenceOnDisk(t *testing.T) {
 	table := map[string]string{
 		"testdata/seqC.@@.tif":     "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",

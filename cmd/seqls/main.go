@@ -19,6 +19,7 @@ import (
 var (
 	numWorkers = 50
 	recurse    = flag.Bool("r", false, `recursively scan all sub-directories`)
+	allFiles   = flag.Bool("a", false, `list all files, including those without frame patterns`)
 )
 
 func init() {
@@ -62,12 +63,19 @@ func main() {
 
 	// fmt.Printf("launching %d workers\n", numWorkers)
 
+	var listerFn func(string) (fileseq.FileSequences, error)
+	if *allFiles {
+		listerFn = fileseq.ListFiles
+	} else {
+		listerFn = fileseq.FindSequencesOnDisk
+	}
+
 	// Start the workers to find sequences
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
 		go func() {
 			for path := range pathChan {
-				seqs, err := fileseq.FindSequencesOnDisk(path)
+				seqs, err := listerFn(path)
 				if err != nil {
 					// Bail out of the app for any path error
 					fmt.Fprintf(os.Stderr, "Error finding sequence in dir %q: %s\n", path, err)

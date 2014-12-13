@@ -453,6 +453,17 @@ func (fs FileSequences) Swap(i, j int) {
 // If there are any errors reading the directory or the files,
 // a non-nil error will be returned.
 func FindSequencesOnDisk(path string) (FileSequences, error) {
+	return findSequencesOnDisk(path, false)
+}
+
+// ListFiles is similar to FindSequencesOnDisk, but will include all
+// files. Even those that do not contain frame range patterns. It is
+// like an ls, but with collapsed sequences.
+func ListFiles(path string) (FileSequences, error) {
+	return findSequencesOnDisk(path, true)
+}
+
+func findSequencesOnDisk(path string, allFiles bool) (FileSequences, error) {
 	root, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -464,11 +475,27 @@ func FindSequencesOnDisk(path string) (FileSequences, error) {
 		return nil, err
 	}
 
-	var match []string
 	seqs := make(map[[2]string][]int)
 	padMap := make(map[[2]string]string)
 
+	var files FileSequences
+	if allFiles {
+		files = make(FileSequences, 0)
+	}
+
+	// Prep a string buffer that we can reuse to constantly
+	// build strings
+	path = filepath.Clean(path)
+	buf := bytes.NewBufferString(path)
+	if !strings.HasSuffix(path, string(filepath.Separator)) {
+		buf.WriteRune(filepath.Separator)
+	}
+
+	size := buf.Len()
+
 	// Read dir and sort files into groups
+	var match []string
+
 	for _, info := range infos {
 		if info.IsDir() {
 			continue
@@ -477,6 +504,17 @@ func FindSequencesOnDisk(path string) (FileSequences, error) {
 		name := info.Name()
 		match = singleFrame.FindStringSubmatch(name)
 		if len(match) == 0 {
+			if allFiles {
+				buf.WriteString(name)
+
+				fs, err := NewFileSequence(buf.String())
+				if err != nil {
+					return nil, err
+				}
+				files = append(files, fs)
+
+				buf.Truncate(size)
+			}
 			continue
 		}
 
@@ -492,18 +530,11 @@ func FindSequencesOnDisk(path string) (FileSequences, error) {
 		seqs[key] = frames
 	}
 
+	var i int
 
-	// Convert groups into sequences
-	path = filepath.Clean(path)
-	buf := bytes.NewBufferString(path)
-	if !strings.HasSuffix(path, string(filepath.Separator)) {
-		buf.WriteRune(filepath.Separator)
-	}
-
-	size := buf.Len()
 	fseqs := make(FileSequences, len(seqs))
 
-	var i int
+	// Convert groups into sequences
 	for key, frames := range seqs {
 		name, ext := key[0], key[1]
 		frange := FramesToFrameRange(frames, true, 0)
@@ -522,6 +553,10 @@ func FindSequencesOnDisk(path string) (FileSequences, error) {
 
 		buf.Truncate(size)
 		i++
+	}
+
+	if allFiles {
+		fseqs = append(fseqs, files...)
 	}
 
 	return fseqs, nil
