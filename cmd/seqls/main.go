@@ -6,6 +6,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -20,21 +21,28 @@ import (
 	"github.com/justinfx/gofileseq"
 )
 
-const Version = "0.9.0"
-
-// number of goroutines to spawn for processing directories
-// and building FileSequence results
-var numWorkers = 50
-
 var opts struct {
 	Recurse   bool `short:"r" long:"recurse" description:"recursively scan all sub-directories"`
 	AllFiles  bool `short:"a" long:"all" description:"list all files, including those without frame patterns"`
 	LongList  bool `short:"l" long:"long" description:"long listing; include extra stat information"`
 	AbsPath   bool `short:"f" long:"full" description:"show absolute paths"`
 	HumanSize bool `short:"H" long:"human" description:"when using long listing, show human-readable file size units"`
+	Quiet     bool `short:"q" long:"quiet" description:"Don't print errors encountered when reading the file system"`
 }
 
-const DateFmt = `Jan _2 15:04`
+const (
+	Version   = "0.9.0"
+	DateFmt   = `Jan _2 15:04`
+	ErrorPath = `Error: Failed reading path`
+)
+
+var (
+	// number of goroutines to spawn for processing directories
+	// and building FileSequence results
+	numWorkers = 50
+
+	errOut io.Writer = os.Stderr
+)
 
 func init() {
 	// If $GOMAXPROCS isn't set, use the full capacity of the machine.
@@ -70,6 +78,10 @@ func main() {
 		os.Exit(1)
 	}
 
+	if opts.Quiet {
+		errOut = ioutil.Discard
+	}
+
 	if len(roots) == 0 {
 		// Use the current directory if specific dirs were not passed
 		roots = []string{"."}
@@ -97,8 +109,8 @@ func main() {
 				seqs, err := listerFn(path)
 				if err != nil {
 					// Bail out of the app for any path error
-					fmt.Fprintf(os.Stderr, "Error finding sequence in dir %q: %s\n", path, err)
 					os.Exit(255)
+					fmt.Fprintf(errOut, "%s %q: %s\n", ErrorPath, path, err)
 				}
 				seqChan <- seqs
 			}
@@ -174,7 +186,9 @@ func loadRecursive(roots uniquePaths, out chan string) {
 	for r := range roots {
 		r := r
 		if err := walk.Walk(r, walkFn); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: Failed to read dir %q: %s\n", r, err)
+			if err != filepath.SkipDir {
+				fmt.Fprintf(errOut, "%s %q: %s\n", ErrorPath, r, err)
+			}
 		}
 	}
 }
@@ -195,7 +209,7 @@ func cleanDirs(paths []string) uniquePaths {
 			continue
 		}
 		if fi, err = os.Stat(p); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: Failed to read path %q: %s\n", p, err)
+			fmt.Fprintf(errOut, "%s %q: %s\n", ErrorPath, p, err)
 			continue
 		}
 		if !fi.IsDir() {
@@ -265,7 +279,7 @@ func printLongListing(w io.Writer, fs *fileseq.FileSequence) {
 
 	if err != nil {
 		fmt.Println(str)
-		fmt.Fprintf(os.Stderr, "Error stating file: %s\n", err.Error())
+		fmt.Fprintf(errOut, "%s: %s\n", ErrorPath, err.Error())
 		return
 	}
 
