@@ -31,7 +31,7 @@ var opts struct {
 }
 
 const (
-	Version   = "0.9.0"
+	Version   = "0.9.1"
 	DateFmt   = `Jan _2 15:04`
 	ErrorPath = `Error: Failed reading path`
 )
