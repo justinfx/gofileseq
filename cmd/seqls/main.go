@@ -283,8 +283,6 @@ func printLongListing(w io.Writer, fs *fileseq.FileSequence) {
 		return
 	}
 
-	usr, gid := uidGidFromFileInfo(stat)
-
 	var size interface{}
 	if opts.HumanSize {
 		size = ByteSize(byteSize)
@@ -292,14 +290,7 @@ func printLongListing(w io.Writer, fs *fileseq.FileSequence) {
 		size = byteSize
 	}
 
-	fmt.Fprintf(w, "%s\t%s\t%s\t%v\t%s\t%s\n",
-		stat.Mode(),
-		usr,
-		gid,
-		size,
-		stat.ModTime().Format(DateFmt),
-		str)
-
+	printDetails(w, str, stat, size)
 }
 
 type ByteSize float64

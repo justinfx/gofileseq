@@ -3,13 +3,15 @@
 package main
 
 import (
+	"fmt"
+	"io"
 	"os"
 	"os/user"
 	"strconv"
 	"syscall"
 )
 
-func uidGidFromFileInfo(stat os.FileInfo) (string, string) {
+func printDetails(w io.Writer, path string, stat os.FileInfo, totalSize interface{}) {
 	stat_t := stat.Sys().(*syscall.Stat_t)
 	usr := strconv.Itoa(int(stat_t.Uid))
 	gid := "-"
@@ -20,5 +22,11 @@ func uidGidFromFileInfo(stat os.FileInfo) (string, string) {
 		gid = uObj.Gid
 	}
 
-	return usr, gid
+	fmt.Fprintf(w, "%s\t%s\t%s\t%v\t%s\t%s\n",
+		stat.Mode(),
+		usr,
+		gid,
+		totalSize,
+		stat.ModTime().Format(DateFmt),
+		path)
 }
