@@ -142,16 +142,16 @@ func (s *FileSequence) Format(tpl string) (string, error) {
 	return buf.String(), nil
 }
 
-func (s *FileSequence) Split() []*FileSequence {
+func (s *FileSequence) Split() FileSequences {
 	if s.frameSet == nil {
 		// Return a copy
-		return []*FileSequence{s.Copy()}
+		return FileSequences{s.Copy()}
 	}
 
 	franges := strings.Split(s.frameSet.FrameRange(), ",")
 	if len(franges) == 1 {
 		// Return a copy
-		return []*FileSequence{s.Copy()}
+		return FileSequences{s.Copy()}
 	}
 
 	var buf bytes.Buffer
@@ -163,7 +163,7 @@ func (s *FileSequence) Split() []*FileSequence {
 	// Mark the buffer so we can truncate
 	size := buf.Len()
 
-	list := make([]*FileSequence, len(franges))
+	list := make(FileSequences, len(franges))
 	var seq *FileSequence
 	for i, frange := range franges {
 		buf.WriteString(frange)
@@ -434,12 +434,25 @@ func (s *FileSequence) Copy() *FileSequence {
 	return seq
 }
 
+// FileSequences is a slice of FileSequence pointers, which can be sorted
+type FileSequences []*FileSequence
+
+func (fs FileSequences) Len() int { return len(fs) }
+
+func (fs FileSequences) Less(i, j int) bool {
+	return fs[i].String() < fs[j].String()
+}
+
+func (fs FileSequences) Swap(i, j int) {
+	fs[i], fs[j] = fs[j], fs[i]
+}
+
 // FindSequencesOnDisk searches a given directory path and
 // sorts all valid sequence-compatible files into a list of
 // FileSequences
 // If there are any errors reading the directory or the files,
 // a non-nil error will be returned.
-func FindSequencesOnDisk(path string) ([]*FileSequence, error) {
+func FindSequencesOnDisk(path string) (FileSequences, error) {
 	root, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -479,7 +492,6 @@ func FindSequencesOnDisk(path string) ([]*FileSequence, error) {
 		seqs[key] = frames
 	}
 
-	fseqs := make([]*FileSequence, len(seqs))
 
 	// Convert groups into sequences
 	path = filepath.Clean(path)
@@ -489,6 +501,7 @@ func FindSequencesOnDisk(path string) ([]*FileSequence, error) {
 	}
 
 	size := buf.Len()
+	fseqs := make(FileSequences, len(seqs))
 
 	var i int
 	for key, frames := range seqs {

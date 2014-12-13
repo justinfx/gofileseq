@@ -58,7 +58,7 @@ func main() {
 	var wg sync.WaitGroup
 
 	pathChan := make(chan string)
-	seqChan := make(chan []*fileseq.FileSequence)
+	seqChan := make(chan fileseq.FileSequences)
 
 	// fmt.Printf("launching %d workers\n", numWorkers)
 
