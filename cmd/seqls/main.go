@@ -109,8 +109,8 @@ func main() {
 				seqs, err := listerFn(path)
 				if err != nil {
 					// Bail out of the app for any path error
-					os.Exit(255)
 					fmt.Fprintf(errOut, "%s %q: %s\n", ErrorPath, path, err)
+					continue
 				}
 				seqChan <- seqs
 			}
@@ -173,14 +173,16 @@ func main() {
 func loadRecursive(roots uniquePaths, out chan string) {
 	walkFn := func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return err
+			return nil
 		}
+
 		if info.IsDir() {
 			out <- path
 
-		} else if fi, err := os.Stat(path); err == nil && fi.IsDir() {
+		} else if info, err = os.Stat(path); err == nil && info.IsDir() {
 			out <- path
 		}
+
 		return nil
 	}
 	for r := range roots {
