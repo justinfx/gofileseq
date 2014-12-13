@@ -4,23 +4,40 @@ seqls - list directory contents, rolled up into file sequences
 package main
 
 import (
-	"flag"
+
+	// "flag"
+
 	"fmt"
+	"io"
 	"os"
+	"os/user"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
+	"syscall"
+	"text/tabwriter"
+	"time"
 
 	"github.com/MichaelTJones/walk"
+	"github.com/jessevdk/go-flags"
 	"github.com/justinfx/gofileseq"
 )
 
-var (
-	numWorkers = 50
-	recurse    = flag.Bool("r", false, `recursively scan all sub-directories`)
-	allFiles   = flag.Bool("a", false, `list all files, including those without frame patterns`)
-)
+// number of goroutines to spawn for processing directories
+// and building FileSequence results
+var numWorkers = 50
+
+var opts struct {
+	Recurse   bool `short:"r" long:"recurse" description:"recursively scan all sub-directories"`
+	AllFiles  bool `short:"a" long:"all" description:"list all files, including those without frame patterns"`
+	LongList  bool `short:"l" long:"long" description:"long listing; include extra stat information"`
+	AbsPath   bool `short:"f" long:"full" description:"show absolute paths"`
+	HumanSize bool `short:"H" long:"human" description:"when using long listing, show human-readable file size units"`
+}
+
+const DateFmt = `Jan _2 15:04`
 
 func init() {
 	// If $GOMAXPROCS isn't set, use the full capacity of the machine.
@@ -34,25 +51,28 @@ func init() {
 	}
 }
 
-const usage = `seqls: list directory contents, rolled up into file sequences
+const usage = `[options] [path [...]]
 
-Usage:  seqls [options] [path [...]]
+List directory contents, rolled up into file sequences.
 
 One or more paths may be provided. If no path is provided, the current
 working directory will be scanned.
+
+Only files are shown in listing results.
 `
 
 func main() {
-	flag.Usage = func() {
-		fmt.Fprintln(os.Stderr, usage)
-		flag.PrintDefaults()
-		fmt.Fprintln(os.Stderr, "\n")
+	parser := flags.NewParser(&opts, flags.HelpFlag|flags.PrintErrors)
+	parser.Name = "seqls"
+	parser.Usage = usage
+	roots, err := parser.Parse()
+
+	if err != nil {
 		os.Exit(1)
 	}
-	flag.Parse()
 
-	roots := flag.Args()
 	if len(roots) == 0 {
+		// Use the current directory if specific dirs were not passed
 		roots = []string{"."}
 	}
 
@@ -64,7 +84,7 @@ func main() {
 	// fmt.Printf("launching %d workers\n", numWorkers)
 
 	var listerFn func(string) (fileseq.FileSequences, error)
-	if *allFiles {
+	if opts.AllFiles {
 		listerFn = fileseq.ListFiles
 	} else {
 		listerFn = fileseq.FindSequencesOnDisk
@@ -90,7 +110,7 @@ func main() {
 	// Load the root paths into the source channel
 	unique := cleanDirs(roots)
 	go func() {
-		if *recurse {
+		if opts.Recurse {
 			loadRecursive(unique, pathChan)
 		} else {
 			for r := range unique {
@@ -108,10 +128,30 @@ func main() {
 	}()
 
 	// Pull out all processed sequences and print
+	var w io.Writer
+	if opts.LongList {
+		w = tabwriter.NewWriter(os.Stdout, 5, 0, 2, ' ', 0)
+	} else {
+		w = os.Stdout
+	}
+
+	var printer func(io.Writer, *fileseq.FileSequence)
+	if opts.LongList {
+		printer = printLongListing
+	} else {
+		printer = printShortListing
+	}
+
+	// Start processing the results that are feeding in the channel
 	for seqs := range seqChan {
 		for _, s := range seqs {
-			fmt.Println(s)
+			printer(w, s)
 		}
+	}
+
+	if opts.LongList {
+		// Flush the tabwriter buffer
+		w.(*tabwriter.Writer).Flush()
 	}
 
 	os.Exit(0)
@@ -165,4 +205,120 @@ func cleanDirs(paths []string) uniquePaths {
 		u[p] = struct{}{}
 	}
 	return u
+}
+
+func printShortListing(w io.Writer, fs *fileseq.FileSequence) {
+	str := fs.String()
+	if opts.AbsPath {
+		abs, err := filepath.Abs(str)
+		if err == nil {
+			str = abs
+		}
+	}
+	fmt.Fprintln(w, str)
+}
+
+func printLongListing(w io.Writer, fs *fileseq.FileSequence) {
+	var (
+		err      error
+		byteSize int64
+		stat     os.FileInfo
+		str      string
+	)
+
+	count := fs.Len()
+	if count == 1 {
+		// Only a single file
+		str = fs.Index(0)
+		stat, err = os.Stat(str)
+		if err == nil {
+			byteSize = stat.Size()
+		}
+
+	} else {
+		str = fs.String()
+		// For a sequence of files, we want to get the most
+		// recent modtime, as well as the total size of the
+		// combined files.
+		mod := time.Unix(0, 0)
+		var thisStat os.FileInfo
+		var thisStr string
+		for i := 0; i < count; i++ {
+			thisStr = fs.Index(i)
+			thisStat, err = os.Stat(thisStr)
+			if err != nil {
+				continue
+			}
+			byteSize += thisStat.Size()
+			if thisStat.ModTime().After(mod) {
+				stat = thisStat
+				mod = thisStat.ModTime()
+			}
+		}
+	}
+
+	if opts.AbsPath {
+		abs, err := filepath.Abs(str)
+		if err == nil {
+			str = abs
+		}
+	}
+
+	if err != nil {
+		fmt.Println(str)
+		fmt.Fprintf(os.Stderr, "Error stating file: %s\n", err.Error())
+		return
+	}
+
+	stat_t := stat.Sys().(*syscall.Stat_t)
+	usr := strconv.Itoa(int(stat_t.Uid))
+	gid := "-"
+
+	uObj, err := user.LookupId(usr)
+	if err == nil {
+		usr = uObj.Username
+		gid = uObj.Gid
+	}
+
+	var size interface{}
+	if opts.HumanSize {
+		size = ByteSize(byteSize)
+	} else {
+		size = byteSize
+	}
+
+	fmt.Fprintf(w, "%s\t%s\t%s\t%v\t%s\t%s\n",
+		stat.Mode(),
+		usr,
+		gid,
+		size,
+		stat.ModTime().Format(DateFmt),
+		str)
+
+}
+
+type ByteSize float64
+
+const (
+	_           = iota // ignore first value by assigning to blank identifier
+	KB ByteSize = 1 << (10 * iota)
+	MB
+	GB
+	TB
+)
+
+func (b ByteSize) String() string {
+	switch {
+	case b >= TB:
+		return fmt.Sprintf("%.1fT", b/TB)
+	case b >= GB:
+		return fmt.Sprintf("%.1fG", b/GB)
+	case b >= MB:
+		return fmt.Sprintf("%.1fM", b/MB)
+	case b >= KB:
+		return fmt.Sprintf("%.1fK", b/KB)
+	case b == 0:
+		return strconv.Itoa(0)
+	}
+	return fmt.Sprintf("%.0f", b)
 }
