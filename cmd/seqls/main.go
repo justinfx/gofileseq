@@ -4,19 +4,14 @@ seqls - list directory contents, rolled up into file sequences
 package main
 
 import (
-
-	// "flag"
-
 	"fmt"
 	"io"
 	"os"
-	"os/user"
 	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"text/tabwriter"
 	"time"
 
@@ -24,6 +19,8 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/justinfx/gofileseq"
 )
+
+const Version = "0.9.0"
 
 // number of goroutines to spawn for processing directories
 // and building FileSequence results
@@ -51,7 +48,9 @@ func init() {
 	}
 }
 
-const usage = `[options] [path [...]]
+var usage = fmt.Sprintf(`[options] [path [...]]
+
+Version: %s 
 
 List directory contents, rolled up into file sequences.
 
@@ -59,7 +58,7 @@ One or more paths may be provided. If no path is provided, the current
 working directory will be scanned.
 
 Only files are shown in listing results.
-`
+`, Version)
 
 func main() {
 	parser := flags.NewParser(&opts, flags.HelpFlag|flags.PrintErrors)
@@ -270,15 +269,7 @@ func printLongListing(w io.Writer, fs *fileseq.FileSequence) {
 		return
 	}
 
-	stat_t := stat.Sys().(*syscall.Stat_t)
-	usr := strconv.Itoa(int(stat_t.Uid))
-	gid := "-"
-
-	uObj, err := user.LookupId(usr)
-	if err == nil {
-		usr = uObj.Username
-		gid = uObj.Gid
-	}
+	usr, gid := uidGidFromFileInfo(stat)
 
 	var size interface{}
 	if opts.HumanSize {
