@@ -8,8 +8,14 @@
 	],
 	"ConfigVersion": "0.9",
 	"TaskSettings": {
+        "bintray" : {
+            "package" : "gofileseq",
+            "subject": "justinfx",
+            "repository": "utils",
+            "downloadspage": "bintray.md"
+        },
 		"archive-tar-gz": {
-			"platforms": "linux darwin"
+			"platforms": "!windows"
 		},
 		"codesign": {
 			"id": "seqls"
