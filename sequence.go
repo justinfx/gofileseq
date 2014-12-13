@@ -61,10 +61,9 @@ func NewFileSequence(sequence string) (*FileSequence, error) {
 		// no frame patterns
 		dir, basename = filepath.Split(sequence)
 		idx := strings.LastIndex(basename, ".")
-		if idx == -1 {
-			return nil, fmt.Errorf("Sequence missing extension: %s", sequence)
+		if idx > -1 {
+			basename, ext = basename[:idx], basename[idx:]
 		}
-		basename, ext = basename[:idx], basename[idx:]
 
 		// Try to see if we can at least find a specific frames
 		// number, a la  .<frame>.ext
