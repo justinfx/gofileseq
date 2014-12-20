@@ -164,6 +164,8 @@ func main() {
 	if opts.LongList {
 		// Flush the tabwriter buffer
 		w.(*tabwriter.Writer).Flush()
+	} else {
+		w.(*bufio.Writer).Flush()
 	}
 }
 
