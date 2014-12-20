@@ -26,6 +26,8 @@ import (
 	"strings"
 )
 
+const Version = "0.9.2"
+
 var (
 	padding       map[string]int
 	rangePatterns []*regexp.Regexp

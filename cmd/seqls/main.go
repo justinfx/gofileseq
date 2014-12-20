@@ -4,6 +4,7 @@ seqls - list directory contents, rolled up into file sequences
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -31,7 +32,7 @@ var opts struct {
 }
 
 const (
-	Version   = "0.9.1"
+	Version   = fileseq.Version
 	DateFmt   = `Jan _2 15:04`
 	ErrorPath = `Error: Failed reading path`
 )
@@ -143,7 +144,7 @@ func main() {
 	if opts.LongList {
 		w = tabwriter.NewWriter(os.Stdout, 5, 0, 2, ' ', 0)
 	} else {
-		w = os.Stdout
+		w = bufio.NewWriter(os.Stdout)
 	}
 
 	var printer func(io.Writer, *fileseq.FileSequence)
@@ -164,8 +165,6 @@ func main() {
 		// Flush the tabwriter buffer
 		w.(*tabwriter.Writer).Flush()
 	}
-
-	os.Exit(0)
 }
 
 // Parallel walk the root paths and populate the path
