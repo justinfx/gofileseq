@@ -1,0 +1,13 @@
+Changes:
+
+0.9.1
+----------------
+* Tweaks to gox cross-compiling 
+* seqls: Added a -quiet flag
+* seqls: Format adjustments for Windows platform
+* seqls: Continuing listing, even when encountering file errors
+
+
+0.9.0
+----------------
+* Initial Release
