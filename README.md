@@ -41,7 +41,9 @@ Install
 go get github.com/justinfx/gofileseq
 ```
 
-Also included is a `seqls` tool, which uses `gofileseq` to produce an executable, used for listing sequences on the filesystem:
+Also included is a [`seqls`](https://github.com/justinfx/gofileseq/tree/master/cmd/seqls) tool, which uses `gofileseq` to produce an executable, used for listing sequences on the filesystem:
+
+[ ![Download](https://api.bintray.com/packages/justinfx/utils/seqls/images/download.svg) ](https://bintray.com/justinfx/utils/seqls/_latestVersion)
 
 ```bash
 go get github.com/justinfx/gofileseq/cmd/seqls
