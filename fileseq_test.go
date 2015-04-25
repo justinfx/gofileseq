@@ -38,7 +38,7 @@ func TestNewFrameSet(t *testing.T) {
 			t.Fatalf("#%d: Failed to parse %q: %s", i, tt.frange, err.Error())
 		}
 		if s.frange == "" {
-			t.Fatal("#%d: Got an empty frange field on FrameSet", i)
+			t.Fatalf("#%d: Got an empty frange field on FrameSet", i)
 		}
 
 		size := s.Len()
@@ -82,7 +82,7 @@ func TestFrameSetLookup(t *testing.T) {
 			}
 			actualVal, err := s.Frame(idx)
 			if err != nil {
-				t.Fatalf("Did not find valid frame for idx %s in frames %v", idx, s.Frames())
+				t.Fatalf("Did not find valid frame for idx %d in frames %v", idx, s.Frames())
 			}
 			if actualVal != val {
 				t.Errorf("Expected value for index %d to be %d, got %d", idx, val, actualVal)
