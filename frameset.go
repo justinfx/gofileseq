@@ -62,11 +62,21 @@ func (s *FrameSet) handleMatch(match []string) error {
 		if err != nil {
 			return err
 		}
-		size := (end + 1) - start
+
+		// Handle descending frame ranges, like 10-1
+		var size, inc int
+		if start > end {
+			inc = -1
+			size = (start + 1) - end
+		} else {
+			inc = 1
+			size = (end + 1) - start
+		}
+
 		parsed = make([]int, size, size)
 		for i := range parsed {
 			parsed[i] = start
-			start++
+			start += inc
 		}
 
 	// Complex frame range

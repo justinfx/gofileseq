@@ -19,6 +19,7 @@ package fileseq
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"regexp"
 	"sort"
@@ -307,25 +308,31 @@ func zfillInt(src int, z int) string {
 // into the full range of int values.
 func toRange(start, end, step int) []int {
 	nums := []int{}
-	if end < start {
-		return nums
-	}
 	if step < 1 {
 		step = 1
 	}
-	for i := start; i <= end; {
-		nums = append(nums, i)
-		i += step
+	if start <= end {
+		for i := start; i <= end; {
+			nums = append(nums, i)
+			i += step
+		}
+	} else {
+		for i := start; i >= end; {
+			nums = append(nums, i)
+			i -= step
+		}
 	}
 	return nums
 }
 
 // Parse an int from a specific part of a frame
 // range string component
+var parseIntErr error = errors.New("Failed to parse int from part of range string")
+
 func parseInt(s string) (int, error) {
 	val, err := strconv.Atoi(s)
 	if err != nil {
-		return 0, fmt.Errorf("Failed to parse int from part of range %q", s)
+		return 0, parseIntErr
 	}
 	return int(val), nil
 }
