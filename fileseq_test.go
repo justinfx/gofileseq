@@ -28,26 +28,26 @@ var stringRangeTable = []struct {
 }
 
 func TestNewFrameSet(t *testing.T) {
-	for _, tt := range stringRangeTable {
+	for i, tt := range stringRangeTable {
 		if !IsFrameRange(tt.frange) {
-			t.Fatalf("%q did not validate as a frame range", tt.frange)
+			t.Fatalf("#%d: %q did not validate as a frame range", i, tt.frange)
 		}
 
 		s, err := NewFrameSet(tt.frange)
 		if err != nil {
-			t.Fatalf("Failed to parse %q: %s", tt.frange, err.Error())
+			t.Fatalf("#%d: Failed to parse %q: %s", i, tt.frange, err.Error())
 		}
 		if s.frange == "" {
-			t.Fatal("Got an empty frange field on FrameSet")
+			t.Fatal("#%d: Got an empty frange field on FrameSet", i)
 		}
 
 		size := s.Len()
 		if size != len(tt.expected) {
-			t.Errorf("Expected Len to be %d, got %d", len(tt.expected), size)
+			t.Errorf("#%d: Expected Len to be %d, got %d", i, len(tt.expected), size)
 		}
 
 		if !reflect.DeepEqual(s.Frames(), tt.expected) {
-			t.Errorf("While parsing %q, got %v, expected %v", tt.frange, s.Frames(), tt.expected)
+			t.Errorf("#%d: While parsing %q, got %v, expected %v", i, tt.frange, s.Frames(), tt.expected)
 		}
 	}
 }
@@ -179,11 +179,18 @@ func TestNewFileSequence(t *testing.T) {
 		{"/file_path.100.exr", 100, 100, 0, 1},
 		{"/dir/f.1-100#.jpeg", 1, 100, 4, 100},
 		{"/dir/f.1-100@@@.f", 1, 100, 3, 100},
-		{"/dir/f.1-10,50,60-90x2##.exr", 1, 90, 8, 27},
+		{"/dir/f.1-10,50,60-90x2##.mp4", 1, 90, 8, 27},
 		{"/dir/f.exr", 0, 0, 0, 1},
+		{"/dir/f.100", 100, 100, 0, 1},
 		{"/dir/f.@@.ext", 0, 0, 2, 1},
+		{"/dir/f100.ext", 100, 100, 0, 1},
+		{"/dir/f_100.ext", 100, 100, 0, 1},
 		{"/dir/no_frames.ext", 0, 0, 0, 1},
 		{"/dir/no_file_extension", 0, 0, 0, 1},
+		{"/dir/.hidden", 0, 0, 0, 1},
+		{"/dir/.hidden.100", 100, 100, 0, 1},
+		{"/dir/.hidden.100.ext", 100, 100, 0, 1},
+		{"/dir/.hidden5.1-10#.7zip", 1, 10, 4, 10},
 	}
 	for _, tt := range table {
 		seq, err := NewFileSequence(tt.path)
@@ -404,10 +411,10 @@ func TestToRange(t *testing.T) {
 		{[]int{-5, -10, -15, -20}, -5, -20, 5},
 	}
 
-	for _, tt := range table {
+	for i, tt := range table {
 		actual := toRange(tt.start, tt.end, tt.step)
 		if !reflect.DeepEqual(actual, tt.expected) {
-			t.Errorf("Got %v, expected %v", actual, tt.expected)
+			t.Errorf("#%d: Got %v, expected %v", i, actual, tt.expected)
 		}
 	}
 }

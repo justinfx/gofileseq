@@ -23,11 +23,12 @@ import (
 )
 
 var opts struct {
-	Recurse   bool `short:"r" long:"recurse" description:"recursively scan all sub-directories"`
-	AllFiles  bool `short:"a" long:"all" description:"list all files, including those without frame patterns"`
-	LongList  bool `short:"l" long:"long" description:"long listing; include extra stat information"`
-	AbsPath   bool `short:"f" long:"full" description:"show absolute paths"`
-	HumanSize bool `short:"H" long:"human" description:"when using long listing, show human-readable file size units"`
+	Recurse   bool `short:"r" long:"recurse" description:"Recursively scan all sub-directories"`
+	AllFiles  bool `short:"a" long:"all" description:"List all files, including hidden files and single (non-sequence) files"`
+	SeqsOnly  bool `short:"s" long:"seqs" description:"Only return sequences, and not single files that didn't have a frame number"`
+	LongList  bool `short:"l" long:"long" description:"Long listing; include extra stat information"`
+	AbsPath   bool `short:"f" long:"full" description:"Show absolute paths"`
+	HumanSize bool `short:"H" long:"human" description:"When using long listing, show human-readable file size units"`
 	Quiet     bool `short:"q" long:"quiet" description:"Don't print errors encountered when reading the file system"`
 }
 
@@ -95,11 +96,12 @@ func main() {
 
 	// fmt.Printf("launching %d workers\n", numWorkers)
 
-	var listerFn func(string) (fileseq.FileSequences, error)
+	var fileopts []fileseq.FileOption
 	if opts.AllFiles {
-		listerFn = fileseq.ListFiles
-	} else {
-		listerFn = fileseq.FindSequencesOnDisk
+		fileopts = append(fileopts, fileseq.HiddenFiles)
+	}
+	if !opts.SeqsOnly {
+		fileopts = append(fileopts, fileseq.SingleFiles)
 	}
 
 	// Start the workers to find sequences
@@ -107,7 +109,7 @@ func main() {
 		wg.Add(1)
 		go func() {
 			for path := range pathChan {
-				seqs, err := listerFn(path)
+				seqs, err := fileseq.FindSequencesOnDisk(path, fileopts...)
 				if err != nil {
 					// Bail out of the app for any path error
 					fmt.Fprintf(errOut, "%s %q: %s\n", ErrorPath, path, err)
