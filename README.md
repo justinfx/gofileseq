@@ -1,4 +1,4 @@
-Fileseq
+Fileseq  ![Travis Build Status](https://api.travis-ci.org/justinfx/gofileseq.svg)
 =======
 
 A Go language library for parsing file sequence strings commonly
