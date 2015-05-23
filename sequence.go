@@ -107,7 +107,7 @@ Utilizes Go text/template format syntax.  Available functions include:
     startf   - the start frame.
     endf     - the end frame.
     len      - the length of the frame range.
-    pad      - the detecting amount of padding.
+    pad      - the detected padding characters (i.e. # , @@@ , ...).
     frange   - the frame range.
     inverted - the inverted frame range. (returns empty string if none)
     zfill    - the int width of the frame padding

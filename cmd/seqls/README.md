@@ -16,14 +16,20 @@ Usage
 ---------
 
 ```bash
-# list all sequences in the current directory
+# list the current directory, with rolled up sequences
 seqls
+
+# *only* list sequences, and not single files without frame patterns
+seqls -s 
 
 # long listing of all sequences in current dir
 seqls -l
 
 # long listing, with absolute (full) paths
 seqls -lf
+
+# long listing, with absolute (full) paths, and human-readable file sizes
+seqls -lfH
 
 # long listing of all files (even those without frame #)
 seqls -la
