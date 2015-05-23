@@ -39,4 +39,8 @@ seqls -ra
 
 # list sequences in two locations 
 seqls /some/absolute/path some/rel/path
+
+# Pattern matching to ${base}${pad}${ext}
+seqls /path/to/filesequence.#.exr 
+seqls relative/path/to/files.#.jpg another/relative/set/of/files.#.exr
 ```
