@@ -1,5 +1,5 @@
 {
-	"PackageVersion": "0.9.9",
+	"PackageVersion": "1.0.0",
 	"Arch": "386 amd64",
 	"Os": "windows linux darwin freebsd",
 	"Tasks": [
