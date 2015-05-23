@@ -1,5 +1,12 @@
 Changes:
 
+1.0.0
+----------------
+* cmd/seqls - Large refactor ; added support for passing sequence patterns (path/files.#.jpg)
+* cmd/seqls - Skip hidden directories (in addition to hidden files), unless -a flag is used
+* Docstring corrections
+
+
 0.9.9
 ----------------
 * Add support for reverse frame ranges (10-1)
