@@ -1,0 +1,15 @@
+{
+	"ImportPath": "github.com/justinfx/gofileseq/cmd/seqls",
+	"GoVersion": "go1.4.2",
+	"Deps": [
+		{
+			"ImportPath": "github.com/MichaelTJones/walk",
+			"Rev": "3af09438b0ab0e8f296410bfa646a7e635ea1fc0"
+		},
+		{
+			"ImportPath": "github.com/jessevdk/go-flags",
+			"Comment": "v1-285-g1679536",
+			"Rev": "1679536dcc895411a9f5848d9a0250be7856448c"
+		}
+	]
+}
