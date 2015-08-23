@@ -11,6 +11,9 @@ func benchFrameSetCreate(b *testing.B, n int) {
 	if err != nil {
 		b.Fatal(err.Error())
 	}
+
+	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
 		NewFrameSet(r)
 	}
@@ -23,6 +26,9 @@ func benchFrameSetValue(b *testing.B, n int) {
 		b.Fatal(err.Error())
 	}
 	idx := fs.Len() - 1
+
+	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
 		fs.Frame(idx)
 	}
@@ -38,6 +44,9 @@ func benchFrameSetIndex(b *testing.B, n int) {
 	if err != nil {
 		b.Fatal(err.Error())
 	}
+
+	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
 		fs.Index(val)
 	}
@@ -52,6 +61,9 @@ func benchFrameSetContains(b *testing.B, n int) {
 	start := fs.Start()
 	end := fs.End()
 	mid := end / 2
+
+	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
 		fs.HasFrame(start)
 		fs.HasFrame(mid)
