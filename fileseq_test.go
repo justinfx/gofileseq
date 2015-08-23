@@ -1,7 +1,6 @@
 package fileseq
 
 import (
-	"fmt"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -321,27 +320,27 @@ func TestFileSequenceFormat(t *testing.T) {
 		format   string
 		expected string
 	}{
-		{
+		{ // 0
 			"{{dir}}{{base}}{{frange}}{{pad}}{{ext}}",
 			seq.String(),
 		},
-		{
+		{ // 1
 			"{{startf}} {{endf}} {{len}} {{zfill}}",
-			fmt.Sprintf("%d %d %d %d", 1, 100, 18, 4),
+			"1 100 18 4",
 		},
-		{
+		{ // 2
 			"{{base}}{{if inverted}}{{inverted}}{{else}}{{frange}}{{end}}{{ext}}",
 			"file_foo.11-49,51-69,71-74,76-79,81-84,86-89,91-94,96-99.ext",
 		},
 	}
 
-	for _, tt := range table {
+	for i, tt := range table {
 		actual, err := seq.Format(tt.format)
 		if err != nil {
-			t.Fatalf("Error formatting %q: %s", tt.format, err.Error())
+			t.Fatalf("Test %d: Error formatting %q: %s", i, tt.format, err.Error())
 		}
 		if actual != tt.expected {
-			t.Errorf("Expected %q ; got %q", tt.expected, actual)
+			t.Errorf("Test %d: Expected %q ; got %q", i, tt.expected, actual)
 		}
 	}
 }
