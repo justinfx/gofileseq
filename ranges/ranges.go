@@ -352,6 +352,10 @@ func (l *InclusiveRanges) Append(start, end, step int) {
 // to the total range list. Only unique values from the
 // given range are appended to the total range.
 func (l *InclusiveRanges) AppendUnique(start, end, step int) {
+	if step == 0 {
+		return
+	}
+
 	subStart := start
 	subEnd := start
 	subStep := step
