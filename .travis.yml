@@ -1,15 +1,15 @@
 language: go
 
 go:
-	- 1.5
-	- release
-	- tip
+    - 1.5
+    - release
+    - tip
 
 script:
-	- go test -v ./...
+    - go test -v ./...
 
 # whitelist
 branches:
-	only:
-		- master
+    only:
+        - master
 
