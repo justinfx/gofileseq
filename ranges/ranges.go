@@ -366,8 +366,14 @@ func (l *InclusiveRanges) AppendUnique(start, end, step int) {
 	// and decreasing ranges
 	var pred func() bool
 	if start <= end {
+		if step < 0 {
+			step *= -1
+		}
 		pred = func() bool { return subEnd <= end }
 	} else {
+		if step > 0 {
+			step *= -1
+		}
 		pred = func() bool { return subEnd >= end }
 	}
 
