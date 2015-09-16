@@ -200,40 +200,23 @@ func (s *FrameSet) FrameRangePadded(pad int) string {
 	return PadFrameRange(s.frange, pad)
 }
 
-// InvertedFrameRange returns a new frame range that represents
-// all frames *not* within the current frame range. That is, it
+// Inverted returns a new FrameSet that represents
+// all frames *not* within the current FrameSet. That is, it
+// will create a range that "fills in" the current one.
+func (s *FrameSet) Inverted() *FrameSet {
+	ptr := s.rangePtr.Inverted()
+	return &FrameSet{ptr.String(), ptr}
+}
+
+// InvertedFrameRange returns a new frame range string that represents
+// all frames *not* within the current FrameSet. That is, it
 // will create a range that "fills in" the current one.
 func (s *FrameSet) InvertedFrameRange(pad int) string {
-	// TODO: Implement
-	return ""
-
-	// size := len(s.frames)
-	// if size < 2 {
-	// 	return ""
-	// }
-
-	// min, max := minMaxFrame(s.frames)
-	// if max-min <= 1 {
-	// 	return ""
-	// }
-
-	// // Compute how big our result set will be
-	// size = (max - min + 1) - size
-	// if size < 1 {
-	// 	return ""
-	// }
-
-	// frames := make([]int, size, size)
-	// var idx int
-	// var exists bool
-	// for val := min + 1; val < max; val++ {
-	// 	if _, exists = s.set[val]; exists {
-	// 		continue
-	// 	}
-	// 	frames[idx] = val
-	// 	idx++
-	// }
-	// return FramesToFrameRange(frames, false, pad)
+	frange := s.rangePtr.Inverted().String()
+	if pad > 1 {
+		frange = PadFrameRange(frange, pad)
+	}
+	return frange
 }
 
 // Normalize returns a new sorted and compacted FrameSet

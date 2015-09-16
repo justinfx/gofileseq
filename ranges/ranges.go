@@ -157,6 +157,26 @@ func (r *InclusiveRange) Len() int {
 	return r.cachedLen
 }
 
+// Min returns the smallest value in the range
+func (r *InclusiveRange) Min() int {
+	start := r.Start()
+	end := r.End()
+	if start < end {
+		return start
+	}
+	return end
+}
+
+// Max returns the highest value in the range
+func (r *InclusiveRange) Max() int {
+	start := r.Start()
+	end := r.End()
+	if start > end {
+		return start
+	}
+	return end
+}
+
 // Contains returns true if the given value is a valid
 // value within the value range.
 func (r *InclusiveRange) Contains(value int) bool {
@@ -323,6 +343,30 @@ func (l *InclusiveRanges) End() int {
 	return l.blocks[len(l.blocks)-1].End()
 }
 
+// Min returns the smallest value in the total range
+func (l *InclusiveRanges) Min() int {
+	val := l.Start()
+	for _, aRange := range l.blocks {
+		next := aRange.Min()
+		if next < val {
+			val = next
+		}
+	}
+	return val
+}
+
+// Max returns the highest value in the total range
+func (l *InclusiveRanges) Max() int {
+	val := l.End()
+	for _, aRange := range l.blocks {
+		next := aRange.Max()
+		if next > val {
+			val = next
+		}
+	}
+	return val
+}
+
 // NumRanges returns the number of discreet sets
 // of ranges that were appended.
 func (l *InclusiveRanges) numRanges() int {
@@ -477,6 +521,93 @@ func (l *InclusiveRanges) Index(value int) int {
 // Next value on valid iterator can be retrieved via Next()
 func (l *InclusiveRanges) IterValues() Iterator {
 	return &inclusiveRangesIt{ptr: l}
+}
+
+// Inverted returns a new instance with a range containing
+// all values within the start/end that are not in the current range.
+// Original ordering is not preserved. New inverted range will be
+// in an increasing value.
+func (l *InclusiveRanges) Inverted() *InclusiveRanges {
+	inverted := &InclusiveRanges{}
+
+	var (
+		start    int
+		end      int
+		step     int
+		current  int
+		pending  int
+		contains bool
+	)
+
+	// fmt.Println("Inverting ", l.String())
+	totalRange := NewInclusiveRange(l.Min(), l.Max(), 1)
+
+	for it := totalRange.IterValues(); !it.IsDone(); {
+
+		current = it.Next()
+
+		// fmt.Println("Checking:", current, "(pending:", pending, ")")
+		contains = l.Contains(current)
+
+		// Short-circuit if we encounter a value that
+		// is already in the original sequence.
+		if contains {
+
+			// fmt.Println("  Existing value")
+
+			// If we haven't accumulated 2+ values to
+			// add, just continue now and keep trying
+			if pending < 2 {
+				step++
+				// fmt.Println("  Increasing step to:", step)
+				continue
+			}
+
+			// If the step has changed from what we have
+			// already accumulated, then add what we have
+			// and start a new range.
+			if (current + 1 - end) != step {
+				// fmt.Println("  Step changed. Adding range:", start, end, step)
+				inverted.Append(start, end, step)
+				step = 1
+				start = current
+				pending = 0
+			}
+
+			continue
+		}
+
+		// fmt.Println("  Unique value")
+
+		// If the value we want to keep is a different
+		// stepping from the pending values, add what
+		// we have and start a new range again.
+		if pending >= 2 && current-end != step {
+			// fmt.Println("  Step changed. Adding range:", start, end, step)
+			inverted.Append(start, end, step)
+			pending = 0
+		}
+
+		end = current
+
+		// Start a new range
+		if pending == 0 {
+			// fmt.Println("  Starting new range")
+			start = end
+			step = 1
+		}
+
+		pending++
+		continue
+	}
+
+	// Flush the remaining values
+	if pending > 0 {
+		// fmt.Println("  Flushing and adding remaining range:", start, end, step)
+		inverted.Append(start, end, step)
+	}
+
+	return inverted
 }
 
 // tracks the iteration state across a inclusiveRanges instance

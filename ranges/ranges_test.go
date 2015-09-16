@@ -276,3 +276,46 @@ func TestRangesIterValues(t *testing.T) {
 		}
 	}
 }
+
+func TestRangesInverted(t *testing.T) {
+	table := []struct {
+		params   [][]int
+		expected string
+	}{
+		{ // 0
+			[][]int{{1, 10, 1}},
+			"",
+		},
+		{ // 1
+			[][]int{{1, 10, 2}},
+			"2-8x2",
+		},
+		{ // 2
+			[][]int{{-6, 0, 2}, {2, 4, 1}, {10, 16, 3}},
+			"-5-1x2,5-9,11-12,14-15",
+		},
+		{ // 3
+			[][]int{{16, 10, 3}, {4, 2, 1}, {0, -6, 2}},
+			"-5-1x2,5-9,11-12,14-15",
+		},
+		{ // 5
+			[][]int{{4, 2, 1}, {0, -6, 2}, {16, 10, 3}, {2, 4, 1}},
+			"-5-1x2,5-9,11-12,14-15",
+		},
+		{ // 6
+			[][]int{{1, 10, 2}, {50, 50, 1}, {60, 62, 2}, {70, 74, 2}},
+			"2-10x2,11-49,51-59,61-63x2,64-69,71-73x2",
+		},
+	}
+
+	for i, tt := range table {
+		var r InclusiveRanges
+		for _, p := range tt.params {
+			r.AppendUnique(p[0], p[1], p[2])
+		}
+		actual := r.Inverted().String()
+		if actual != tt.expected {
+			t.Errorf("Test %d: got %q; expected %q", i, actual, tt.expected)
+		}
+	}
+}
