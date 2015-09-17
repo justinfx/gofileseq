@@ -319,3 +319,34 @@ func TestRangesInverted(t *testing.T) {
 		}
 	}
 }
+
+func TestRangesNormalized(t *testing.T) {
+	table := []struct {
+		params   [][]int
+		expected string
+	}{
+		{ // 0
+			[][]int{{1, 1, 1}, {2, 2, 1}, {3, 3, 1}, {4, 4, 1}, {5, 5, 1}},
+			"1-5",
+		},
+		{ // 1
+			[][]int{{5, 5, 1}, {1, 1, 1}, {4, 4, 1}, {2, 2, 1}, {3, 3, 1}, {1, 1, 1}, {1, 1, 1}},
+			"1-5",
+		},
+		{ // 2
+			[][]int{{1, 5, 1}, {6, 6, 1}, {7, 7, 1}, {8, 8, 1}, {9, 9, 1}, {10, 10, 1}, {11, 20, 1}},
+			"1-20",
+		},
+	}
+
+	for i, tt := range table {
+		var r InclusiveRanges
+		for _, p := range tt.params {
+			r.Append(p[0], p[1], p[2])
+		}
+		actual := r.Normalized().String()
+		if actual != tt.expected {
+			t.Errorf("Test %d: got %q; expected %q", i, actual, tt.expected)
+		}
+	}
+}

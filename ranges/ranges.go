@@ -528,30 +528,49 @@ func (l *InclusiveRanges) IterValues() Iterator {
 // Original ordering is not preserved. New inverted range will be
 // in an increasing value.
 func (l *InclusiveRanges) Inverted() *InclusiveRanges {
-	inverted := &InclusiveRanges{}
+	return l.normalized(true)
+}
+
+// Normalized returns a new instance, where all values have
+// been sorted and compacted (where possible)
+func (l *InclusiveRanges) Normalized() *InclusiveRanges {
+	return l.normalized(false)
+}
+
+// Normalized returns a new instance, where all values have
+// been sorted and compacted (where possible).
+// If invert is true, then return all values within the start/end that
+// are not in the current range.
+func (l *InclusiveRanges) normalized(invert bool) *InclusiveRanges {
+	normalized := &InclusiveRanges{}
 
 	var (
-		start    int
-		end      int
-		step     int
-		current  int
-		pending  int
-		contains bool
+		start     int
+		end       int
+		step      int
+		current   int
+		pending   int
+		keepValue bool
 	)
 
-	// fmt.Println("Inverting ", l.String())
 	totalRange := NewInclusiveRange(l.Min(), l.Max(), 1)
+
+	checkValue := l.Contains
+	if !invert {
+		checkValue = func(value int) bool {
+			return !l.Contains(value)
+		}
+	}
 
 	for it := totalRange.IterValues(); !it.IsDone(); {
 
 		current = it.Next()
 
-		// fmt.Println("Checking:", current, "(pending:", pending, ")")
-		contains = l.Contains(current)
+		keepValue = checkValue(current)
 
 		// Short-circuit if we encounter a value that
-		// is already in the original sequence.
-		if contains {
+		// is not in the original sequence.
+		if keepValue {
 
 			// fmt.Println("  Existing value")
 
@@ -568,7 +587,7 @@ func (l *InclusiveRanges) Inverted() *InclusiveRanges {
 			// and start a new range.
 			if (current + 1 - end) != step {
 				// fmt.Println("  Step changed. Adding range:", start, end, step)
-				inverted.Append(start, end, step)
+				normalized.Append(start, end, step)
 				step = 1
 				start = current
 				pending = 0
@@ -584,7 +603,7 @@ func (l *InclusiveRanges) Inverted() *InclusiveRanges {
 		// we have and start a new range again.
 		if pending >= 2 && current-end != step {
 			// fmt.Println("  Step changed. Adding range:", start, end, step)
-			inverted.Append(start, end, step)
+			normalized.Append(start, end, step)
 			pending = 0
 		}
 
@@ -604,10 +623,10 @@ func (l *InclusiveRanges) Inverted() *InclusiveRanges {
 	// Flush the remaining values
 	if pending > 0 {
 		// fmt.Println("  Flushing and adding remaining range:", start, end, step)
-		inverted.Append(start, end, step)
+		normalized.Append(start, end, step)
 	}
 
-	return inverted
+	return normalized
 }
 
 // tracks the iteration state across a inclusiveRanges instance

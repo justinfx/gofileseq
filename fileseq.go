@@ -27,7 +27,7 @@ import (
 	"strings"
 )
 
-const Version = "1.0.0"
+const Version = "1.1.0"
 
 var (
 	padding       map[string]int
