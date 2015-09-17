@@ -1,5 +1,15 @@
 Changes:
 
+1.1.0
+----------------
+* Major refactor to the underlying logic of resolving ranges. Use an optimized storage and iteration approach, in order to
+handle arbitrarily large ranges. Avoids memory allocation crashes, and very slow construction of FrameSet/FileSequence
+
+Known Issues:
+* Invert/Normalize functions are not as optimized as they could be. While they are much faster now for the common case of source
+ranges like "1-10x2,50-100x3", they are significantly slower for less common cases where the source range is a massive amount
+of individual values like "1,2,3,4,...,100000"
+
 1.0.0
 ----------------
 * cmd/seqls - Large refactor ; added support for passing sequence patterns (path/files.#.jpg)
@@ -24,7 +34,7 @@ Changes:
 
 0.9.1
 ----------------
-* Tweaks to gox cross-compiling 
+* Tweaks to gox cross-compiling
 * seqls: Added a -quiet flag
 * seqls: Format adjustments for Windows platform
 * seqls: Continuing listing, even when encountering file errors
