@@ -1,7 +1,6 @@
 package fileseq
 
 import (
-	"fmt"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -129,6 +128,7 @@ func TestFrameSetNormalize(t *testing.T) {
 		output string
 	}{
 		{"1,2,3,4,5", "1-5"},
+		{"5,1,4,2,3", "1-5"},
 		{"1-5,6,7,8,9,10,11-20", "1-20"},
 	}
 
@@ -158,7 +158,7 @@ func TestFrameSetInverted(t *testing.T) {
 		{"1-10y2", "3-9x2", 0},
 		{"1-10y2", "00003-00009x2", 5},
 		{"1-10:4", "", 0},
-		{" 1 - 10x2, 50, 60 - 62, 70 - 74x2 ", "2-10x2,11-49,51-59,63-69,71,73", 0},
+		{" 1 - 10x2, 50, 60 - 62, 70 - 74x2 ", "2-10x2,11-49,51-59,63-69,71-73x2", 0},
 	}
 
 	for _, tt := range table {
@@ -191,6 +191,8 @@ func TestNewFileSequence(t *testing.T) {
 		{"/dir/.hidden.100", 100, 100, 0, 1},
 		{"/dir/.hidden.100.ext", 100, 100, 0, 1},
 		{"/dir/.hidden5.1-10#.7zip", 1, 10, 4, 10},
+		{".10000000000", 0, 0, 0, 1},
+		{".10000000000.123", 10000000000, 10000000000, 0, 1},
 	}
 	for _, tt := range table {
 		seq, err := NewFileSequence(tt.path)
@@ -321,27 +323,27 @@ func TestFileSequenceFormat(t *testing.T) {
 		format   string
 		expected string
 	}{
-		{
+		{ // 0
 			"{{dir}}{{base}}{{frange}}{{pad}}{{ext}}",
 			seq.String(),
 		},
-		{
+		{ // 1
 			"{{startf}} {{endf}} {{len}} {{zfill}}",
-			fmt.Sprintf("%d %d %d %d", 1, 100, 18, 4),
+			"1 100 18 4",
 		},
-		{
+		{ // 2
 			"{{base}}{{if inverted}}{{inverted}}{{else}}{{frange}}{{end}}{{ext}}",
 			"file_foo.11-49,51-69,71-74,76-79,81-84,86-89,91-94,96-99.ext",
 		},
 	}
 
-	for _, tt := range table {
+	for i, tt := range table {
 		actual, err := seq.Format(tt.format)
 		if err != nil {
-			t.Fatalf("Error formatting %q: %s", tt.format, err.Error())
+			t.Fatalf("Test %d: Error formatting %q: %s", i, tt.format, err.Error())
 		}
 		if actual != tt.expected {
-			t.Errorf("Expected %q ; got %q", tt.expected, actual)
+			t.Errorf("Test %d: Expected %q ; got %q", i, tt.expected, actual)
 		}
 	}
 }

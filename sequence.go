@@ -65,18 +65,23 @@ func NewFileSequence(sequence string) (*FileSequence, error) {
 			basename, ext = basename[:idx], basename[idx:]
 		}
 
-		// Try to see if we can at least find a specific frames
-		// number, a la  .<frame>.ext
-		parts = singleFrame.FindStringSubmatch(sequence)
-		if len(parts) > 0 {
-			frameSet, err = NewFrameSet(parts[2])
-			if err != nil {
-				frameSet = nil
-			} else {
-				// Reparse the dir/basename to not include the trailing frame
-				dir, basename = filepath.Split(parts[1])
+		if dir == "" && basename == "" && ext != "" {
+			// Just assume all we have is a file extension
+
+		} else {
+			// Try to see if we can at least find a specific frame
+			// number, a la  .<frame>.ext
+			parts = singleFrame.FindStringSubmatch(sequence)
+			if len(parts) > 0 {
+				frameSet, err = NewFrameSet(parts[2])
+				if err != nil {
+					frameSet = nil
+				} else {
+					// Reparse the dir/basename to not include the trailing frame
+					dir, basename = filepath.Split(parts[1])
+				}
+				ext = parts[3]
 			}
-			ext = parts[3]
 		}
 
 	} else {

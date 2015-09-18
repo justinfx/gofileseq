@@ -1,14 +1,17 @@
 package fileseq
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/justinfx/gofileseq/ranges"
+)
 
 // FrameSet wraps a sequence of frames in container that
 // exposes array-like operations and queries, after parsing
 // the given frame range string.
 type FrameSet struct {
-	frange string
-	frames []int
-	set    map[int]struct{}
+	frange   string
+	rangePtr *ranges.InclusiveRanges
 }
 
 // Create a new FrameSet from a given frame range string
@@ -16,11 +19,7 @@ type FrameSet struct {
 func NewFrameSet(frange string) (*FrameSet, error) {
 	var err error
 
-	frameSet := &FrameSet{
-		frange: frange,
-		frames: []int{},
-		set:    map[int]struct{}{},
-	}
+	frameSet := &FrameSet{frange, &ranges.InclusiveRanges{}}
 
 	// Process the frame range and get a slice of match slices
 	matches, err := frameRangeMatches(frange)
@@ -40,8 +39,6 @@ func NewFrameSet(frange string) (*FrameSet, error) {
 
 // Process a rangePattern match group
 func (s *FrameSet) handleMatch(match []string) error {
-	var parsed []int
-
 	switch len(match) {
 
 	// Single frame match
@@ -50,7 +47,7 @@ func (s *FrameSet) handleMatch(match []string) error {
 		if err != nil {
 			return err
 		}
-		parsed = []int{f}
+		s.rangePtr.AppendUnique(f, f, 1)
 
 	// Simple frame range
 	case 2:
@@ -64,20 +61,14 @@ func (s *FrameSet) handleMatch(match []string) error {
 		}
 
 		// Handle descending frame ranges, like 10-1
-		var size, inc int
+		var inc int
 		if start > end {
 			inc = -1
-			size = (start + 1) - end
 		} else {
 			inc = 1
-			size = (end + 1) - start
 		}
 
-		parsed = make([]int, size, size)
-		for i := range parsed {
-			parsed[i] = start
-			start += inc
-		}
+		s.rangePtr.AppendUnique(start, end, inc)
 
 	// Complex frame range
 	case 4:
@@ -106,24 +97,27 @@ func (s *FrameSet) handleMatch(match []string) error {
 
 		switch mod {
 		case `x`:
-			parsed = toRange(start, end, chunk)
+			s.rangePtr.AppendUnique(start, end, chunk)
 
 		case `y`:
-			parsed = []int{}
+			// TODO: Add proper support for adding inverse of range.
+			// This approach will add excessive amounts of singe
+			// range elements. They could be compressed into chunks
 			skip := start
-			for _, val := range toRange(start, end, 1) {
+			aRange := ranges.NewInclusiveRange(start, end, 1)
+			var val int
+			for it := aRange.IterValues(); !it.IsDone(); {
+				val = it.Next()
 				if val == skip {
 					skip += chunk
 					continue
 				}
-				parsed = append(parsed, val)
+				s.rangePtr.AppendUnique(val, val, 1)
 			}
 
 		case `:`:
-			parsed = []int{}
-			for ; chunk >= 0; chunk-- {
-				staggered := toRange(start, end, chunk)
-				parsed = append(parsed, staggered...)
+			for ; chunk > 0; chunk-- {
+				s.rangePtr.AppendUnique(start, end, chunk)
 			}
 		}
 
@@ -131,7 +125,6 @@ func (s *FrameSet) handleMatch(match []string) error {
 		return fmt.Errorf("Unexpected match []string size: %v", match)
 	}
 
-	s.addFrames(parsed)
 	return nil
 }
 
@@ -143,32 +136,14 @@ func (s *FrameSet) String() string {
 
 // Len returns the number of frames in the set
 func (s *FrameSet) Len() int {
-	return len(s.frames)
-}
-
-// Adds a slice of frame numbers to the internal
-// array, only if they have not yet been added.
-func (s *FrameSet) addFrames(frames []int) {
-	var exists bool
-	for _, f := range frames {
-		if _, exists = s.set[f]; exists {
-			continue
-		}
-		s.set[f] = struct{}{}
-		s.frames = append(s.frames, f)
-	}
+	return s.rangePtr.Len()
 }
 
 // Index returns the index position of the frame value
 // within the frame set.
 // If the given frame does not exist, then return -1
 func (s *FrameSet) Index(frame int) int {
-	for i, v := range s.frames {
-		if v == frame {
-			return i
-		}
-	}
-	return -1
+	return s.rangePtr.Index(frame)
 }
 
 // Frame returns the frame number value for a given index into
@@ -176,42 +151,40 @@ func (s *FrameSet) Index(frame int) int {
 // If the index is outside the bounds of the frame set range,
 // then an error is returned.
 func (s *FrameSet) Frame(index int) (int, error) {
-	if index < 0 || index >= len(s.frames) {
-		return 0, fmt.Errorf("index %d is outside the bounds of the frame set 0-%d",
-			index, len(s.frames))
-	}
-	return s.frames[index], nil
+	return s.rangePtr.Value(index)
 }
 
 // Frames returns a slice of the frame numbers that were parsed
-// from the original frame range string
+// from the original frame range string.
+//
+// Warning: This allocates a slice containing number of elements
+// equal to the Len() of the range. If the sequence is massive,
+// it could hit slice limits. Better to use IterFrames()
 func (s *FrameSet) Frames() []int {
-	return s.frames
+	size := s.rangePtr.Len()
+	frames := make([]int, size, size)
+	i := 0
+	for it := s.rangePtr.IterValues(); !it.IsDone(); {
+		frames[i] = it.Next()
+		i++
+	}
+	return frames
 }
 
 // HasFrame returns true if the frameset contains the given
 // frame value.
 func (s *FrameSet) HasFrame(frame int) bool {
-	if s.Index(frame) == -1 {
-		return false
-	}
-	return true
+	return s.rangePtr.Contains(frame)
 }
 
 // Start returns the first frame in the frame set
 func (s *FrameSet) Start() int {
-	if len(s.frames) == 0 {
-		return 0
-	}
-	return s.frames[0]
+	return s.rangePtr.Start()
 }
 
 // End returns the last frame in the frame set
 func (s *FrameSet) End() int {
-	if len(s.frames) == 0 {
-		return 0
-	}
-	return s.frames[len(s.frames)-1]
+	return s.rangePtr.End()
 }
 
 // FrameRange returns the range string that was used
@@ -227,41 +200,27 @@ func (s *FrameSet) FrameRangePadded(pad int) string {
 	return PadFrameRange(s.frange, pad)
 }
 
-// InvertedFrameRange returns a new frame range that represents
-// all frames *not* within the current frame range. That is, it
+// Invert returns a new FrameSet that represents
+// all frames *not* within the current FrameSet. That is, it
+// will create a range that "fills in" the current one.
+func (s *FrameSet) Invert() *FrameSet {
+	ptr := s.rangePtr.Inverted()
+	return &FrameSet{ptr.String(), ptr}
+}
+
+// InvertedFrameRange returns a new frame range string that represents
+// all frames *not* within the current FrameSet. That is, it
 // will create a range that "fills in" the current one.
 func (s *FrameSet) InvertedFrameRange(pad int) string {
-	size := len(s.frames)
-	if size < 2 {
-		return ""
+	frange := s.rangePtr.Inverted().String()
+	if pad > 1 {
+		frange = PadFrameRange(frange, pad)
 	}
-
-	min, max := minMaxFrame(s.frames)
-	if max-min <= 1 {
-		return ""
-	}
-
-	// Compute how big our result set will be
-	size = (max - min + 1) - size
-	if size < 1 {
-		return ""
-	}
-
-	frames := make([]int, size, size)
-	var idx int
-	var exists bool
-	for val := min + 1; val < max; val++ {
-		if _, exists = s.set[val]; exists {
-			continue
-		}
-		frames[idx] = val
-		idx++
-	}
-	return FramesToFrameRange(frames, false, pad)
+	return frange
 }
 
 // Normalize returns a new sorted and compacted FrameSet
 func (s *FrameSet) Normalize() *FrameSet {
-	ret, _ := NewFrameSet(FramesToFrameRange(s.frames, true, 0))
-	return ret
+	ptr := s.rangePtr.Normalized()
+	return &FrameSet{ptr.String(), ptr}
 }
