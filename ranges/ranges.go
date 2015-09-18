@@ -421,6 +421,17 @@ func (l *InclusiveRanges) AppendUnique(start, end, step int) {
 		pred = func() bool { return subEnd >= end }
 	}
 
+	// Short-circuit if this is the first range being added
+	if len(l.blocks) == 0 {
+		l.Append(start, end, step)
+		return
+	}
+
+	// TODO: More intelligent fast-paths for easy-to-identify
+	// overlapping ranges. Such as when the existing range is:
+	// 1-100x1 and we are appending 50-150x1. Should be easy
+	// enough to just know we can Append(101,150,1)
+
 	for ; pred(); subEnd += step {
 		if !l.Contains(subEnd) {
 			// Is a unique value in the range
