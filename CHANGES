@@ -1,11 +1,15 @@
 Changes:
 
-1.1.0
+2.0.0
 ----------------
 * Major refactor to the underlying logic of resolving ranges. Use an optimized storage and iteration approach, in order to
 handle arbitrarily large ranges. Avoids memory allocation crashes, and very slow construction of FrameSet/FileSequence
 
 Known Issues:
+* While creating a FrameSet from a massive range like "1-10000000000x2" will be very quick, creating
+FrameSets from multi-ranges with massive components like "20,50,60-10000000000" may be slow. 
+Improvements are still needed to the process of detecting unique values in the previously added
+range components.
 * Invert/Normalize functions are not as optimized as they could be. While they are much faster now for the common case of source
 ranges like "1-10x2,50-100x3", they are significantly slower for less common cases where the source range is a massive amount
 of individual values like "1,2,3,4,...,100000"
