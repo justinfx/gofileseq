@@ -191,6 +191,8 @@ func TestNewFileSequence(t *testing.T) {
 		{"/dir/.hidden.100", 100, 100, 0, 1},
 		{"/dir/.hidden.100.ext", 100, 100, 0, 1},
 		{"/dir/.hidden5.1-10#.7zip", 1, 10, 4, 10},
+		{".10000000000", 0, 0, 0, 1},
+		{".10000000000.123", 10000000000, 10000000000, 0, 1},
 	}
 	for _, tt := range table {
 		seq, err := NewFileSequence(tt.path)
