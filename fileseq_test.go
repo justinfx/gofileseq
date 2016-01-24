@@ -515,3 +515,21 @@ func TestFindSequenceOnDisk(t *testing.T) {
 		}
 	}
 }
+
+func TestHandleSymlinksOnDisk(t *testing.T) {
+	seqs, err := FindSequencesOnDisk("testdata/versions")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(seqs) != 1 {
+		t.Fatalf("Expected 1 result ; got %d : %v", len(seqs), seqs)
+	}
+
+	actual := seqs[0].String()
+	expected := "testdata/versions/seq.1-10#.ext"
+
+	if actual != expected {
+		t.Fatalf("Expected to find seq %q ; got %q", expected, actual)
+	}
+}

@@ -536,6 +536,21 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 			continue
 		}
 
+		// Also skip symlinks that point to directories
+		if (info.Mode() & os.ModeSymlink) != 0 {
+			buf.WriteString(info.Name())
+			syminfo, err := os.Stat(buf.String())
+			if err != nil {
+				return nil, fmt.Errorf("Error reading symlink %q: %s", buf.Bytes(), err)
+			}
+
+			buf.Truncate(size)
+
+			if syminfo.IsDir() {
+				continue
+			}
+		}
+
 		name := info.Name()
 
 		if !hiddenFiles && strings.HasPrefix(name, ".") {
