@@ -1,4 +1,4 @@
-seqls &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ ![Download](https://api.bintray.com/packages/justinfx/utils/seqls/images/download.svg) ](https://bintray.com/justinfx/utils/seqls/_latestVersion)
+seqls &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[![GitHub version](https://badge.fury.io/gh/justinfx%2Fgofileseq.svg)](https://github.com/justinfx/gofileseq/releases/latest)
 ========
 
 A command-line utility, using [gofileseq](https://github.com/justinfx/gofileseq), to list file sequences.
