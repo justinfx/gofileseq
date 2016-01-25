@@ -1,33 +1,36 @@
 {
-	"PackageVersion": "2.0.0",
-	"Arch": "386 amd64",
-	"Os": "windows linux darwin freebsd",
 	"Tasks": [
-		"interpolate-source",
-		"default"
+		"default",
+		"publish-github"
 	],
-	"ConfigVersion": "0.9",
+	"BuildConstraints": "linux freebsd windows,amd64 darwin,amd64",
+	"PackageVersion": "2.0.1",
 	"TaskSettings": {
-        "bintray" : {
-            "package" : "seqls",
-            "subject": "justinfx",
-            "repository": "utils",
-            "downloadspage": "bintray.md"
-        },
 		"archive-tar-gz": {
 			"platforms": "!windows"
+		},
+		"bintray": {
+			"downloadspage": "bintray.md",
+			"package": "seqls",
+			"repository": "utils",
+			"subject": "justinfx"
 		},
 		"codesign": {
 			"id": "seqls"
 		},
 		"interpolate-source": {
 			"varnameVersion": "Version"
+		},
+		"publish-github": {
+			"owner": "justinfx",
+			"repository": "gofileseq"
 		}
 	},
+	"ConfigVersion": "0.9",
 	"BuildSettings": {
 		"LdFlags": "-s",
 		"LdFlagsXVars": {
-			"Version": "main.VERSION"
+			"Version": "main.Version"
 		}
 	}
 }
