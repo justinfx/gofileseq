@@ -1,5 +1,9 @@
 Changes:
 
+2.0.1
+----------------
+* cmd/seqls - Detect symlinks to directories and don't interpret them as discovered sequences
+
 2.0.0
 ----------------
 * Major refactor to the underlying logic of resolving ranges. Use an optimized storage and iteration approach, in order to
