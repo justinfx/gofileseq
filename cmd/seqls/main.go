@@ -10,8 +10,8 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/jessevdk/go-flags"
 	"github.com/justinfx/gofileseq"
-	"github.com/justinfx/gofileseq/cmd/seqls/Godeps/_workspace/src/github.com/jessevdk/go-flags"
 )
 
 var Options struct {

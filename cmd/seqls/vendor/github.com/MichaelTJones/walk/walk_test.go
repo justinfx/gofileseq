@@ -13,7 +13,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/justinfx/gofileseq/cmd/seqls/Godeps/_workspace/src/github.com/MichaelTJones/walk"
+	"github.com/MichaelTJones/walk"
 )
 
 var LstatP = walk.LstatP

@@ -11,8 +11,8 @@ import (
 	"sync"
 	"text/tabwriter"
 
+	"github.com/MichaelTJones/walk"
 	"github.com/justinfx/gofileseq"
-	"github.com/justinfx/gofileseq/cmd/seqls/Godeps/_workspace/src/github.com/MichaelTJones/walk"
 )
 
 // number of goroutines to spawn for processing directories
