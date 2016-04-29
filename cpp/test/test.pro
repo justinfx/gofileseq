@@ -5,10 +5,10 @@ CONFIG -= qt
 
 SOURCES += main.cpp
 
+unix: LIBS += -lpthread -L$$PWD/../ -lfileseq
 
-unix: LIBS += -L$$PWD/../cpp/ -lfileseq
+INCLUDEPATH += $$PWD/..
+DEPENDPATH += $$PWD/..
 
-INCLUDEPATH += $$PWD/../cpp
-DEPENDPATH += $$PWD/../cpp
-
-unix: PRE_TARGETDEPS += $$PWD/../cpp/libfileseq.a
+unix: QMAKE_LFLAGS += -Wl,-rpath,$$PWD/..
+unix: PRE_TARGETDEPS += $$PWD/../libfileseq.so

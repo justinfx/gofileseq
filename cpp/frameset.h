@@ -6,7 +6,7 @@
 
 namespace fileseq {
 
-#include "private/libgofileseq.h"
+#include "libgofileseq.h"
 
 class FrameSet {
 

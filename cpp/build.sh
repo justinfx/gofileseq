@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Build the Go wrapper lib
-go build -buildmode=c-archive -o ./private/libgofileseq.a ./private
+export CGO_CXXFLAGS="-fPIC"
 
+echo "Configuring build..."
 
 # Generate a Makefile for building the C++ lib
 unamestr=`uname`
@@ -19,7 +20,16 @@ else
 
 fi
 
+echo "Building libgofileseq (static)..."
+go build -buildmode=c-archive -o ./libgofileseq.a ./private
+
+echo "Building libgofileseq (shared)..."
+go build -buildmode=c-shared -o ./libgofileseq.so ./private
+
+echo "Building libfileseq..."
 make
+
+echo "Done."
 
 
 

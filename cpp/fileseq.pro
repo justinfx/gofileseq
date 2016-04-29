@@ -4,20 +4,18 @@
 
 TEMPLATE = lib
 TARGET = fileseq
-DEPENDPATH += .
-INCLUDEPATH += .
 
 CONFIG -= app_bundle
 CONFIG -= qt
-CONFIG += staticlib
+
+INCLUDEPATH += $$PWD
+DEPENDPATH += $$PWD
 
 # Input
 HEADERS += frameset.h private/libgofileseq.h
 SOURCES += frameset.cpp
 
-unix: LIBS += -L$$PWD/private/ -lgofileseq
-
-INCLUDEPATH += $$PWD/private
-DEPENDPATH += $$PWD/private
-
-unix: PRE_TARGETDEPS += $$PWD/private/libgofileseq.a
+unix: QMAKE_CXXFLAGS += -fPIC
+unix: QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN\''
+unix: LIBS += -L$$PWD -lgofileseq
+unix: PRE_TARGETDEPS += $$PWD/libgofileseq.so
