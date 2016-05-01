@@ -139,17 +139,18 @@ void test_find_seqs() {
               << "\n  " << err
               << std::endl;
 
-//    std::string path2 = "../testdata";
-//    std::cout << "findSequencesOnDisk for " << path2 << std::endl;
-//    fileseq::FileSequences seqs;
-//    err = fileseq::findSequencesOnDisk(seqs, path2, true, true);
-//    if (!err.empty()) {
-//        std::cout << "  Error: " << err << std::endl;
-//    } else {
-//        for (size_t i=0; i < seqs.size(); ++i) {
-//            std::cout << "  seq: " << seqs.at(i) << std::endl;
-//        }
-//    }
+    std::string path2 = "../testdata";
+    std::cout << "findSequencesOnDisk for " << path2 << std::endl;
+    fileseq::FileSequences seqs;
+    seqs.push_back(fileseq::FileSequence("existing.1-100#.ext"));
+    std::string err2 = fileseq::findSequencesOnDisk(seqs, path2, true, true);
+    if (!err2.empty()) {
+        std::cout << "  Error: " << err2 << std::endl;
+    } else {
+        for (size_t i=0; i < seqs.size(); ++i) {
+            std::cout << "  seq: " << seqs.at(i) << std::endl;
+        }
+    }
 
 }
 

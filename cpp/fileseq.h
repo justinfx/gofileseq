@@ -26,12 +26,10 @@ FileSequence findSequenceOnDisk(const std::string &pattern,
 // search results.
 // If there are any errors reading the directory or the files, a
 // non-empty error string will be returned.
-/*
 std::string findSequencesOnDisk(FileSequences &seqs,
                                 const std::string &path,
                                 bool hiddenFiles=false,
                                 bool singleFiles=false);
-*/
 
 
 // Debug

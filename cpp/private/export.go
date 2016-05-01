@@ -552,7 +552,7 @@ func FindSequencesOnDisk(path *C.char, opts C.FileOption) (FileSequences, uint64
 
 	gopath := C.GoString(path)
 	seqs, err := fileseq.FindSequencesOnDisk(gopath, fileOpts...)
-	fmt.Printf("DEBUG: %v\n", seqs)
+	// fmt.Printf("export.go::DEBUG:results: %v\n", seqs)
 	if err != nil {
 		return nil, 0, C.CString(err.Error())
 	}
@@ -560,15 +560,16 @@ func FindSequencesOnDisk(path *C.char, opts C.FileOption) (FileSequences, uint64
 	num := uint64(len(seqs))
 	size := uint64(unsafe.Sizeof(C.uint64_t(0)))
 	list := C.malloc(C.size_t(num * size))
+	startPtr := uintptr(unsafe.Pointer(list))
 
 	for i, seq := range seqs {
 		id := sFileSeqs.Add(seq)
-		fmt.Printf("DEBUG:id: %v\n", id)
-		ptr := unsafe.Pointer(uintptr(list) + uintptr(size*uint64(i)))
+		// fmt.Printf("export.go::DEBUG:id: %v\n", id)
+		ptr := unsafe.Pointer(startPtr + uintptr(size*uint64(i)))
 		*(*C.uint64_t)(ptr) = C.uint64_t(id)
 	}
 
-	return (FileSequences)(unsafe.Pointer(list)), num, nil
+	return FileSequences(list), num, nil
 }
 
 // Required by CGO

@@ -173,10 +173,10 @@ private:
 
     friend FileSequence findSequenceOnDisk(const std::string &pattern, std::string* err);
 
-//    friend std::string findSequencesOnDisk(FileSequences &seqs,
-//                                           const std::string &path,
-//                                           bool hiddenFiles,
-//                                           bool singleFiles);
+    friend std::string findSequencesOnDisk(FileSequences &seqs,
+                                           const std::string &path,
+                                           bool hiddenFiles,
+                                           bool singleFiles);
 };
 
 } // fileseq

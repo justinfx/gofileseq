@@ -20,7 +20,7 @@ FileSequence findSequenceOnDisk(const std::string &pattern, std::string* err) {
     return FileSequence(ret.r0);
 }
 
-/*
+
 std::string findSequencesOnDisk(FileSequences &seqs,
                                 const std::string &path,
                                 bool hiddenFiles,
@@ -50,16 +50,15 @@ std::string findSequencesOnDisk(FileSequences &seqs,
 
     uint64_t* start = ret.r0;
     for (uint64_t i = 0; i < ret.r1; ++i) {
-        seqs[0] = FileSequence(*start);
+        seqs[i] = FileSequence(*start);
         ++start;
-        std::cout << "DEBUG:: " << seqs.at(i).string() << std::endl;
+//        std::cout << "cpp::DEBUG:: " << seqs.at(i).string() << std::endl;
     }
 
     free(ret.r0);
 
     return err;
 }
-*/
 
 
 /*
