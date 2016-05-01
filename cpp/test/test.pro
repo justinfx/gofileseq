@@ -1,4 +1,5 @@
 TEMPLATE = app
+TARGET = test
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
@@ -10,6 +11,7 @@ DEPENDPATH += $$PWD/..
 
 unix: {
     LIBS += -lpthread -L$$PWD/../ -lfileseq
+    # LIBS += -Wl,-Bstatic -lgofileseq -Wl,-Bdynamic
     QMAKE_RPATHDIR += $$_PRO_FILE_PWD_/..
 }
 

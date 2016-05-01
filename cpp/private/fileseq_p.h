@@ -1,7 +1,7 @@
 #ifndef _GOFILESEQ_CPP_FILESEQ_P_H_
 #define _GOFILESEQ_CPP_FILESEQ_P_H_
 
-#include <iostream>
+#include <cstdlib>
 #include <string>
 
 namespace fileseq {
@@ -52,12 +52,17 @@ public:
         return *this;
     }
 
+    operator bool() const { return !m_str.empty(); }
     operator std::string() const { return m_str; }
 
 private:
     char* m_data;
     std::string m_str;
 };
+
+
+void printErrorIgnored(const std::string &err);
+
 
 } // internal
 

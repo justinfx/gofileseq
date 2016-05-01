@@ -1,16 +1,20 @@
+#include <ctime>
+#include <cstdio>
 #include <iostream>
 #include <vector>
 
-#include "fileseq.h"
+// #include <fileseq/fileseq.h>
+#include "../fileseq.h"
 
 using namespace std;
 
 void test_frameset() {
-    fileseq::FrameSet fs("1-20x2");
+    fileseq::Status ok;
+    fileseq::FrameSet fs("1-20x2", &ok);
 
     std::cout << "valid? " << fs.isValid() << std::endl;
-    if (!fs.isValid()) {
-        std::cout << "  Error:" << fs.getLastError() << std::endl;
+    if (!ok) {
+        std::cout << "  Error:" << ok << std::endl;
     }
     std::cout << "string: " << fs.string() << std::endl;
     std::cout << "length: " << fs.length() << std::endl;
@@ -23,25 +27,24 @@ void test_frameset() {
     std::cout << "frameRange: " << fs.frameRange() << std::endl;
     std::cout << "frameRange(pad=6): " << fs.frameRange(6) << std::endl;
 
-    bool ok;
     std::cout << "frame 1: " << fs.frame(1, &ok);
-        if (!ok) std::cout << " (error was: " << fs.getLastError() << ")";
+        if (!ok) std::cout << " (error was: " << ok << ")";
         std::cout << std::endl;
 
     std::cout << "frame 10: " << fs.frame(9, &ok);
-        if (!ok) std::cout << " (error was: " << fs.getLastError() << ")";
+        if (!ok) std::cout << " (error was: " << ok << ")";
         std::cout << std::endl;
 
     std::cout << "frame 20: " << fs.frame(20, &ok);
-        if (!ok) std::cout << " (error was: " << fs.getLastError() << ")";
+        if (!ok) std::cout << " (error was: " << ok << ")";
         std::cout << std::endl;
 
     std::vector<int> frames;
 
-    fileseq::FrameSet fsEmpty("");
+    fileseq::FrameSet fsEmpty("", &ok);
     fsEmpty.frames(frames);
     std::cout << "frames of empty FrameSet: " << frames.size()
-              << ", err: " << fsEmpty.getLastError() << std::endl;
+              << ", err: " << ok << std::endl;
 
     fs.frames(frames);
     std::cout << "frames (size " << frames.size() << "): ";
@@ -57,7 +60,7 @@ void test_frameset() {
     std::cout << "inverted string: " << invert.string() << std::endl;
     std::cout << "inverted frameRange: " << invert.frameRange() << std::endl;
 
-    fs = fileseq::FrameSet("1,1,2,2,3,8,4,20,15,17,16");
+    fs = fileseq::FrameSet("1,1,2,2,3,8,4,20,15,17,16", &ok);
     std::cout << "string: " << fs.string() << std::endl;
     fs = fs.normalized();
     std::cout << "normalized valid? " << fs.isValid() << std::endl;
@@ -87,12 +90,12 @@ void test_fileseqs() {
               << "\nFrame: " << fs.frame("#")
               << std::endl;
 
-    bool ok = true;
+    fileseq::Status ok;
     std::string fmt = fs.format("{{dir}}::{{base}}::{{frange}}::{{pad}}::{{ext}}", &ok);
-    std::cout << "format: " << fmt << (ok ? "" : "\n"+fs.getLastError()) << std::endl;
+    std::cout << "format: " << fmt << (ok ? "" : "\n" + (std::string)ok) << std::endl;
 
     fmt = fs.format("{{bad}}::{{ext}}", &ok);
-    std::cout << "format: " << fmt << (ok ? "" : "\n"+fs.getLastError()) << std::endl;
+    std::cout << "format: " << fmt << (ok ? "" : "\n"+ (std::string)ok) << std::endl;
 
     std::cout << "indexes:" << std::endl;
     for (size_t i = 0; i < fs.length() + 1; ++i ) {
@@ -106,12 +109,12 @@ void test_fileseqs() {
     fs.setDirname("/a");
     fs.setBasename("base.");
     fs.setExt(".ext2");
-    ok = fs.setFrameRange("-20--10");
-    std::cout << "String after setters: " << fs << " (ok? " << ok << ")"
+    fs.setFrameRange("-20--10", &ok);
+    std::cout << "String after setters: " << fs << " (ok? " << bool(ok) << ")"
               << "\n  FrameSet: " << fs.frameSet()
               << std::endl;
-    ok = fs.setFrameRange("abc");
-    std::cout << "expect an error after setting bad frame range: " << fs.getLastError()
+    fs.setFrameRange("abc", &ok);
+    std::cout << "expect an error after setting bad frame range: " << ok
               << "\n  FrameSet: " << fs.frameSet()
               << std::endl;
 
@@ -121,31 +124,31 @@ void test_fileseqs() {
 }
 
 void test_find_seqs() {
-    std::string path = "../testdata/seqB.#.jpg";
+    std::string path = "../../testdata/seqB.#.jpg";
     std::string pathBad = "asdlkasdkls---___--__adkl.######.jpg";
 
-    std::string err;
+    fileseq::Status ok;
 
-    fileseq::FileSequence fs = fileseq::findSequenceOnDisk(path, &err);
-    if (!err.empty()) {
-        std::cerr << "findSequenceOnDisk failed: " << err << std::endl;
+    fileseq::FileSequence fs = fileseq::findSequenceOnDisk(path, &ok);
+    if (!ok) {
+        std::cerr << "findSequenceOnDisk failed: " << ok << std::endl;
     } else {
         std::cout << "findSequenceOnDisk (valid? " << fs.isValid() << "): "
                   << fs << std::endl;
     }
 
-    fs = fileseq::findSequenceOnDisk(pathBad, &err);
-    std::cout << "Got expected error for bad path? " << (!err.empty())
-              << "\n  " << err
+    fs = fileseq::findSequenceOnDisk(pathBad, &ok);
+    std::cout << "Got expected error for bad path? " << (!ok)
+              << "\n  error: " << ok
               << std::endl;
 
-    std::string path2 = "../testdata";
+    std::string path2 = "../../testdata";
     std::cout << "findSequencesOnDisk for " << path2 << std::endl;
     fileseq::FileSequences seqs;
     seqs.push_back(fileseq::FileSequence("existing.1-100#.ext"));
-    std::string err2 = fileseq::findSequencesOnDisk(seqs, path2, true, true);
-    if (!err2.empty()) {
-        std::cout << "  Error: " << err2 << std::endl;
+    ok = fileseq::findSequencesOnDisk(seqs, path2, true, true);
+    if (!ok) {
+        std::cout << "  Error: " << ok << std::endl;
     } else {
         for (size_t i=0; i < seqs.size(); ++i) {
             std::cout << "  seq: " << seqs.at(i) << std::endl;
@@ -160,7 +163,28 @@ int main()
     test_fileseqs();
     test_find_seqs();
 
-    std::cout << "Final allocs: " << fileseq::allocStats() << std::endl;
+    std::cout << "\nFinal allocs: " << fileseq::allocStats() << std::endl;
+
+    // const int n = 100000;
+
+    // std::string str;
+    // int num;
+
+    // clock_t t;
+    // t = clock();
+
+    // for (int i=0; i < n; ++i) {
+    //     fileseq::FileSequence fs("/path/to/file_name.1-100x2#.ext");
+    //     str = fs.string();
+    //     str = fs.frameRange();
+    //     num = fs.start();
+    //     num = fs.end();
+    // }
+
+    // t = clock() - t;
+    // printf("%0.3f seconds\n", ((double)t)/CLOCKS_PER_SEC);
+
+    // (void*)&num;
 
     return 0;
 }

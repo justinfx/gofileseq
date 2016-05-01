@@ -1,23 +1,31 @@
 #include "sequence.h"
-#include "fileseq_p.h"
+#include "private/fileseq_p.h"
 
 #include <iostream>
 
 namespace fileseq {
 
-FileSequence::FileSequence(const std::string &frange)
+FileSequence::FileSequence(const std::string &frange, Status* ok)
     : m_valid(false)
     , m_id(0)
-    , m_fsetId(0)
-    , m_lastError() {
+    , m_fsetId(0) {
 
     internal::FileSequence_New_return fs = internal::FileSequence_New(
                 const_cast<char*>(frange.c_str()));
 
     if (fs.r1 != NULL) {
-        m_lastError = "Failed to create Frames(" + frange + "): " + std::string(fs.r1);
+        std::string err = "Failed to create sequence(" + frange + "): " + std::string(fs.r1);
+        if (ok != NULL) {
+            ok->setError(err);
+        } else {
+            internal::printErrorIgnored(err);
+        }
         free(fs.r1);
         return;
+    }
+
+    if (ok != NULL) {
+        ok->clearError();
     }
 
     m_id = fs.r0;
@@ -28,7 +36,6 @@ FileSequence::FileSequence(uint64_t id)
     : m_valid(true)
     , m_id(id)
     , m_fsetId(0)
-    , m_lastError()
 {
 //    std::cout << "FileSequence from id " << id << std::endl;
 }
@@ -44,17 +51,13 @@ FileSequence::~FileSequence() {
 }
 
 FileSequence::FileSequence(const FileSequence& rhs)
-    : m_valid(false)
-    , m_id(0)
+    : m_valid(rhs.m_valid)
+    , m_id(rhs.m_id)
     , m_fsetId(0)
-    , m_lastError()
 {
-    if (rhs.m_id != 0) {
-//        std::cout << "FileSequence copy " << rhs.m_id << std::endl;
-        m_id = internal::FileSequence_Copy(rhs.m_id);
-    }
-
     if (m_id != 0) {
+//        std::cout << "FileSequence copy " << rhs.m_id << std::endl;
+        internal::FileSequence_Incref(m_id);
         m_valid = true;
     }
 }
@@ -93,7 +96,7 @@ std::string FileSequence::string() const {
     return str;
 }
 
-std::string FileSequence::format(const std::string& fmt, bool* ok) const {
+std::string FileSequence::format(const std::string& fmt, Status* ok) const {
     internal::FileSequence_Format_return ret;
     ret = internal::FileSequence_Format(m_id, const_cast<char*>(fmt.c_str()));
     std::string str;
@@ -107,15 +110,16 @@ std::string FileSequence::format(const std::string& fmt, bool* ok) const {
     // Handle err
     if (ret.r1) {
         if (ok != NULL) {
-            *ok = false;
+            ok->setError(ret.r1);
+        } else {
+            internal::printErrorIgnored(ret.r1);
         }
-        m_lastError.assign(ret.r1);
         free(ret.r1);
         return str;
     }
 
     if (ok != NULL) {
-        *ok = true;
+        ok->clearError();
     }
     return str;
 }
@@ -169,7 +173,7 @@ std::string FileSequence::frameRange(bool padded) const {
     return str;
 }
 
-bool FileSequence::setFrameRange(const std::string &frange) {
+void FileSequence::setFrameRange(const std::string &frange, Status* ok) {
     internal::StringProxy err = internal::FileSequence_SetFrameRange(
                 m_id, const_cast<char*>(frange.c_str()));
 
@@ -177,8 +181,18 @@ bool FileSequence::setFrameRange(const std::string &frange) {
     // Next access to the FrameSet will update with a new id.
     m_fsetId = 0;
 
-    m_lastError = err;
-    return m_lastError.empty();
+    if (err) {
+        if (ok) {
+            ok->setError(err);
+        } else {
+            internal::printErrorIgnored(err);
+        }
+        return;
+    }
+
+    if (ok) {
+        ok->clearError();
+    }
 }
 
 std::string FileSequence::invertedFrameRange(bool padded) const {

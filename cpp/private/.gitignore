@@ -1,4 +1,4 @@
 *.a
 *.o
 *.so
-*.h
+libgo*.h

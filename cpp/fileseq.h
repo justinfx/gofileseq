@@ -14,9 +14,9 @@ namespace fileseq {
 // the basename and extension.
 // If no match is found, an invalid FileSequence is returned.
 // If an error occurs while reading the filesystem, it can be
-// captured by passing a string pointer.
+// captured by passing a fileseq::Status pointer.
 FileSequence findSequenceOnDisk(const std::string &pattern,
-                                std::string* err=NULL);
+                                Status* ok=NULL);
 
 // FindSequencesOnDisk searches a given directory path and sorts all
 // valid sequence-compatible files into a list of FileSequence matches.
@@ -24,12 +24,10 @@ FileSequence findSequenceOnDisk(const std::string &pattern,
 // Extra options may be given to control whether things like hidden
 // files, or single (non-sequence) files should be included in the
 // search results.
-// If there are any errors reading the directory or the files, a
-// non-empty error string will be returned.
-std::string findSequencesOnDisk(FileSequences &seqs,
-                                const std::string &path,
-                                bool hiddenFiles=false,
-                                bool singleFiles=false);
+Status findSequencesOnDisk(FileSequences &seqs,
+                           const std::string &path,
+                           bool hiddenFiles=false,
+                           bool singleFiles=false);
 
 
 // Debug

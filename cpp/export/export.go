@@ -1,6 +1,7 @@
 package main
 
 /*
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -268,7 +269,7 @@ func FileSequence_Copy(id FileSeqId) FileSeqId {
 		return 0
 	}
 
-	copyFs, _ := fileseq.NewFileSequence(fs.FrameRange())
+	copyFs, _ := fileseq.NewFileSequence(fs.String())
 	copyId := sFileSeqs.Add(copyFs)
 	return copyId
 }

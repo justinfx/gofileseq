@@ -1,30 +1,37 @@
 #include "fileseq.h"
-#include "fileseq_p.h"
+#include "private/fileseq_p.h"
 
 #include <string>
 
 namespace fileseq {
 
-FileSequence findSequenceOnDisk(const std::string &pattern, std::string* err) {
+FileSequence findSequenceOnDisk(const std::string &pattern, Status* ok) {
+
     internal::FindSequenceOnDisk_return ret;
     ret = internal::FindSequenceOnDisk(const_cast<char*>(pattern.c_str()));
 
     if (ret.r1 != NULL) {
-        if (err != NULL) {
-            err->assign(ret.r1);
-        };
+        if (ok != NULL) {
+            ok->setError(ret.r1);
+        } else {
+            internal::printErrorIgnored(ret.r1);
+        }
         free(ret.r1);
         return FileSequence(0);
+    }
+
+    if (ok != NULL) {
+        ok->clearError();
     }
 
     return FileSequence(ret.r0);
 }
 
 
-std::string findSequencesOnDisk(FileSequences &seqs,
-                                const std::string &path,
-                                bool hiddenFiles,
-                                bool singleFiles) {
+Status findSequencesOnDisk(FileSequences &seqs,
+                           const std::string &path,
+                           bool hiddenFiles,
+                           bool singleFiles) {
 
     internal::FileOption opts;
     opts.hiddenFiles = hiddenFiles;
@@ -33,31 +40,30 @@ std::string findSequencesOnDisk(FileSequences &seqs,
     internal::FindSequencesOnDisk_return ret;
     ret = internal::FindSequencesOnDisk(const_cast<char*>(path.c_str()), opts);
 
-    std::string err;
+    Status stat;
 
     if (ret.r2 != NULL) {
-        err.assign(ret.r2);
+        stat.setError(ret.r2);
         free(ret.r2);
 
         if (ret.r0 != NULL) {
             free(ret.r0);
         }
-        return err;
+        return stat;
     }
 
     seqs.clear();
     seqs.resize(ret.r1, FileSequence(0));
 
-    uint64_t* start = ret.r0;
-    for (uint64_t i = 0; i < ret.r1; ++i) {
+    internal::GoUint64* start = ret.r0;
+    for (internal::GoUint64 i = 0; i < ret.r1; ++i) {
         seqs[i] = FileSequence(*start);
         ++start;
-//        std::cout << "cpp::DEBUG:: " << seqs.at(i).string() << std::endl;
     }
 
     free(ret.r0);
 
-    return err;
+    return stat;
 }
 
 

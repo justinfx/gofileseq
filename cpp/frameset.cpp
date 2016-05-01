@@ -1,23 +1,31 @@
 #include "frameset.h"
-#include "fileseq_p.h"
+#include "types.h"
+#include "private/fileseq_p.h"
 
 #include <iostream>
 
 namespace fileseq {
 
-FrameSet::FrameSet(const std::string &frange)
+FrameSet::FrameSet(const std::string &frange, Status* ok)
     : m_valid(false)
-    , m_id(0) 
-    , m_lastError() {
+    , m_id(0) {
 
     internal::FrameSet_New_return fs = internal::FrameSet_New(
                 const_cast<char*>(frange.c_str()));
 
     if (fs.r1 != NULL) {
-        std::string err(fs.r1);
+        std::string err = "Failed to create Frames(" + frange + "): " + std::string(fs.r1);
+        if (ok != NULL) {
+            ok->setError(err);
+        } else {
+            internal::printErrorIgnored(err);
+        }
         free(fs.r1);
-        m_lastError = "Failed to create Frames(" + frange + "): " + err; 
         return;
+    }
+
+    if (ok != NULL) {
+        ok->clearError();
     }
 
     m_id = fs.r0;
@@ -26,8 +34,7 @@ FrameSet::FrameSet(const std::string &frange)
 
 FrameSet::FrameSet(uint64_t id)
     : m_valid(id != 0)
-    , m_id(id) 
-    , m_lastError()
+    , m_id(id)
 {
 }
 
@@ -41,7 +48,6 @@ FrameSet::~FrameSet() {
 FrameSet::FrameSet(const FrameSet& rhs)
     : m_valid(false)
     , m_id(0)
-    , m_lastError()
 {
     m_id = internal::FrameSet_Copy(rhs.m_id);
     if (m_id != 0) {
@@ -79,20 +85,20 @@ int FrameSet::index(int frame) const {
     return internal::FrameSet_Index(m_id, frame);
 };
 
-int FrameSet::frame(int index, bool* ok) const {
-    m_lastError.clear();
-
+int FrameSet::frame(int index, Status* ok) const {
     internal::FrameSet_Frame_return fs = internal::FrameSet_Frame(m_id, index);
     if (fs.r1 != NULL) {
         if (ok != NULL) {
-            *ok = false;
+            ok->setError(fs.r1);
+        } else {
+            internal::printErrorIgnored(fs.r1);
         }
-        m_lastError.assign(fs.r1);
         free(fs.r1); // we own the error
         return 0;
     }
+
     if (ok != NULL) {
-        *ok = true;
+        ok->clearError();
     }
     return fs.r0;
 };

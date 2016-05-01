@@ -31,24 +31,22 @@ class FileSequence {
 
 public:
     // Create a new FrameSet from a given frame range string.
-    // If the range could not be parsed, FileSequence.isValid()
-    // will return false, and the reason can be checked via
-    // FileSequence.getLastError()
-    explicit FileSequence(const std::string &frange);
+    // If the range could not be parsed, Status will evaluate to false
+    // and be filled with the error message
+    explicit FileSequence(const std::string &frange, Status* ok=NULL);
 
     ~FileSequence();
 
     FileSequence(const FileSequence& rhs);
+
     FileSequence& operator=(const FileSequence& rhs);
 
     // Return whether the range was properly parsed
     bool isValid() const { return m_valid; }
-    // Return the last error that was generated from calls which
-    // say they can produce an error.
-    std::string getLastError() const { return m_lastError; }
 
     // Return the string representation of the file sequence
     std::string string() const;
+
     operator std::string() const { return string(); }
 
     friend std::ostream& operator<< (std::ostream& stream, const FileSequence& fs) {
@@ -58,10 +56,13 @@ public:
 
     // The number of files/frames in the sequence range
     size_t length() const;
+
     // Return the first frame number in the range
     int start() const;
+
     // Return the last frame number in the range
     int end() const;
+
     // zfill returns the number of "0" fill characters used to
     // pad the frame numbers to match the actual file paths
     int zfill() const;
@@ -87,44 +88,52 @@ public:
     Example:
 
         {{dir}}{{base}}{{frange}}{{pad}}{{ext}}
-
     */
-    std::string format(const std::string &fmt, bool* ok=NULL) const;
+    std::string format(const std::string &fmt, Status* ok=NULL) const;
 
     // Dirname returns the parsed directory component of the sequence string
     std::string dirname() const;
+
     // Set the dir name component of the sequence string
     void setDirname(const std::string &dirname) const;
+
     // Basename returns the parsed basename component of the sequence string.
     // This is the file part, just before the frame range component.
     std::string basename() const;
+
     // Set the basename component of the sequence string.
     // This is the file part, just before the frame range component.
     void setBasename(const std::string &basename) const;
+
     // Ext returns the file extension component from the sequence, including
     // the leading period character.
     std::string ext() const;
+
     // Set a new extension component for the sequence, which should include
     // the leading period character.
     void setExt(const std::string &ext) const;
+
     // FrameRange returns the string frame range component, parsed from the
     // sequence. If no frame range was parsed, then this method will return
     // an empty string.
     // If padded is true, then pad the frame range using the zfill
     std::string frameRange(bool padded=false) const;
+
     // Set a new FrameSet, by way of providing a string frame range.
-    // Return true if the frame range was valid and parsed.
-    bool setFrameRange(const std::string &frange);
+    void setFrameRange(const std::string &frange, Status* ok=NULL);
+
     // InvertedFrameRange returns a new frame range that represents all
     // frames *not* within the current frame range. That is, it will
     // create a range that "fills in" the current one.
     // If padded is true, then pad out frames using zfill
     std::string invertedFrameRange(bool padded=false) const;
+
     // Index returns the path to the file at the given index in the sequence.
     // If a frame range was not parsed from the sequence, this will always
     // returns the original path. If the index is not valid, this will
     // return an empty string.
     std::string index(int idx) const;
+
     /*
     Frame returns a path to the given frame in the sequence.
     Integer or string digits are treated as a frame number and padding is
@@ -137,9 +146,9 @@ public:
 
     seq.Frame("#")
     >> /foo/bar.#.exr
-
     */
     std::string frame(int frame) const;
+
     /*
     Frame returns a path to the given frame in the sequence.
     Integer or string digits are treated as a frame number and padding is
@@ -155,10 +164,12 @@ public:
 
     */
     std::string frame(const std::string &fillPattern) const;
+
     // FrameSet returns a FrameSet instance that was created when the
     // sequence was parsed. If no frame range was parsed from the sequence,
     // then this method will return an invalid FrameSet.
     FrameSet frameSet();
+
     // Set a new FrameSet for this sequence
     void setFrameSet(FrameSet &frameSet);
 
@@ -169,14 +180,12 @@ private:
     uint64_t m_id;
     uint64_t m_fsetId;
 
-    mutable std::string m_lastError;
+    friend FileSequence findSequenceOnDisk(const std::string &pattern, Status* ok);
 
-    friend FileSequence findSequenceOnDisk(const std::string &pattern, std::string* err);
-
-    friend std::string findSequencesOnDisk(FileSequences &seqs,
-                                           const std::string &path,
-                                           bool hiddenFiles,
-                                           bool singleFiles);
+    friend Status findSequencesOnDisk(FileSequences &seqs,
+                                      const std::string &path,
+                                      bool hiddenFiles,
+                                      bool singleFiles);
 };
 
 } // fileseq
