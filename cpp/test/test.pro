@@ -5,10 +5,12 @@ CONFIG -= qt
 
 SOURCES += main.cpp
 
-unix: LIBS += -lpthread -L$$PWD/../ -lfileseq
-
 INCLUDEPATH += $$PWD/..
 DEPENDPATH += $$PWD/..
 
-unix: QMAKE_LFLAGS += -Wl,-rpath,$$PWD/..
-unix: PRE_TARGETDEPS += $$PWD/../libfileseq.so
+unix: {
+    LIBS += -lpthread -L$$PWD/../ -lfileseq
+    QMAKE_RPATHDIR += $$_PRO_FILE_PWD_/..
+}
+
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.6

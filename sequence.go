@@ -659,7 +659,7 @@ func FindSequenceOnDisk(pattern string) (*FileSequence, error) {
 
 	seqs, err := FindSequencesOnDisk(fs.Dirname())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to find %q: %s", pattern, err.Error())
 	}
 
 	base := fs.Basename()

@@ -12,10 +12,20 @@ INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
 # Input
-HEADERS += frameset.h private/libgofileseq.h
-SOURCES += frameset.cpp
+HEADERS += frameset.h \
+    libgofileseq.h \
+    fileseq_p.h \
+    sequence.h \
+    fileseq.h \
+    types.h
+
+SOURCES += frameset.cpp \
+    sequence.cpp \
+    fileseq.cpp
 
 unix: QMAKE_CXXFLAGS += -fPIC
 unix: QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN\''
 unix: LIBS += -L$$PWD -lgofileseq
-unix: PRE_TARGETDEPS += $$PWD/libgofileseq.so
+unix: PRE_TARGETDEPS += libgofileseq.so
+
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.6

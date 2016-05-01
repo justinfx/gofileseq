@@ -3,3 +3,6 @@
 *.a
 *.so*
 libgo*
+*.dylib
+Makefile
+build*
