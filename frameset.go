@@ -131,7 +131,8 @@ func (s *FrameSet) handleMatch(match []string) error {
 // String implements Stringer, by returning the frame
 // range string
 func (s *FrameSet) String() string {
-	return s.FrameRange()
+	frange := s.FrameRange()
+	return frange
 }
 
 // Len returns the number of frames in the set
