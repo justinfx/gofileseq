@@ -4,12 +4,18 @@
 
 This is an experimental library which provides a C++ wrapper over gofileseq, using Go's buildmodes to export the support.
 
-### Requirements
+### Build Requirements
 
 * go >= 1.6.0
-* qmake (comes with Qt)
+* qmake (comes with Qt) to generate the Makefile
 
-You don't have to have qmake if you want to compile it manually :-)
+Go is only needed to build the library and is not a runtime dependency.
+
+You don't have to have qmake if you want to compile it with your own Makefile :-)
+
+### Runtime Dependencies
+
+None
 
 ### Building
 
