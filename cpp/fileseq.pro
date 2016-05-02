@@ -52,4 +52,4 @@ QMAKE_EXTRA_TARGETS += libgo_d libgo_s libgo_h
 # clean
 #
 
-QMAKE_CLEAN += libgofileseq.*
+QMAKE_CLEAN += libgofileseq.* private/libgofileseq.*
