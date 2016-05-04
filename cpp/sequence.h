@@ -113,6 +113,15 @@ public:
     // the leading period character.
     void setExt(const std::string &ext) const;
 
+    // Returns the parsed padding characters component of the sequence string.
+    // May return an empty string if the file sequence was really a single
+    // file. i.e. # or @ or @@@
+    std::string padding() const;
+
+    // Set new padding characters for the sequence, i.e. # or @ or @@@
+    void setPadding(const std::string &padChars) const;
+
+
     // FrameRange returns the string frame range component, parsed from the
     // sequence. If no frame range was parsed, then this method will return
     // an empty string.

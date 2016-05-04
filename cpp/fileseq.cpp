@@ -5,6 +5,31 @@
 
 namespace fileseq {
 
+std::string framesToFrameRange(const std::vector<int> &frames,
+                               bool sorted, int zfill) {
+
+    internal::StringProxy str = internal::FramesToFrameRange(
+        const_cast<int*>(&frames[0]), frames.size(), sorted, zfill);
+
+    return str;
+}
+
+bool isFrameRange(const std::string &frange) {
+    return internal::IsFrameRange(const_cast<char*>(frange.c_str()));
+}
+
+std::string getPaddingChars(int pad) {
+    internal::StringProxy str = internal::PaddingChars(pad);
+    return str;
+}
+
+std::string padFrameRange(const std::string &frange, int pad) {
+    internal::StringProxy str = internal::PadFrameRange(
+        const_cast<char*>(frange.c_str()), pad);
+
+    return str;
+}
+
 FileSequence findSequenceOnDisk(const std::string &pattern, Status* ok) {
 
     internal::FindSequenceOnDisk_return ret;

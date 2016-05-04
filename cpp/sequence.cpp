@@ -151,6 +151,15 @@ void FileSequence::setExt(const std::string& ext) const {
     internal::FileSequence_SetExt(m_id, const_cast<char*>(ext.c_str()));
 }
 
+std::string FileSequence::padding() const {
+    internal::StringProxy str = internal::FileSequence_Padding(m_id);
+    return str;
+}
+
+void FileSequence::setPadding(const std::string &padChars) const {
+    internal::FileSequence_SetPadding(m_id, const_cast<char*>(padChars.c_str()));
+}
+
 int FileSequence::start() const {
     return internal::FileSequence_Start(m_id);
 }

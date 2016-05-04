@@ -1,3 +1,4 @@
+#include <cassert>
 #include <ctime>
 #include <cstdio>
 #include <iostream>
@@ -82,6 +83,7 @@ void test_fileseqs() {
               << "\nExt: " << fs.ext()
               << "\nStart: " << fs.start() << ", End: " << fs.end()
               << "\nZfill: " << fs.zfill()
+              << "\nZfill: " << fs.padding()
               << "\nFrameRange: " << fs.frameRange()
               << "\nFrameRange Pad: " << fs.frameRange(true)
               << "\nInverted: " << fs.invertedFrameRange()
@@ -109,6 +111,7 @@ void test_fileseqs() {
     fs.setDirname("/a");
     fs.setBasename("base.");
     fs.setExt(".ext2");
+    fs.setPadding("##@@@");
     fs.setFrameRange("-20--10", &ok);
     std::cout << "String after setters: " << fs << " (ok? " << bool(ok) << ")"
               << "\n  FrameSet: " << fs.frameSet()
@@ -157,8 +160,38 @@ void test_find_seqs() {
 
 }
 
+void test_functions() {
+    assert (fileseq::getPaddingChars(1) == "@");
+    assert (fileseq::getPaddingChars(2) == "@@");
+    assert (fileseq::getPaddingChars(4) == "#");
+    assert (fileseq::getPaddingChars(6) == "@@@@@@");
+
+    assert (fileseq::isFrameRange("1"));
+    assert (fileseq::isFrameRange("1-100x2"));
+    assert (fileseq::isFrameRange("1-100x2,300,400-500x5#"));
+    assert (!fileseq::isFrameRange("foo"));
+    assert (!fileseq::isFrameRange("a-b"));
+    assert (!fileseq::isFrameRange("1-b"));
+
+    assert (fileseq::padFrameRange("1-100", 4) == "0001-0100");
+    assert (fileseq::padFrameRange("10-100", 3) == "010-100");
+
+    std::vector<int> frames;
+
+    for (int i=0; i <= 100; ++i) {
+        if (i % 2 == 0) {
+            frames.push_back(i);
+        }
+    }
+
+    std::string frange = fileseq::framesToFrameRange(frames);
+    std::cout << "got frange: " << frange << std::endl;
+    assert (frange == "0-100x2");
+}
+
 int main()
 {
+    test_functions();
     test_frameset();
     test_fileseqs();
     test_find_seqs();

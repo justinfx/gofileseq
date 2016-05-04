@@ -337,6 +337,16 @@ func FileSequence_ZFill(id FileSeqId) C.int {
 	return C.int(fs.ZFill())
 }
 
+//export FileSequence_Padding
+func FileSequence_Padding(id FileSeqId) *C.char {
+	fs, ok := sFileSeqs.Get(id)
+	// caller must free string
+	if !ok {
+		return C.CString("")
+	}
+	return C.CString(fs.Padding())
+}
+
 //export FileSequence_FrameRange
 func FileSequence_FrameRange(id FileSeqId) *C.char {
 	fs, ok := sFileSeqs.Get(id)
@@ -518,6 +528,47 @@ func FileSequence_SetFrameRange(id FileSeqId, frameRange *C.char) Error {
 // TODO
 //export FileSequence_Split
 // func FileSequence_Split() FileSequences {
+
+/*
+
+Functions
+
+*/
+
+//export FramesToFrameRange
+func FramesToFrameRange(frames *C.int, num C.size_t, sorted bool, zfill int) *C.char {
+	// caller must free string
+	if num == C.size_t(0) {
+		return C.CString("")
+	}
+
+	n := int(num)
+	slice := (*[1 << 30]C.int)(unsafe.Pointer(frames))[:n:n]
+
+	ints := make([]int, n)
+	for i := 0; i < n; i++ {
+		ints[i] = int(slice[i])
+	}
+
+	return C.CString(fileseq.FramesToFrameRange(ints, sorted, zfill))
+}
+
+//export IsFrameRange
+func IsFrameRange(frange *C.char) bool {
+	return fileseq.IsFrameRange(C.GoString(frange))
+}
+
+//export PadFrameRange
+func PadFrameRange(frange *C.char, pad int) *C.char {
+	// caller must free string
+	return C.CString(fileseq.PadFrameRange(C.GoString(frange), pad))
+}
+
+//export PaddingChars
+func PaddingChars(pad int) *C.char {
+	// caller must free string
+	return C.CString(fileseq.PaddingChars(pad))
+}
 
 //export FindSequenceOnDisk
 func FindSequenceOnDisk(pattern *C.char) (FileSeqId, Error) {
