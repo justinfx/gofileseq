@@ -1,5 +1,9 @@
 Changes:
 
+2.1.0
+----------------
+* cpp - New C++ bindings on top of gofileseq
+
 2.0.1
 ----------------
 * cmd/seqls - Detect symlinks to directories and don't interpret them as discovered sequences
