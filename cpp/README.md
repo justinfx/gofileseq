@@ -6,18 +6,18 @@ This is an experimental library which provides a C++ wrapper over gofileseq, usi
 
 ### Build Requirements
 
-* go >= 1.6.0
-* qmake (comes with Qt) to generate the Makefile
+* [go](https://golang.org/dl/) >= 1.6.0
+* [qmake](https://www.qt.io/download-open-source/) (comes with Qt) or [waf](https://waf.io/)
 
 Go is only needed to build the library and is not a runtime dependency.
 
-You don't have to have qmake if you want to compile it with your own Makefile :-)
+You don't have to have qmake or waf if you want to compile it with your own Makefile :-)
 
 ### Runtime Dependencies
 
 None
 
-### Building
+### Building with qmake
 
 ```shell
 $ cd <path/to/gofileseq>/cpp
@@ -25,10 +25,20 @@ $ qmake
 $ make
 ```
 
-### Testing
+### Testing with qmake
 
 ```shell
 $ cd <path/to/gofileseq>/cpp/test
 $ qmake
 $ make
+```
+
+### Building with waf
+
+```shell
+$ cd <path/to/gofileseq>/cpp
+$ waf configure --prefix=/path/to/install/to
+$ waf build
+$ waf test
+$ waf install
 ```
