@@ -6,3 +6,4 @@ libgo*
 *.dylib
 Makefile
 build*
+.lock-waf*

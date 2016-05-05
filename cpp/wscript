@@ -1,0 +1,119 @@
+#! /usr/bin/env python
+
+import os
+
+from waflib import Context, Task
+
+APPNAME = "fileseq"
+
+top = '.'
+out = 'build'
+
+def options(opt):
+    opt.load('compiler_cxx')
+
+def configure(ctx):
+    ctx.load('compiler_cxx')
+    ctx.find_program('go', var="GO")
+
+
+_is_test = False
+
+def test(bld):
+    from waflib import Options
+    Options.commands = ['build'] + Options.commands
+
+    global _is_test
+    _is_test = True
+
+
+class gofileseq(Task.Task):
+    run_str = ""
+
+    def exec_command(self, cmd, **kwargs):
+        cwd = kwargs.pop('cwd', None)
+        if not cwd:
+            cwd = self.inputs[0].parent.abspath()
+
+        env = kwargs.pop('env', None)
+        if not env:
+            env = os.environ.copy()
+            if self.env.GOPATH:
+                env['GOPATH'] = self.env.get_flat("GOPATH")
+            if self.env.GOROOT:
+                env['GOROOT'] = self.env.get_flat("GOROOT")
+
+        super(gofileseq, self).exec_command(cmd, cwd=cwd, env=env, **kwargs)
+
+
+def build(bld):
+    # Go lib
+    #
+    root = os.path.abspath(os.path.join(bld.top_dir, '..'))
+    env = bld.env.derive()
+    env.GOPATH = ":".join([root] + env.GOPATH)
+
+    golibname = "libgofileseq"
+
+    cmd_str = "${GO} build -buildmode=c-%s -o ${TGT[0].abspath()}"
+
+    class gofileseq_shared(gofileseq):
+        name = "gofileseq_shared"
+        run_str = cmd_str % "shared"
+
+    tsk = gofileseq_shared(name="gofileseq_shared", env=env)
+    tsk.set_inputs(bld.path.ant_glob("export/*.go"))
+    tsk.set_outputs([bld.path.find_or_declare("%s.so" % golibname),
+                     bld.path.find_or_declare("%s.h" % golibname)])
+    bld.add_to_group(tsk)
+
+    class gofileseq_static(gofileseq):
+        name = "gofileseq_static"
+        run_str = cmd_str % "archive"
+
+    tsk = gofileseq_static(name="gofileseq_static", env=env)
+    tsk.set_inputs(bld.path.ant_glob("export/*.go"))
+    tsk.set_outputs([bld.path.find_or_declare("%s.a" % golibname)])
+    bld.add_to_group(tsk)
+
+    # Install Go libs
+    bld.install_files(
+        '${PREFIX}/lib',
+        bld.path.get_bld().ant_glob(["*.so", "*.a"]),
+        )
+
+    # C++ lib
+    #
+    bld.shlib(
+        source = bld.path.ant_glob(['*.cpp', 'private/*.cpp']),
+        target = "fileseq",
+        includes = ['.', 'private', bld.variant_dir],
+        lib = ["gofileseq"],
+        libpath = [bld.variant_dir],
+        use = ["%s.h" % golibname],
+        rpath = ["$ORIGIN"],
+    )
+
+    # Install headers
+    bld.install_files('${PREFIX}/include/fileseq', bld.path.ant_glob("*.h"))
+
+    # Test
+    #
+    if _is_test:
+
+        tsk = bld.program(
+            source = 'test/main.cpp',
+            target = 'test_fileseq',
+            use = 'fileseq',
+            libpath = [bld.variant_dir],
+            linkflags = ["-Wl,-rpath-link=."],
+            rpath = ["$ORIGIN", "$ORIGIN/../"],
+            )
+
+        bld(
+            rule="cd %s && ./${SRC}" % bld.variant_dir,
+            source=tsk.target,
+            use="test_fileseq",
+            )
+
+
