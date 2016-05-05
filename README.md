@@ -51,3 +51,8 @@ go get github.com/justinfx/gofileseq/cmd/seqls
 seql some/images
 # some/images/file_foo.1-100@@@.tif
 ```
+
+C++ Bindings
+------------
+
+C++ bindings on top of gofileseq are also available in the [cpp](https://github.com/justinfx/gofileseq/tree/master/cpp) dir
