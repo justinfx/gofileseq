@@ -8,16 +8,21 @@ namespace fileseq {
 
 typedef std::vector<FileSequence> FileSequences;
 
-// Status is used to communicate whether various calls
-// have succeeded or failed. It can be treated like a
-// bool to test the success, and converted to a
-// std::string to receive the error message.
+/*!
+Status is used to communicate whether various calls
+have succeeded or failed. It can be treated like a
+bool to test the success, and converted to a
+std::string to receive the error message.
+*/
 class Status {
 
 public:
     Status() {}
 
+    //! If Status evaluates to false, it indicates an error state
     operator bool() const { return m_error.empty(); }
+
+    //! Retrieve the string error message
     operator std::string() const { return m_error; }
 
     Status(const Status& rhs) : m_error(rhs.m_error) {}
