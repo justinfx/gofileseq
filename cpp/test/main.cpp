@@ -74,7 +74,10 @@ void test_frameset() {
 }
 
 void test_fileseqs() {
-    fileseq::FileSequence fs("/path/to/file_thing.10-30x2#.ext");
+    fileseq::Status ok;
+
+    fileseq::FileSequence fs("/path/to/file_thing.10-30x2#.ext", &ok);
+    assert (ok);
 
     std::cout << "Valid? " << fs.isValid()
               << "\nString: " << fs
@@ -92,11 +95,12 @@ void test_fileseqs() {
               << "\nFrame: " << fs.frame("#")
               << std::endl;
 
-    fileseq::Status ok;
     std::string fmt = fs.format("{{dir}}::{{base}}::{{frange}}::{{pad}}::{{ext}}", &ok);
+    assert (ok);
     std::cout << "format: " << fmt << (ok ? "" : "\n" + (std::string)ok) << std::endl;
 
     fmt = fs.format("{{bad}}::{{ext}}", &ok);
+    assert (!ok);
     std::cout << "format: " << fmt << (ok ? "" : "\n"+ (std::string)ok) << std::endl;
 
     std::cout << "indexes:" << std::endl;
@@ -113,10 +117,12 @@ void test_fileseqs() {
     fs.setExt(".ext2");
     fs.setPadding("##@@@");
     fs.setFrameRange("-20--10", &ok);
+    assert (ok);
     std::cout << "String after setters: " << fs << " (ok? " << bool(ok) << ")"
               << "\n  FrameSet: " << fs.frameSet()
               << std::endl;
     fs.setFrameRange("abc", &ok);
+    assert (!ok);
     std::cout << "expect an error after setting bad frame range: " << ok
               << "\n  FrameSet: " << fs.frameSet()
               << std::endl;
@@ -127,29 +133,31 @@ void test_fileseqs() {
 }
 
 void test_find_seqs() {
-    std::string path = "../../testdata/seqB.#.jpg";
-    std::string pathBad = "asdlkasdkls---___--__adkl.######.jpg";
-
     fileseq::Status ok;
 
+    std::string path = "../../testdata/seqB.#.jpg";
     fileseq::FileSequence fs = fileseq::findSequenceOnDisk(path, &ok);
     if (!ok) {
         std::cerr << "findSequenceOnDisk failed: " << ok << std::endl;
+        assert (ok);
     } else {
         std::cout << "findSequenceOnDisk (valid? " << fs.isValid() << "): "
                   << fs << std::endl;
     }
 
+    std::string pathBad = "../../asdlkasdkls";
     fs = fileseq::findSequenceOnDisk(pathBad, &ok);
-    std::cout << "Got expected error for bad path? " << (!ok)
-              << "\n  error: " << ok
+    std::cout << "isValid (we expect false)? " << fs.isValid()
+              << (ok ? "" : "\n  error: ") << ok
               << std::endl;
+    assert (!fs.isValid());
 
     std::string path2 = "../../testdata";
     std::cout << "findSequencesOnDisk for " << path2 << std::endl;
     fileseq::FileSequences seqs;
     seqs.push_back(fileseq::FileSequence("existing.1-100#.ext"));
     ok = fileseq::findSequencesOnDisk(seqs, path2, true, true);
+    assert (ok);
     if (!ok) {
         std::cout << "  Error: " << ok << std::endl;
     } else {

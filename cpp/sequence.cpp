@@ -33,11 +33,12 @@ FileSequence::FileSequence(const std::string &frange, Status* ok)
 }
 
 FileSequence::FileSequence(uint64_t id)
-    : m_valid(true)
+    : m_valid(false)
     , m_id(id)
     , m_fsetId(0)
 {
 //    std::cout << "FileSequence from id " << id << std::endl;
+    m_valid = (id > 0);
 }
 
 FileSequence::~FileSequence() {
