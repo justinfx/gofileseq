@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import os
+import sys  
 
 from waflib import Context, Task
 
@@ -100,13 +101,15 @@ def build(bld):
     # Test
     #
     if _is_test:
+        
+        plat = sys.platform 
 
         tsk = bld.program(
             source = 'test/main.cpp',
             target = 'test_fileseq',
             use = 'fileseq',
             libpath = [bld.variant_dir],
-            linkflags = ["-Wl,-rpath-link=."],
+            linkflags = ["-Wl,-rpath-link=."] if plat=="linux" else [],
             rpath = ["$ORIGIN", "$ORIGIN/../"],
             )
 
