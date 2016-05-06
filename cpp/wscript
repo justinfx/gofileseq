@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import os
-import sys  
+import sys
 
 from waflib import Context, Task
 
@@ -58,24 +58,26 @@ def build(bld):
 
     cmd_str = "${GO} build -buildmode=c-%s -o ${TGT[0].abspath()}"
 
+    source = bld.path.ant_glob("export/*.go")
+
     class gofileseq_shared(gofileseq):
-        name = "gofileseq_shared"
         run_str = cmd_str % "shared"
 
-    tsk = gofileseq_shared(name="gofileseq_shared", env=env)
-    tsk.set_inputs(bld.path.ant_glob("export/*.go"))
-    tsk.set_outputs([bld.path.find_or_declare("%s.so" % golibname),
+    shared_tsk = gofileseq_shared(env=env)
+    shared_tsk.set_inputs(source)
+    shared_tsk.set_outputs([bld.path.find_or_declare("%s.so" % golibname),
                      bld.path.find_or_declare("%s.h" % golibname)])
-    bld.add_to_group(tsk)
+    bld.add_to_group(shared_tsk)
 
     class gofileseq_static(gofileseq):
-        name = "gofileseq_static"
         run_str = cmd_str % "archive"
 
-    tsk = gofileseq_static(name="gofileseq_static", env=env)
-    tsk.set_inputs(bld.path.ant_glob("export/*.go"))
-    tsk.set_outputs([bld.path.find_or_declare("%s.a" % golibname)])
-    bld.add_to_group(tsk)
+    static_tsk = gofileseq_static(env=env)
+    static_tsk.set_inputs(source)
+    static_tsk.set_outputs([bld.path.find_or_declare("%s.a" % golibname)])
+    bld.add_to_group(static_tsk)
+
+    bld.add_group()
 
     # Install Go libs
     bld.install_files(
@@ -85,14 +87,28 @@ def build(bld):
 
     # C++ lib
     #
-    bld.shlib(
-        source = bld.path.ant_glob(['*.cpp', 'private/*.cpp']),
+    includes = ['.', 'private', bld.variant_dir]
+    source = bld.path.ant_glob(['*.cpp', 'private/*.cpp'])
+
+    t = bld.shlib(
+        name = "fileseq_shared",
+        source = source,
         target = "fileseq",
-        includes = ['.', 'private', bld.variant_dir],
+        includes = includes,
         lib = ["gofileseq"],
         libpath = [bld.variant_dir],
-        use = ["%s.h" % golibname],
         rpath = ["$ORIGIN"],
+        use = ["%s.h" % golibname],
+    )
+
+    bld.stlib(
+        name = "fileseq_static",
+        source = source,
+        target = "fileseq",
+        includes = includes,
+        stlib = ["gofileseq"],
+        stlibpath = [bld.variant_dir],
+        use = ["%s.h" % golibname],
     )
 
     # Install headers
@@ -101,16 +117,15 @@ def build(bld):
     # Test
     #
     if _is_test:
-        
-        plat = sys.platform 
+
+        plat = sys.platform
 
         tsk = bld.program(
             source = 'test/main.cpp',
             target = 'test_fileseq',
-            use = 'fileseq',
-            libpath = [bld.variant_dir],
-            linkflags = ["-Wl,-rpath-link=."] if plat=="linux" else [],
-            rpath = ["$ORIGIN", "$ORIGIN/../"],
+            lib = ['pthread'],
+            stlib = ['gofileseq'],
+            use = 'fileseq_static',
             )
 
         bld(

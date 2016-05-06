@@ -10,8 +10,9 @@ INCLUDEPATH += $$PWD/..
 DEPENDPATH += $$PWD/..
 
 unix: {
-    LIBS += -lpthread -L$$PWD/../ -lfileseq
-    # LIBS += -Wl,-Bstatic -lgofileseq -Wl,-Bdynamic
+    LIBS += -lpthread
+    LIBS += -L$$PWD/../ -lfileseq
+    # LIBS += -Wl,-Bstatic -lfileseq -lgofileseq -Wl,-Bdynamic
     QMAKE_RPATHDIR += $$_PRO_FILE_PWD_/..
 }
 
