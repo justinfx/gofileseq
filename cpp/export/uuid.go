@@ -9,6 +9,17 @@ func init() {
 	randSource = NewXor64Source(time.Now().UnixNano())
 }
 
+// idMaker interface generates a unique uint64 id
+type idMaker interface {
+	Uint64() uint64
+}
+
+// Create a new idMaker
+func NewRandSource() idMaker {
+	return NewXor64Source(time.Now().UnixNano())
+}
+
+// Generate a new unique id using the shared generator
 func uuid() uint64 {
 
 	//// Slowest
