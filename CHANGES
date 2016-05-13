@@ -1,5 +1,10 @@
 Changes:
 
+2.2.0
+----------------
+* #6 - Bug: Single frame parsing for padding and zfill does not match py-fileseq
+* #7 - Feature: Allow option for changing frame padding styles (i.e. to something like Nuke)
+
 2.1.0
 ----------------
 * cpp - New C++ bindings on top of gofileseq
