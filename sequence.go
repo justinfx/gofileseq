@@ -75,9 +75,18 @@ func NewFileSequencePad(sequence string, style PadStyle) (*FileSequence, error) 
 	var frameSet *FrameSet
 	var err error
 
+	// Determine which style of padding to use
+	padder, ok := padders[style]
+	if !ok {
+		padder = defaultPadding
+	}
+
 	parts := splitPattern.FindStringSubmatch(sequence)
 
 	if len(parts) == 0 {
+		// If no match at this point, we are dealing with a possible
+		// path that contains no range. Maybe a single frame or no frame.
+
 		for _, pad := range defaultPadding.AllChars() {
 			if strings.Contains(sequence, pad) {
 				return nil, fmt.Errorf("Failed to parse sequence: %s", sequence)
@@ -99,18 +108,24 @@ func NewFileSequencePad(sequence string, style PadStyle) (*FileSequence, error) 
 			// number, a la  .<frame>.ext
 			parts = singleFrame.FindStringSubmatch(sequence)
 			if len(parts) > 0 {
-				frameSet, err = NewFrameSet(parts[2])
+				frameStr := parts[2]
+				frameSet, err = NewFrameSet(frameStr)
 				if err != nil {
 					frameSet = nil
 				} else {
 					// Reparse the dir/basename to not include the trailing frame
 					dir, basename = filepath.Split(parts[1])
+
+					// Calculate the padding chars
+					pad = padder.PaddingChars(len(strings.TrimSpace(frameStr)))
 				}
 				ext = parts[3]
 			}
 		}
 
 	} else {
+		// We are dealing with a pattern containing a frame range
+
 		frameSet, err = NewFrameSet(parts[2])
 		if err != nil {
 			frameSet = nil
@@ -121,18 +136,12 @@ func NewFileSequencePad(sequence string, style PadStyle) (*FileSequence, error) 
 		ext = parts[4]
 	}
 
-	// Determine which style of padding to use
-	padder, ok := padders[style]
-	if !ok {
-		padder = defaultPadding
-	}
-
 	seq := &FileSequence{
 		basename:  basename,
 		dir:       dir,
 		ext:       ext,
 		padChar:   pad,
-		zfill:     0,
+		zfill:     0, // Fill will be calculated after SetPadding()
 		frameSet:  frameSet,
 		padMapper: padder,
 	}

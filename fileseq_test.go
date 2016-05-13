@@ -172,48 +172,67 @@ func TestFrameSetInverted(t *testing.T) {
 
 func TestNewFileSequence(t *testing.T) {
 	var table = []struct {
-		path              string
+		path, outPath     string
 		start, end, zfill int
 		frameCount        int
 	}{
-		{"/file_path.100.exr", 100, 100, 0, 1},
-		{"/dir/f.1-100#.jpeg", 1, 100, 4, 100},
-		{"/dir/f.1-100@@@.f", 1, 100, 3, 100},
-		{"/dir/f.1-10,50,60-90x2##.mp4", 1, 90, 8, 27},
-		{"/dir/f.exr", 0, 0, 0, 1},
-		{"/dir/f.100", 100, 100, 0, 1},
-		{"/dir/f.@@.ext", 0, 0, 2, 1},
-		{"/dir/f100.ext", 100, 100, 0, 1},
-		{"/dir/f_100.ext", 100, 100, 0, 1},
-		{"/dir/no_frames.ext", 0, 0, 0, 1},
-		{"/dir/no_file_extension", 0, 0, 0, 1},
-		{"/dir/.hidden", 0, 0, 0, 1},
-		{"/dir/.hidden.100", 100, 100, 0, 1},
-		{"/dir/.hidden.100.ext", 100, 100, 0, 1},
-		{"/dir/.hidden5.1-10#.7zip", 1, 10, 4, 10},
-		{".10000000000", 0, 0, 0, 1},
-		{".10000000000.123", 10000000000, 10000000000, 0, 1},
+		{"/file_path.100.exr",
+			"/file_path.100@@@.exr", 100, 100, 3, 1},
+		{"/file_path.0100.exr",
+			"/file_path.0100#.exr", 100, 100, 4, 1},
+		{"/dir/f.1-100#.jpeg",
+			"/dir/f.1-100#.jpeg", 1, 100, 4, 100},
+		{"/dir/f.1-100@@@.f",
+			"/dir/f.1-100@@@.f", 1, 100, 3, 100},
+		{"/dir/f.1-10,50,60-90x2##.mp4",
+			"/dir/f.1-10,50,60-90x2##.mp4", 1, 90, 8, 27},
+		{"/dir/f.exr",
+			"/dir/f.exr", 0, 0, 0, 1},
+		{"/dir/f.100",
+			"/dir/f.100@@@", 100, 100, 3, 1},
+		{"/dir/f.@@.ext",
+			"/dir/f.@@.ext", 0, 0, 2, 1},
+		{"/dir/f100.ext",
+			"/dir/f100@@@.ext", 100, 100, 3, 1},
+		{"/dir/f_100.ext",
+			"/dir/f_100@@@.ext", 100, 100, 3, 1},
+		{"/dir/no_frames.ext",
+			"/dir/no_frames.ext", 0, 0, 0, 1},
+		{"/dir/no_file_extension",
+			"/dir/no_file_extension", 0, 0, 0, 1},
+		{"/dir/.hidden",
+			"/dir/.hidden", 0, 0, 0, 1},
+		{"/dir/.hidden.100",
+			"/dir/.hidden.100@@@", 100, 100, 3, 1},
+		{"/dir/.hidden.100.ext",
+			"/dir/.hidden.100@@@.ext", 100, 100, 3, 1},
+		{"/dir/.hidden5.1-10#.7zip",
+			"/dir/.hidden5.1-10#.7zip", 1, 10, 4, 10},
+		{".10000000000",
+			".10000000000", 0, 0, 0, 1},
+		{".10000000000.123",
+			".10000000000@@@@@@@@@@@.123", 10000000000, 10000000000, 11, 1},
 	}
 	for _, tt := range table {
 		seq, err := NewFileSequence(tt.path)
 		if err != nil {
 			t.Fatal(err.Error())
 		}
-		full := seq.String()
-		if full != tt.path {
-			t.Fatalf("%s != %s", full, tt.path)
+		actual := seq.String()
+		if actual != tt.outPath {
+			t.Errorf("%s != %s", actual, tt.outPath)
 		}
 		if seq.Start() != tt.start {
-			t.Errorf("Expected start to be %d, got %d", tt.start, seq.Start())
+			t.Errorf("Expected %q start to be %d, got %d", tt.path, tt.start, seq.Start())
 		}
 		if seq.End() != tt.end {
-			t.Errorf("Expected end to be %d, got %d", tt.end, seq.End())
+			t.Errorf("Expected %q end to be %d, got %d", tt.path, tt.end, seq.End())
 		}
 		if seq.ZFill() != tt.zfill {
-			t.Errorf("Expected zfill to be %d, got %d", tt.zfill, seq.ZFill())
+			t.Errorf("Expected %q zfill to be %d, got %d", tt.path, tt.zfill, seq.ZFill())
 		}
 		if seq.Len() != tt.frameCount {
-			t.Errorf("Expected frame count to be %d, got %d", tt.frameCount, seq.Len())
+			t.Errorf("Expected %q frame count to be %d, got %d", tt.path, tt.frameCount, seq.Len())
 		}
 	}
 }
