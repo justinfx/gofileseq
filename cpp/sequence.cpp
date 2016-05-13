@@ -10,8 +10,20 @@ FileSequence::FileSequence(const std::string &frange, Status* ok)
     , m_id(0)
     , m_fsetId(0) {
 
-    internal::FileSequence_New_return fs = internal::FileSequence_New(
-                const_cast<char*>(frange.c_str()));
+    init(frange, PadStyleDefault, ok);
+}
+
+FileSequence::FileSequence(const std::string &frange, PadStyle padStyle, Status* ok)
+    : m_valid(false)
+    , m_id(0)
+    , m_fsetId(0) {
+
+    init(frange, padStyle, ok);
+}
+
+void FileSequence::init(const std::string &frange, PadStyle padStyle, Status* ok) {
+    internal::FileSequence_New_Pad_return fs = internal::FileSequence_New_Pad(
+                const_cast<char*>(frange.c_str()), int(padStyle));
 
     if (fs.r1 != NULL) {
         std::string err = "Failed to create sequence(" + frange + "): " + std::string(fs.r1);
@@ -159,6 +171,14 @@ std::string FileSequence::padding() const {
 
 void FileSequence::setPadding(const std::string &padChars) const {
     internal::FileSequence_SetPadding(m_id, const_cast<char*>(padChars.c_str()));
+}
+
+PadStyle FileSequence::paddingStyle() const {
+    return (PadStyle)internal::FileSequence_PaddingStyle(m_id);
+}
+
+void FileSequence::setPaddingStyle(PadStyle style) const {
+    internal::FileSequence_SetPaddingStyle(m_id, int(style));
 }
 
 int FileSequence::start() const {

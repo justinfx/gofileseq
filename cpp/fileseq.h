@@ -48,6 +48,19 @@ FileSequence findSequenceOnDisk(const std::string &pattern,
                                 Status* ok=NULL);
 
 /*!
+FindSequenceOnDisk takes a string that is a compatible/parsible
+FileSequence pattern, and finds a sequence on disk which matches
+the basename and extension. The returned seq will use the given
+padding style.
+If no match is found, an invalid FileSequence is returned.
+If an error occurs while reading the filesystem, it can be
+captured by passing a fileseq::Status pointer.
+*/
+FileSequence findSequenceOnDisk(const std::string &pattern,
+                                PadStyle style=PadStyleDefault,
+                                Status* ok=NULL);
+
+/*!
 FindSequencesOnDisk searches a given directory path and sorts all
 valid sequence-compatible files into a list of FileSequence matches.
 By default, only non-hidden sequences of files will be returned.
@@ -58,7 +71,8 @@ search results.
 Status findSequencesOnDisk(FileSequences &seqs,
                            const std::string &path,
                            bool hiddenFiles=false,
-                           bool singleFiles=false);
+                           bool singleFiles=false,
+                           PadStyle style=PadStyleDefault);
 
 // Internal Use
 std::string allocStats();

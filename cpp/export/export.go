@@ -8,6 +8,7 @@ package main
 typedef struct {
 	bool hiddenFiles;
 	bool singleFiles;
+	int padStyle;
 } FileOption;
 
 */
@@ -252,6 +253,19 @@ func FileSequence_New(frange *C.char) (FileSeqId, Error) {
 	return id, nil
 }
 
+//export FileSequence_New_Pad
+func FileSequence_New_Pad(frange *C.char, padStyle C.int) (FileSeqId, Error) {
+	style := fileseq.PadStyle(padStyle)
+	fs, e := fileseq.NewFileSequencePad(C.GoString(frange), style)
+	if e != nil {
+		// err string is freed by caller
+		return 0, C.CString(e.Error())
+	}
+
+	id := sFileSeqs.Add(fs)
+	return id, nil
+}
+
 //export FileSequence_Incref
 func FileSequence_Incref(id FileSeqId) {
 	sFileSeqs.Incref(id)
@@ -345,6 +359,16 @@ func FileSequence_Padding(id FileSeqId) *C.char {
 		return C.CString("")
 	}
 	return C.CString(fs.Padding())
+}
+
+//export FileSequence_PaddingStyle
+func FileSequence_PaddingStyle(id FileSeqId) C.int {
+	fs, ok := sFileSeqs.Get(id)
+	// caller must free string
+	if !ok {
+		return C.int(fileseq.PadStyleDefault)
+	}
+	return C.int(fs.PaddingStyle())
 }
 
 //export FileSequence_FrameRange
@@ -490,6 +514,14 @@ func FileSequence_SetPadding(id FileSeqId, padChars *C.char) {
 	}
 }
 
+//export FileSequence_SetPaddingStyle
+func FileSequence_SetPaddingStyle(id FileSeqId, padStyle C.int) {
+	if fs, ok := sFileSeqs.Get(id); ok {
+		style := fileseq.PadStyle(padStyle)
+		fs.SetPaddingStyle(style)
+	}
+}
+
 //export FileSequence_SetExt
 func FileSequence_SetExt(id FileSeqId, ext *C.char) {
 	if fs, ok := sFileSeqs.Get(id); ok {
@@ -572,13 +604,18 @@ func PaddingChars(pad int) *C.char {
 
 //export FindSequenceOnDisk
 func FindSequenceOnDisk(pattern *C.char) (FileSeqId, Error) {
+	return FindSequenceOnDiskPad(pattern, C.int(fileseq.PadStyleDefault))
+}
+
+//export FindSequenceOnDiskPad
+func FindSequenceOnDiskPad(pattern *C.char, padStyle C.int) (FileSeqId, Error) {
 	str := C.GoString(pattern)
 	// Caller is responsible for freeing error string
 	if str == "" {
 		return 0, C.CString("empty pattern")
 	}
 
-	fs, err := fileseq.FindSequenceOnDisk(str)
+	fs, err := fileseq.FindSequenceOnDiskPad(str, fileseq.PadStyle(padStyle))
 	if err != nil {
 		return 0, C.CString(err.Error())
 	}
@@ -595,11 +632,25 @@ func FindSequenceOnDisk(pattern *C.char) (FileSeqId, Error) {
 //export FindSequencesOnDisk
 func FindSequencesOnDisk(path *C.char, opts C.FileOption) (FileSequences, uint64, Error) {
 	fileOpts := []fileseq.FileOption{}
+
 	if opts.hiddenFiles {
 		fileOpts = append(fileOpts, fileseq.HiddenFiles)
 	}
+
 	if opts.singleFiles {
 		fileOpts = append(fileOpts, fileseq.SingleFiles)
+	}
+
+	switch fileseq.PadStyle(opts.padStyle) {
+
+	case fileseq.PadStyleHash1:
+		fileOpts = append(fileOpts, fileseq.FileOptPadStyleHash1)
+		fmt.Println("pad style hash1")
+
+	case fileseq.PadStyleHash4:
+		fileOpts = append(fileOpts, fileseq.FileOptPadStyleHash4)
+		fmt.Println("pad style hash4")
+
 	}
 
 	gopath := C.GoString(path)

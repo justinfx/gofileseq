@@ -32,10 +32,19 @@ class FileSequence {
 public:
     /*!
     Create a new FrameSet from a given frame range string.
+    Uses PadStyleDefault for the padding char style.
     If the range could not be parsed, Status will evaluate to false
     and be filled with the error message
     */
     explicit FileSequence(const std::string &frange, Status* ok=NULL);
+
+    /*!
+    Create a new FrameSet from a given frame range string, and a specific
+    style of converting between padding chars and their numberic width.
+    If the range could not be parsed, Status will evaluate to false
+    and be filled with the error message
+    */
+    FileSequence(const std::string &frange, PadStyle padStyle, Status* ok=NULL);
 
     ~FileSequence();
 
@@ -135,6 +144,17 @@ public:
     //! Set new padding characters for the sequence, i.e. # or @ or @@@
     void setPadding(const std::string &padChars) const;
 
+    /*!
+    Returns the style of padding being used to convert between characters
+    and their numeric width, i.e. # == 4
+    */
+    PadStyle paddingStyle() const;
+
+    /*!
+    Returns the style of padding being used to convert between characters
+    and their numeric width, i.e. # == 4
+    */
+    void setPaddingStyle(PadStyle style) const;
 
     /*!
     FrameRange returns the string frame range component, parsed from the
@@ -206,16 +226,20 @@ public:
 private:
     explicit FileSequence(uint64_t id);
 
+    void init(const std::string &frange, PadStyle padStyle, Status* ok=NULL);
+
     bool m_valid;
     uint64_t m_id;
     uint64_t m_fsetId;
 
     friend FileSequence findSequenceOnDisk(const std::string &pattern, Status* ok);
+    friend FileSequence findSequenceOnDisk(const std::string &pattern, PadStyle style, Status* ok);
 
     friend Status findSequencesOnDisk(FileSequences &seqs,
                                       const std::string &path,
                                       bool hiddenFiles,
-                                      bool singleFiles);
+                                      bool singleFiles,
+                                      PadStyle style);
 };
 
 } // fileseq

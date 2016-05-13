@@ -381,17 +381,69 @@ func TestFramesToFrameRange(t *testing.T) {
 }
 
 func TestPaddingChars(t *testing.T) {
-	var table = []struct {
+	type TestVals struct {
 		pad      int
 		padChars string
-	}{
-		{-1, "@"}, {0, "@"}, {1, "@"}, {2, "@@"}, {3, "@@@"},
-		{4, "#"}, {5, "@@@@@"}, {8, "##"}, {12, "###"}}
+	}
 
-	for _, tt := range table {
-		actual := PaddingChars(tt.pad)
-		if actual != tt.padChars {
-			t.Errorf("Expected %s for padding %d, got %s", tt.padChars, tt.pad, actual)
+	var table = []struct {
+		padMapper paddingMapper
+		testVals  []TestVals
+	}{
+		{
+			padders[PadStyleHash1], []TestVals{
+				{-1, "#"}, {0, "#"}, {1, "#"}, {2, "##"}, {3, "###"},
+				{1, "#"}, {5, "#####"}, {2, "##"}, {3, "###"},
+			},
+		},
+		{
+			padders[PadStyleHash4], []TestVals{
+				{-1, "@"}, {0, "@"}, {1, "@"}, {2, "@@"}, {3, "@@@"},
+				{4, "#"}, {5, "@@@@@"}, {8, "##"}, {12, "###"},
+			},
+		},
+	}
+
+	for _, tg := range table {
+		for _, tt := range tg.testVals {
+			actual := tg.padMapper.PaddingChars(tt.pad)
+			if actual != tt.padChars {
+				t.Errorf("Expected %s for padding %d, got %s", tt.padChars, tt.pad, actual)
+			}
+		}
+	}
+}
+
+func TestPaddingCharsSize(t *testing.T) {
+	type TestVals struct {
+		padChars string
+		pad      int
+	}
+
+	var table = []struct {
+		padMapper paddingMapper
+		testVals  []TestVals
+	}{
+		{
+			padders[PadStyleHash1], []TestVals{
+				{"", 0}, {"#", 1}, {"##", 2}, {"###", 3}, {"####", 4},
+				{"@", 1}, {"@@", 2}, {"@@@", 3}, {"@@@@", 4},
+			},
+		},
+		{
+			padders[PadStyleHash4], []TestVals{
+				{"", 0}, {"#", 4}, {"##", 8}, {"###", 12}, {"####", 16},
+				{"@", 1}, {"@@", 2}, {"@@@", 3}, {"@@@@", 4},
+			},
+		},
+	}
+
+	for _, tg := range table {
+		for _, tt := range tg.testVals {
+			actual := tg.padMapper.PaddingCharsSize(tt.padChars)
+			if actual != tt.pad {
+				t.Errorf("Expected %d for padding %s, got %d", tt.pad, tt.padChars, actual)
+			}
 		}
 	}
 }
@@ -486,32 +538,57 @@ func TestListFiles(t *testing.T) {
 }
 
 func TestFindSequenceOnDisk(t *testing.T) {
-	table := map[string]string{
-		"testdata/seqC.@@.tif":     "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
-		"testdata/seqC.0010.tif":   "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
-		"testdata/seqB.#.jpg":      "testdata/seqB.5-14,16-18,20#.jpg",
-		"testdata/seqB.16-18#.jpg": "testdata/seqB.5-14,16-18,20#.jpg",
-		"testdata/seqA.#.exr":      "testdata/seqA.1,3-6,8-10#.exr",
-		"testdata/seqA.@.exr":      "testdata/seqA.1,3-6,8-10#.exr",
-		"testdata/seqA.@.jpg":      "",
+	type TestSet struct {
+		mapper PadStyle
+		tests  map[string]string
 	}
 
-	for pattern, expected := range table {
-		seq, err := FindSequenceOnDisk(pattern)
-		if err != nil {
-			t.Fatal(err.Error())
-		}
-		if seq == nil && expected != "" {
-			t.Fatalf("Expected %q ; got a nil sequence", expected)
-		}
+	table := []TestSet{
+		{
+			PadStyleHash1,
+			map[string]string{
+				"testdata/seqC.@@.tif":     "testdata/seqC.-5-2,4-10,20-21,27-30##.tif",
+				"testdata/seqC.0010.tif":   "testdata/seqC.-5-2,4-10,20-21,27-30##.tif",
+				"testdata/seqB.#.jpg":      "testdata/seqB.5-14,16-18,20####.jpg",
+				"testdata/seqB.16-18#.jpg": "testdata/seqB.5-14,16-18,20####.jpg",
+				"testdata/seqA.#.exr":      "testdata/seqA.1,3-6,8-10####.exr",
+				"testdata/seqA.@.exr":      "testdata/seqA.1,3-6,8-10####.exr",
+				"testdata/seqA.@.jpg":      "",
+			},
+		},
 
-		var actual string
-		if expected != "" {
-			actual = seq.String()
-		}
+		{
+			PadStyleHash4,
+			map[string]string{
+				"testdata/seqC.@@.tif":     "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
+				"testdata/seqC.0010.tif":   "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
+				"testdata/seqB.#.jpg":      "testdata/seqB.5-14,16-18,20#.jpg",
+				"testdata/seqB.16-18#.jpg": "testdata/seqB.5-14,16-18,20#.jpg",
+				"testdata/seqA.#.exr":      "testdata/seqA.1,3-6,8-10#.exr",
+				"testdata/seqA.@.exr":      "testdata/seqA.1,3-6,8-10#.exr",
+				"testdata/seqA.@.jpg":      "",
+			},
+		},
+	}
 
-		if actual != expected {
-			t.Fatalf("Expected %q ; got %q", expected, actual)
+	for _, tg := range table {
+		for pattern, expected := range tg.tests {
+			seq, err := FindSequenceOnDiskPad(pattern, tg.mapper)
+			if err != nil {
+				t.Fatal(err.Error())
+			}
+			if seq == nil && expected != "" {
+				t.Fatalf("Expected %q ; got a nil sequence", expected)
+			}
+
+			var actual string
+			if expected != "" {
+				actual = seq.String()
+			}
+
+			if actual != expected {
+				t.Fatalf("Expected %q ; got %q", expected, actual)
+			}
 		}
 	}
 }

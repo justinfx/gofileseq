@@ -5,6 +5,11 @@
 
 namespace fileseq {
 
+enum PadStyle {
+    PadStyleHash1 = 0,
+    PadStyleHash4 = 1,
+    PadStyleDefault = PadStyleHash4
+};
 
 typedef std::vector<FileSequence> FileSequences;
 

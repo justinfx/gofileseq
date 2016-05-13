@@ -26,12 +26,13 @@ import (
 //     /path/to/image_foo.1-10x2@@@.jpg (i.e. 001)
 //
 type FileSequence struct {
-	basename string
-	dir      string
-	ext      string
-	padChar  string
-	zfill    int
-	frameSet *FrameSet
+	basename  string
+	dir       string
+	ext       string
+	padChar   string
+	zfill     int
+	frameSet  *FrameSet
+	padMapper paddingMapper
 }
 
 // NewFileSequence returns a FileSequence from a string
@@ -40,11 +41,36 @@ type FileSequence struct {
 // If error is non-nil, then the given sequence string could not
 // be successfully parsed.
 //
+// PadStyleDefault is used as the padding character formatter
+//
 // Example paths:
 //     /path/to/image_foo.1-10x2#.jpg
 //     /path/to/single_image.0100.jpg
 //
 func NewFileSequence(sequence string) (*FileSequence, error) {
+	return NewFileSequencePad(sequence, PadStyleDefault)
+}
+
+// NewFileSequencePad returns a FileSequence from a string
+// sequence path. The path should be a valid sequence, expressing
+// a frame range, or a single file path.
+// If error is non-nil, then the given sequence string could not
+// be successfully parsed.
+//
+// The sequence uses the style of padding given, in
+// order to convert between padding characters and their numeric width.
+//
+// Example path w/ PadStyleHash1:
+//     /path/to/image_foo.1-10x2#.jpg => /path/to/image_foo.1.jpg ...
+//     /path/to/image_foo.1-10x2@.jpg => /path/to/image_foo.1.jpg ...
+//     /path/to/image_foo.1-10x2##.jpg => /path/to/image_foo.01.jpg ...
+//
+// Example path w/ PadStyleHash4:
+//     /path/to/image_foo.1-10x2#.jpg => /path/to/image_foo.0001.jpg ...
+//     /path/to/image_foo.1-10x2@.jpg => /path/to/image_foo.1.jpg ...
+//     /path/to/image_foo.1-10x2##.jpg => /path/to/image_foo.00000001.jpg ...
+//
+func NewFileSequencePad(sequence string, style PadStyle) (*FileSequence, error) {
 	var dir, basename, pad, ext string
 	var frameSet *FrameSet
 	var err error
@@ -52,7 +78,7 @@ func NewFileSequence(sequence string) (*FileSequence, error) {
 	parts := splitPattern.FindStringSubmatch(sequence)
 
 	if len(parts) == 0 {
-		for pad := range padding {
+		for _, pad := range defaultPadding.AllChars() {
 			if strings.Contains(sequence, pad) {
 				return nil, fmt.Errorf("Failed to parse sequence: %s", sequence)
 			}
@@ -95,7 +121,22 @@ func NewFileSequence(sequence string) (*FileSequence, error) {
 		ext = parts[4]
 	}
 
-	seq := &FileSequence{basename, dir, ext, pad, 0, frameSet}
+	// Determine which style of padding to use
+	padder, ok := padders[style]
+	if !ok {
+		padder = defaultPadding
+	}
+
+	seq := &FileSequence{
+		basename:  basename,
+		dir:       dir,
+		ext:       ext,
+		padChar:   pad,
+		zfill:     0,
+		frameSet:  frameSet,
+		padMapper: padder,
+	}
+
 	seq.SetPadding(pad)
 
 	return seq, nil
@@ -200,6 +241,18 @@ func (s *FileSequence) Basename() string {
 // i.e. # or @ or @@@
 func (s *FileSequence) Padding() string {
 	return s.padChar
+}
+
+// PaddingStyle returns the style of padding being used
+// to convert between characters and their numeric width,
+// i.e. # == 4
+func (s *FileSequence) PaddingStyle() PadStyle {
+	for style, mapper := range padders {
+		if mapper == s.padMapper {
+			return style
+		}
+	}
+	return PadStyleDefault
 }
 
 // Start returns the starting frame of the sequence.
@@ -379,12 +432,14 @@ func (s *FileSequence) SetBasename(base string) {
 // Set a new padding characters for the sequence
 func (s *FileSequence) SetPadding(padChars string) {
 	s.padChar = padChars
+	s.zfill = s.padMapper.PaddingCharsSize(padChars)
+}
 
-	var zfill int
-	for _, c := range padChars {
-		zfill += padding[string(c)]
-	}
-	s.zfill = zfill
+// Set a new padding style for mapping between characters and
+// their numeric width
+func (s *FileSequence) SetPaddingStyle(style PadStyle) {
+	s.padMapper = padders[style]
+	s.SetPadding(s.padMapper.PaddingChars(s.ZFill()))
 }
 
 // Set a new ext for the sequence
@@ -462,6 +517,10 @@ const (
 	// Include paths that aren't detected as sequences, and are
 	// just single files
 	SingleFiles
+	// Set the PadStyle to PadStyleHash1
+	FileOptPadStyleHash1
+	// Set the PadStyle to PadStyleHash4
+	FileOptPadStyleHash4
 )
 
 // FindSequencesOnDisk searches a given directory path and
@@ -499,16 +558,25 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 	}
 
 	// Get options
-	var singleFiles bool
-	var hiddenFiles bool
+	var (
+		singleFiles bool
+		hiddenFiles bool
+		padStyle    PadStyle = PadStyleDefault
+	)
 	for _, opt := range opts {
 		switch opt {
 		case HiddenFiles:
 			hiddenFiles = true
 		case SingleFiles:
 			singleFiles = true
+		case FileOptPadStyleHash1:
+			padStyle = PadStyleHash1
+		case FileOptPadStyleHash4:
+			padStyle = PadStyleHash4
 		}
 	}
+
+	padder := padders[padStyle]
 
 	seqs := make(map[[2]string][]int)
 	padMap := make(map[[2]string]string)
@@ -562,7 +630,7 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 			if singleFiles {
 				buf.WriteString(name)
 
-				fs, err := NewFileSequence(buf.String())
+				fs, err := NewFileSequencePad(buf.String(), padStyle)
 				if err != nil {
 					return nil, err
 				}
@@ -580,7 +648,7 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 		frames, ok := seqs[key]
 		if !ok {
 			frames = []int{frame}
-			padMap[key] = PaddingChars(len(match[2]))
+			padMap[key] = padder.PaddingChars(len(match[2]))
 		} else {
 			frames = append(frames, frame)
 		}
@@ -623,7 +691,7 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 		buf.WriteString(pad)
 		buf.WriteString(ext)
 
-		fs, err := NewFileSequence(buf.String())
+		fs, err := NewFileSequencePad(buf.String(), padStyle)
 		if err != nil {
 			return nil, err
 		}
@@ -650,7 +718,17 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 // If an error occurs while reading the filesystem, a non-nil error
 // is returned.
 func FindSequenceOnDisk(pattern string) (*FileSequence, error) {
-	fs, err := NewFileSequence(pattern)
+	return FindSequenceOnDiskPad(pattern, PadStyleDefault)
+}
+
+// FindSequenceOnDiskPad takes a string that is a compatible/parsible
+// FileSequence pattern, and finds a sequence on disk which matches
+// the Basename and Extension. The returned seq will use the given PadStyle.
+// If no match is found, a nil FileSequence is returned.
+// If an error occurs while reading the filesystem, a non-nil error
+// is returned.
+func FindSequenceOnDiskPad(pattern string, padStyle PadStyle) (*FileSequence, error) {
+	fs, err := NewFileSequencePad(pattern, padStyle)
 	if err != nil {
 		// Treat a bad pattern as a non-match
 		fmt.Println(err.Error())
@@ -668,6 +746,7 @@ func FindSequenceOnDisk(pattern string) (*FileSequence, error) {
 	for _, seq := range seqs {
 		// Find the first match and return it
 		if seq.Basename() == base && seq.Ext() == ext {
+			seq.SetPaddingStyle(padStyle)
 			return seq, nil
 		}
 	}

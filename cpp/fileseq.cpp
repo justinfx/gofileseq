@@ -31,9 +31,13 @@ std::string padFrameRange(const std::string &frange, int pad) {
 }
 
 FileSequence findSequenceOnDisk(const std::string &pattern, Status* ok) {
+    return findSequenceOnDisk(pattern, PadStyleDefault, ok);
+}
 
-    internal::FindSequenceOnDisk_return ret;
-    ret = internal::FindSequenceOnDisk(const_cast<char*>(pattern.c_str()));
+FileSequence findSequenceOnDisk(const std::string &pattern, PadStyle style, Status* ok) {
+
+    internal::FindSequenceOnDiskPad_return ret;
+    ret = internal::FindSequenceOnDiskPad(const_cast<char*>(pattern.c_str()), int(style));
 
     if (ret.r1 != NULL) {
         if (ok != NULL) {
@@ -52,15 +56,16 @@ FileSequence findSequenceOnDisk(const std::string &pattern, Status* ok) {
     return FileSequence(ret.r0);
 }
 
-
 Status findSequencesOnDisk(FileSequences &seqs,
                            const std::string &path,
                            bool hiddenFiles,
-                           bool singleFiles) {
+                           bool singleFiles,
+                           PadStyle style) {
 
     internal::FileOption opts;
     opts.hiddenFiles = hiddenFiles;
     opts.singleFiles = singleFiles;
+    opts.padStyle = int(style);
 
     internal::FindSequencesOnDisk_return ret;
     ret = internal::FindSequencesOnDisk(const_cast<char*>(path.c_str()), opts);

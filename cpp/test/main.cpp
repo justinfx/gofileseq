@@ -130,20 +130,41 @@ void test_fileseqs() {
     frameSet = fileseq::FrameSet("100-120x2,50,60,65-85x4").normalized();
     fs.setFrameSet(frameSet);
     std::cout << "String after setting FrameSet: " << fs << std::endl;
+
+    // Test padding
+    fs = fileseq::FileSequence("/path/to/file_thing.10-30x2##.ext", &ok);
+    assert (ok);
+    assert (fs.paddingStyle() == fileseq::PadStyleHash4);
+    assert (fs.zfill() == 8);
+    assert (fs.padding() == "##");
+    fs.setPaddingStyle(fileseq::PadStyleHash1);
+    assert (fs.paddingStyle() == fileseq::PadStyleHash1);
+    assert (fs.zfill() == 8);
+    assert (fs.padding() == "########");
+
+    fs = fileseq::FileSequence("/path/to/file_thing.10-30x2##.ext", fileseq::PadStyleHash1, &ok);
+    assert (ok);
+    assert (fs.paddingStyle() == fileseq::PadStyleHash1);
+    assert (fs.zfill() == 2);
+    assert (fs.padding() == "##");
+    fs.setPaddingStyle(fileseq::PadStyleHash4);
+    assert (fs.paddingStyle() == fileseq::PadStyleHash4);
+    assert (fs.zfill() == 2);
+    assert (fs.padding() == "@@");
 }
 
 void test_find_seqs() {
     fileseq::Status ok;
 
     std::string path = "../../testdata/seqB.#.jpg";
+    std::string expect = "../../testdata/seqB.5-14,16-18,20#.jpg";
+
     fileseq::FileSequence fs = fileseq::findSequenceOnDisk(path, &ok);
     if (!ok) {
         std::cerr << "findSequenceOnDisk failed: " << ok << std::endl;
         assert (ok);
-    } else {
-        std::cout << "findSequenceOnDisk (valid? " << fs.isValid() << "): "
-                  << fs << std::endl;
     }
+    assert (fs.string() == expect);
 
     std::string pathBad = "../../asdlkasdkls";
     fs = fileseq::findSequenceOnDisk(pathBad, &ok);
@@ -152,11 +173,19 @@ void test_find_seqs() {
               << std::endl;
     assert (!fs.isValid());
 
-    std::string path2 = "../../testdata";
-    std::cout << "findSequencesOnDisk for " << path2 << std::endl;
+    path = "../../testdata/seqB.####.jpg";
+    expect = "../../testdata/seqB.5-14,16-18,20####.jpg";
+    std::cout << "findSequenceOnDisk for " << path << std::endl;
+    fs = fileseq::findSequenceOnDisk(path, fileseq::PadStyleHash1, &ok);
+    if (!ok) std::cout << "  Error: " << ok << std::endl;
+    assert (ok);
+    assert (fs.string() == expect);
+
+    path = "../../testdata";
+    std::cout << "findSequencesOnDisk for " << path << std::endl;
     fileseq::FileSequences seqs;
     seqs.push_back(fileseq::FileSequence("existing.1-100#.ext"));
-    ok = fileseq::findSequencesOnDisk(seqs, path2, true, true);
+    ok = fileseq::findSequencesOnDisk(seqs, path, true, true);
     assert (ok);
     if (!ok) {
         std::cout << "  Error: " << ok << std::endl;

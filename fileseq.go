@@ -27,21 +27,15 @@ import (
 	"strings"
 )
 
-const Version = "2.0.1"
+const Version = "2.2.0"
 
 var (
-	padding       map[string]int
 	rangePatterns []*regexp.Regexp
 	splitPattern  *regexp.Regexp
 	singleFrame   *regexp.Regexp
 )
 
 func init() {
-	padding = map[string]int{
-		"#": 4,
-		"@": 1,
-	}
-
 	// Regular expression patterns for matching frame set strings.
 	// Examples:
 	//     1-100
@@ -168,76 +162,10 @@ func FramesToFrameRange(frames []int, sorted bool, zfill int) string {
 	return buf.String()
 }
 
-// PadFrameRange takes a frame range string and returns a
-// new range with each number padded out with zeros to a given width
-func PadFrameRange(frange string, pad int) string {
-	// We don't need to do anything if they gave us
-	// an invalid pad number
-	if pad < 2 {
-		return frange
-	}
-
-	size := strings.Count(frange, ",") + 1
-	parts := make([]string, size, size)
-
-	for i, part := range strings.Split(frange, ",") {
-
-		didMatch := false
-
-		for _, rx := range rangePatterns {
-			matched := rx.FindStringSubmatch(part)
-			if len(matched) == 0 {
-				continue
-			}
-			matched = matched[1:]
-			size = len(matched)
-			switch size {
-			case 1:
-				parts[i] = zfillString(matched[0], pad)
-			case 2:
-				parts[i] = fmt.Sprintf("%s-%s",
-					zfillString(matched[0], pad),
-					zfillString(matched[1], pad))
-			case 4:
-				parts[i] = fmt.Sprintf("%s-%s%s%s",
-					zfillString(matched[0], pad),
-					zfillString(matched[1], pad),
-					matched[2], matched[3])
-			default:
-				// No match. Try the next pattern
-				continue
-			}
-			// If we got here, we matched a case and can stop
-			// checking the rest of the patterns
-			didMatch = true
-			break
-		}
-		// If we didn't match one of our expected patterns
-		// then just take the original part and add it unmodified
-		if !didMatch {
-			parts = append(parts, part)
-		}
-	}
-	return strings.Join(parts, ",")
-}
-
-// PaddingChars returns the proper padding characters,
-// given an amount of padding.
-func PaddingChars(pad int) string {
-	switch {
-	case pad <= 0:
-		return "@"
-	case pad%4 == 0:
-		return strings.Repeat("#", pad/4)
-	default:
-		return strings.Repeat("@", pad)
-	}
-}
-
 // frameRangeMatches breaks down the string frame range
 // into groups of range matches, for further processing.
 func frameRangeMatches(frange string) ([][]string, error) {
-	for k := range padding {
+	for _, k := range defaultPadding.AllChars() {
 		frange = strings.Replace(frange, k, "", -1)
 	}
 
@@ -276,32 +204,6 @@ func frameRangeMatches(frange string) ([][]string, error) {
 	}
 
 	return matches, nil
-}
-
-// Left pads a string to a given with, using "0".
-// If the string begins with a negative "-" character, then
-// padding is inserted between the "-" and the remaining characters.
-func zfillString(src string, z int) string {
-	size := len(src)
-	if size >= z {
-		return src
-	}
-
-	fill := strings.Repeat("0", z-size)
-	if strings.HasPrefix(src, "-") {
-		return fmt.Sprintf("-%s%s", fill, src[1:])
-	}
-	return fmt.Sprintf("%s%s", fill, src)
-}
-
-// Left pads an int to a given with, using "0".
-// If the string begins with a negative "-" character, then
-// padding is inserted between the "-" and the remaining characters.
-func zfillInt(src int, z int) string {
-	if z < 2 {
-		return strconv.Itoa(src)
-	}
-	return fmt.Sprintf(fmt.Sprintf("%%0%dd", z), src)
 }
 
 // Expands a start, end, and stepping value
