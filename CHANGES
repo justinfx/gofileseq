@@ -1,5 +1,9 @@
 Changes:
 
+2.2.1
+----------------
+* waf c++ build flags updated for static lib to avoid errors about -fPIC when link into another C++ lib
+
 2.2.0
 ----------------
 * #6 - Bug: Single frame parsing for padding and zfill does not match py-fileseq

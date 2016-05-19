@@ -56,7 +56,13 @@ def build(bld):
 
     golibname = "libgofileseq"
 
-    cmd_str = "${GO} build -buildmode=c-%s -o ${TGT[0].abspath()}"
+    cmd_str = "${GO} build " \
+                  "-buildmode=c-%s " \
+                  "-gcflags=-shared " \
+                  "-asmflags=-shared " \
+                  "-installsuffix=_shared " \
+                  "-a " \
+                  "-o ${TGT[0].abspath()}"
 
     source = bld.path.ant_glob("export/*.go")
 
@@ -90,11 +96,12 @@ def build(bld):
     includes = ['.', 'private', bld.variant_dir]
     source = bld.path.ant_glob(['*.cpp', 'private/*.cpp'])
 
-    t = bld.shlib(
+    bld.shlib(
         name = "fileseq_shared",
         source = source,
         target = "fileseq",
         includes = includes,
+        cxxflags = ["-fPIC"],
         lib = ["gofileseq"],
         libpath = [bld.variant_dir],
         rpath = ["$ORIGIN"],
@@ -106,6 +113,7 @@ def build(bld):
         source = source,
         target = "fileseq",
         includes = includes,
+        cxxflags = ["-fPIC"],
         stlib = ["gofileseq"],
         stlibpath = [bld.variant_dir],
         use = ["%s.h" % golibname],
