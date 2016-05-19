@@ -66,8 +66,6 @@ def build(bld):
 
     source = bld.path.ant_glob("export/*.go")
 
-    source = bld.path.ant_glob("export/*.go")
-
     class gofileseq_shared(gofileseq):
         run_str = cmd_str % "shared"
 
