@@ -33,7 +33,9 @@ with each number padded out with zeros to a given width
 */
 std::string padFrameRange(const std::string &frange, int pad);
 
-// Returns the proper padding characters, given an amount of padding.
+/*!
+Returns the proper padding characters, given an amount of padding.
+*/
 std::string getPaddingChars(int pad);
 
 /*!
@@ -74,7 +76,6 @@ Status findSequencesOnDisk(FileSequences &seqs,
                            bool singleFiles=false,
                            PadStyle style=PadStyleDefault);
 
-// Internal Use
 std::string allocStats();
 
 } // fileseq

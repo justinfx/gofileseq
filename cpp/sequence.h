@@ -52,10 +52,14 @@ public:
 
     FileSequence& operator=(const FileSequence& rhs);
 
-    //! Return whether the range was properly parsed
+    /*!
+    Return whether the range was properly parsed
+    */
     bool isValid() const { return m_valid; }
 
-    //! Return the string representation of the file sequence
+    /*!
+    Return the string representation of the file sequence
+    */
     std::string string() const;
 
     operator std::string() const { return string(); }
@@ -65,13 +69,19 @@ public:
         return stream;
     }
 
-    //! The number of files/frames in the sequence range
+    /*!
+    The number of files/frames in the sequence range
+    */
     size_t length() const;
 
-    //! Return the first frame number in the range
+    /*!
+    Return the first frame number in the range
+    */
     int start() const;
 
-    //! Return the last frame number in the range
+    /*!
+    Return the last frame number in the range
+    */
     int end() const;
 
     /*!
@@ -104,10 +114,14 @@ public:
     */
     std::string format(const std::string &fmt, Status* ok=NULL) const;
 
-    //! Dirname returns the parsed directory component of the sequence string
+    /*!
+    Dirname returns the parsed directory component of the sequence string
+    */
     std::string dirname() const;
 
-    //! Set the dir name component of the sequence string
+    /*!
+    Set the dir name component of the sequence string
+    */
     void setDirname(const std::string &dirname) const;
 
     /*!
@@ -141,7 +155,9 @@ public:
     */
     std::string padding() const;
 
-    //! Set new padding characters for the sequence, i.e. # or @ or @@@
+    /*!
+    Set new padding characters for the sequence, i.e. # or @ or @@@
+    */
     void setPadding(const std::string &padChars) const;
 
     /*!
@@ -164,7 +180,9 @@ public:
     */
     std::string frameRange(bool padded=false) const;
 
-    //! Set a new FrameSet, by way of providing a string frame range.
+    /*!
+    Set a new FrameSet, by way of providing a string frame range.
+    */
     void setFrameRange(const std::string &frange, Status* ok=NULL);
 
     /*!
@@ -220,7 +238,9 @@ public:
     */
     FrameSet frameSet();
 
-    //! Set a new FrameSet for this sequence
+    /*!
+    Set a new FrameSet for this sequence
+    */
     void setFrameSet(FrameSet &frameSet);
 
 private:
