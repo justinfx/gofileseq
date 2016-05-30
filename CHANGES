@@ -1,5 +1,10 @@
 Changes:
 
+2.2.2
+----------------
+* cmd/seqinfo - New tool for parsing and printing info about one or more file seq patterns
+* Refactored vendoring into cmd/ location
+
 2.2.1
 ----------------
 * waf c++ build flags updated for static lib to avoid errors about -fPIC when link into another C++ lib
