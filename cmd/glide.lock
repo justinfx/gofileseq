@@ -1,0 +1,10 @@
+hash: aa1022292904bd32befa1c97fb1ecf0c648b52ad834d81814c83e4ca334f0d38
+updated: 2016-05-27T10:36:45.723875294+12:00
+imports:
+- name: github.com/jessevdk/go-flags
+  version: 7168dbf82f26bb6b29d821d9a4e436d50e9e3c4a
+- name: github.com/justinfx/gofileseq
+  version: ""
+- name: github.com/MichaelTJones/walk
+  version: 3af09438b0ab0e8f296410bfa646a7e635ea1fc0
+devImports: []

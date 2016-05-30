@@ -1,0 +1,8 @@
+package: github.com/justinfx/gofileseq/cmd
+
+import:
+- package: github.com/MichaelTJones/walk
+- package: github.com/jessevdk/go-flags
+
+ignore:
+- github.com/justinfx/gofileseq
