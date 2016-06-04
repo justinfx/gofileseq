@@ -1,0 +1,63 @@
+#! /usr/bin/env python
+
+from waflib import Context, Task
+
+APPNAME = "fileseq"
+
+top = '.'
+out = 'build'
+
+
+def options(opt):
+    opt.load('compiler_cxx')
+
+
+def configure(ctx):
+    ctx.load('compiler_cxx')
+
+
+def build(bld):
+    opts = dict(
+        target = APPNAME,
+        source = bld.path.ant_glob(['*.cpp', 'private/*.cpp']),
+        includes = ['.', 'private'],
+        cxxflags = ["-fPIC"],
+    )
+
+    # bld.shlib(name="fileseq_shared", **opts)
+    bld.stlib(name="fileseq_static", **opts)
+
+    # Install headers
+    bld.install_files('${PREFIX}/include/fileseq', bld.path.ant_glob("*.h"))
+
+    # Test
+    #
+    if _is_test:
+        _create_test(bld)
+
+
+
+_is_test = False
+
+def test(bld):
+    from waflib import Options
+    Options.commands = ['build'] + Options.commands
+
+    global _is_test
+    _is_test = True
+
+
+def _create_test(bld):
+    tsk = bld.program(
+            target = 'test_fileseq',
+            source = 'test/raw_tests.cpp',
+            use = 'fileseq_static',
+        )
+
+    bld(
+        rule="cd %s && ./${SRC}" % bld.variant_dir,
+        source=tsk.target,
+        use="test_fileseq",
+        )
+
+
