@@ -1,0 +1,208 @@
+/* Custom styles for Doxygen for weta docs.
+   version: 0.0.2 */
+
+/* ### Prettification ### */
+
+/* Turn off horrible Roboto font and weird bolding */
+body, table, div, p, dl, a {
+    font-weight: 110;
+    font-family: sans-serif;
+}
+
+div.contents h1 {
+    font-size: 120%;
+    font-weight: 110;
+    font-family: sans-serif;
+}
+div.contents h2 {
+    font-weight: 110;
+    font-family: sans-serif;
+}
+
+a.el {
+    font-weight: 110;
+    font-family: sans-serif;
+}
+.contents .textblock a, .contents a.el {
+    color: #727272;
+/*    color: #11556d;
+    text-decoration: underline;*/
+}
+
+#projectlogo {
+    text-align: left;
+}
+
+#navrow1, .tabs {
+    padding-top: 0.6em;
+    padding-bottom: 0.6em;
+    border-bottom: 1px solid #b3b3b3;
+    background-image: none;
+    background-color: #ffffff;
+}
+#navrow2, .tabs2 {
+    background-image: none;
+    border-bottom: 1px solid #b3b3b3;
+}
+#navrow4, .tabs3 {
+    background-image: none;
+    border-bottom: 1px solid #b3b3b3;
+}
+
+.memSeparator {
+    border: none;
+}
+.memproto, .memdoc {
+    background-image: none;
+    background-color: #f1f1f1;
+    box-shadow: none;
+}
+.memproto {
+    border: none;
+    border-top: 1px solid #efefef;
+    border-left: 1px solid #efefef;
+    border-right: 1px solid #efefef;
+}
+.memdoc {
+    border: none;
+    border-bottom: 1px solid #efefef;
+    border-left: 1px solid #efefef;
+    border-right: 1px solid #efefef;
+}
+
+/* glow color on focus (temporary highlight of target) */
+.memitem.glow {
+    box-shadow: 0 0 15px #d2d2d2;
+}
+.memberdecls td.glow, .fieldtable tr.glow {
+    background-color: #d2d2d2;
+    box-shadow: 0 0 15px #d2d2d2;
+}
+.div.line.glow {
+    background-color: #d2d2d2;
+    box-shadow: 0 0 15px #d2d2d2;
+}
+
+#titlearea {
+    border: none;
+}
+
+/* Page listing and doxygen search */
+ul.tablist a, ul.tablist li {
+    border-left: 0.3em solid #ffffff;
+    background-image: none;
+    background-color: #ffffff;
+}
+ul.tablist a:hover, ul.tablist li, ul.tablist li.current a:hover {
+    background-image: none;
+    background-color: #7b7b7b;
+}
+ul.tablist li.current a {
+    background-image: none;
+    background-color: #323232;
+}
+div.header {
+    padding-top: 0.78em;
+    border: none;
+    background-image: none;
+    background-color: #ffffff;
+}
+.navpath ul {
+    background-image: none;
+    background-color: #d5d5d5;
+    border: none;
+}
+ul.tablist a:hover, ul.tablist li, ul.tablist li.current a:hover {
+    background-image: none;
+    background-color: #525252;
+}
+ul.tablist li.current a {
+    background-image: none;
+    background-color: #323232;
+}
+#nav-tree {
+    background-image: none;
+}
+img.footer{
+    max-width: 59px;
+}
+.ui-resizable-e {
+    background-image: none;
+    background-color: #f7f7f7;
+}
+.ui-resizable-e:hover {
+    background-color: #ededed;
+}
+
+   /* makes doxygen search box bigger */
+#MSearchBox {
+    width: 350px;
+}
+#MSearchField {
+    width: 298px;
+}
+
+#titlearea table{
+  min-width: 100%;
+}
+
+/* smeagol search */
+.headerSearch {
+  float: right;
+  margin-left: 32px;
+  margin-right: 36px;
+  padding-top: 12px;
+  padding-left: 12px;
+  height: 42px;
+  text-align: right;
+  /* default to display none (doxygen's native search defaults to inline) */
+  display: none;
+}
+.headerSearch form.search {
+  width: 100%;
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
+/* common search */
+input.search {
+  border: none;
+  background-color: #ececec;
+}
+/* form elements */
+input {
+  margin: 0;
+  margin-left: 5px;
+  vertical-align: 5%;
+
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 10pt;
+  color: #252525;
+}
+.headerSearch input[type="text"]{
+  padding: 0.2em 0.8em;
+  min-width: 160px;
+  max-width: 260px;
+
+  border: 1px solid #b3b3b3;
+  border-radius:15px;
+  -moz-border-radius: 15px;
+  -webkit-border-radius: 15px;
+
+  background-color: #ffffff;
+}
+
+/* This isn't needed as there is no actual button - keeping in case */
+input[type="submit"]{
+  padding: 0.15em 0.8em;
+
+  border: none;
+  border-radius:15px;
+  -moz-border-radius: 15px;
+  -webkit-border-radius: 15px;
+
+  background-color: #c2c2c2;
+}*/
+input:focus{
+  outline: none;
+  border: 1px solid #525252;
+}
