@@ -1,0 +1,13 @@
+from digiwaflib import *
+
+gtestBin = DigiBinary()
+gtestBin.includes = [ ".", ".." ]
+gtestBin.target = 'TestFileseq'
+gtestBin.source = bld.path.ant_glob(['main.cc', 'Test*.cc'])
+gtestBin.features = ['gtest']
+gtestBin.use = ["fileseq_static", 'GTEST_static']
+gtestBin.cxxflags = ["-Wno-undef"]
+
+bld.def_gtest_objects = True
+
+DigiExtension.build(bld, binaries=[gtestBin])
