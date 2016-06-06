@@ -41,15 +41,15 @@ size_t FrameSet::length() const {
     return 0;
 };
 
-long FrameSet::index(long frame) const {
+size_t FrameSet::index(Frame frame) const {
     return 0;
 };
 
-long FrameSet::frame(long index, Status* ok) const {
+Frame FrameSet::frame(size_t index, Status* ok) const {
     return 0;
 };
 
-void FrameSet::frames(std::vector<long> &frames) const {
+void FrameSet::frames(Frames &frames) const {
     frames.clear();
 
     size_t len = length();
@@ -61,15 +61,15 @@ void FrameSet::frames(std::vector<long> &frames) const {
     // TODO
 };
 
-bool FrameSet::hasFrame(long frame) const {
+bool FrameSet::hasFrame(Frame frame) const {
     return false;
 };
 
-long FrameSet::start() const {
+Frame FrameSet::start() const {
     return 0;
 };
 
-long FrameSet::end() const {
+Frame FrameSet::end() const {
     return 0;
 };
 

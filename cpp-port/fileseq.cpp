@@ -4,7 +4,7 @@
 
 namespace fileseq {
 
-std::string framesToFrameRange(const std::vector<int> &frames,
+std::string framesToFrameRange(const Frames &frames,
                                bool sorted, int zfill) {
     return "";
 }

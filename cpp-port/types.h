@@ -10,6 +10,8 @@ namespace fileseq {
 class FileSequence;
 
 // Typedefs
+typedef long Frame;
+typedef std::vector<Frame> Frames;
 typedef std::vector<FileSequence> FileSequences;
 
 // Constants defining the style of padding to use

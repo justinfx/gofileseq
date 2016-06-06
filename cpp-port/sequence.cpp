@@ -88,11 +88,11 @@ void FileSequence::setPaddingStyle(PadStyle style) const {
 
 }
 
-int FileSequence::start() const {
+Frame FileSequence::start() const {
     return m_frameSet.start();
 }
 
-int FileSequence::end() const {
+Frame FileSequence::end() const {
     return m_frameSet.end();
 }
 
@@ -112,11 +112,11 @@ std::string FileSequence::invertedFrameRange(bool padded) const {
     return "";
 }
 
-std::string FileSequence::index(int idx) const {
+std::string FileSequence::index(size_t idx) const {
     return "";
 }
 
-std::string FileSequence::frame(int frame) const {
+std::string FileSequence::frame(Frame frame) const {
     return "";
 }
 
