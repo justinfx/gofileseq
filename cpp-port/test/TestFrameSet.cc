@@ -7,67 +7,63 @@
 #include <vector>
 
 
-// Create a std::vector<long> from an long[] array
-#define FRAME_ARR_TO_VEC(X) (std::vector<long>(X, X+(sizeof(X)/sizeof(X[0]))))
-
-
 class TestFrameSetRanges : public testing::Test {
 
 public:
     struct Case {
         std::string range;
-        std::vector<long> frames;
+        fileseq::Frames frames;
     };
 
 protected:
     void SetUp() {
         {
-            long arr[] = {10};
+            fileseq::Frame arr[] = {10};
             Case t = {"10", FRAME_ARR_TO_VEC(arr)};
             m_cases.push_back(t);
         }
         {
-            long arr[] = {1, 2, 3, 4, 5};
+            fileseq::Frame arr[] = {1, 2, 3, 4, 5};
             Case t = {"1-5", FRAME_ARR_TO_VEC(arr)};
             m_cases.push_back(t);
         }
         {
-            long arr[] = {1, 6};
+            fileseq::Frame arr[] = {1, 6};
             Case t = {"1-10x5", FRAME_ARR_TO_VEC(arr)};
             m_cases.push_back(t);
         }
         {
-            long arr[] = {1, 3, 5, 7, 9};
+            fileseq::Frame arr[] = {1, 3, 5, 7, 9};
             Case t = {"1-10x2", FRAME_ARR_TO_VEC(arr)};
             m_cases.push_back(t);
         }
         {
-            long arr[] = {1, 5, 9, 4, 7, 10, 3, 2, 6, 8};
+            fileseq::Frame arr[] = {1, 5, 9, 4, 7, 10, 3, 2, 6, 8};
             Case t = {"1-10:4", FRAME_ARR_TO_VEC(arr)};
             m_cases.push_back(t);
         }
         {
-            long arr[] = {2, 4, 6, 8, 10};
+            fileseq::Frame arr[] = {2, 4, 6, 8, 10};
             Case t = {"1-10y2", FRAME_ARR_TO_VEC(arr)};
             m_cases.push_back(t);
         }
         {
-            long arr[] = {2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15};
+            fileseq::Frame arr[] = {2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15};
             Case t = {"1-15y4", FRAME_ARR_TO_VEC(arr)};
             m_cases.push_back(t);
         }
         {
-            long arr[] = {1, 2, 3, 20, 30, 31, 32, 33};
+            fileseq::Frame arr[] = {1, 2, 3, 20, 30, 31, 32, 33};
             Case t = {"1-3,20,30-33", FRAME_ARR_TO_VEC(arr)};
             m_cases.push_back(t);
         }
         {
-            long arr[] = {1, 3, 5, 7, 9, 50, 60, 61, 62, 70, 72, 74};
+            fileseq::Frame arr[] = {1, 3, 5, 7, 9, 50, 60, 61, 62, 70, 72, 74};
             Case t = {" 1 - 10x2, 50, 60 - 62, 70 - 74x2 ", FRAME_ARR_TO_VEC(arr)};
             m_cases.push_back(t);
         }
         {
-            long arr[] = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+            fileseq::Frame arr[] = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
             Case t = {"10-1", FRAME_ARR_TO_VEC(arr)};
             m_cases.push_back(t);
         }
@@ -93,7 +89,7 @@ TEST_F( TestFrameSetRanges, NewFrameSet ) {
 
         EXPECT_EQ(t.frames.size(), s.length());
 
-        std::vector<long> actual;
+        fileseq::Frames actual;
         s.frames(actual);
         EXPECT_EQ(t.frames, actual);
     }
@@ -113,12 +109,12 @@ TEST_F( TestFrameSetRanges, Lookup ) {
         ASSERT_EQ(t.frames.back(), s.end()) << "End frame did not match";
 
         for (size_t idx=0; i < t.frames.size(); ++i) {
-            long frame = t.frames[i];
+            fileseq::Frame frame = t.frames[i];
 
             ASSERT_TRUE(s.hasFrame(frame)) << "Expected frame " << frame << " to be in frames";
             ASSERT_EQ(idx, s.index(frame)) << "Index of frame " << frame << " did not match";
 
-            long actualFrame = s.frame(idx, &stat);
+            fileseq::Frame actualFrame = s.frame(idx, &stat);
             ASSERT_TRUE(stat) << stat;
             ASSERT_EQ(frame, actualFrame);
         }

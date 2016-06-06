@@ -1,6 +1,8 @@
 #ifndef FILESEQ_FRAMESET_H_
 #define FILESEQ_FRAMESET_H_
 
+#include "types.h"
+
 #include <inttypes.h>
 #include <ostream>
 #include <string>
@@ -56,13 +58,13 @@ public:
     Index returns the index position of the frame value within the frame set.
     If the given frame does not exist, then return -1
     */
-    long index(long frame) const;
+    size_t index(Frame frame) const;
 
     /*! Frame returns the frame number value for a given index into
     the frame set. If the index is outside the bounds of the frame
     set range, then an error is returned as a Status
     */
-    long frame(long index, Status* ok=NULL) const;
+    Frame frame(size_t index, Status* ok=NULL) const;
 
     /*!
     Frames returns a slice of the frame numbers that were parsed from the
@@ -70,16 +72,16 @@ public:
     Warning: This allocates a slice containing number of elements equal
     to the Len() of the range. TODO: Support frame iteration.
     */
-    void frames(std::vector<long> &frames) const;
+    void frames(Frames &frames) const;
 
     //! HasFrame returns true if the FrameSet contains the given frame value.
-    bool hasFrame(long frame) const;
+    bool hasFrame(Frame frame) const;
 
     //! The first frame of the range
-    long start() const;
+    Frame start() const;
 
     //! The last frame in the range
-    long end() const;
+    Frame end() const;
 
     /*!
     FrameRange returns the range string that was used to initialize the FrameSet.

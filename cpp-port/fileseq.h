@@ -19,7 +19,7 @@ their current order in the range.
 If zfill > 1, then pad out each number with "0" to the given
 total width.
 */
-std::string framesToFrameRange(const std::vector<int> &frames, bool sorted=false, int zfill=0);
+std::string framesToFrameRange(const Frames &frames, bool sorted=false, int zfill=0);
 
 /*!
 isFrameRange returns true if the given string is a valid frame

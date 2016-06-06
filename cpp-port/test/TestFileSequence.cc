@@ -10,10 +10,10 @@ public:
     struct Case {
         std::string path;
         std::string outPath;
-        long start;
-        long end;
+        fileseq::Frame start;
+        fileseq::Frame end;
         int zfill;
-        long frameCount;
+        size_t frameCount;
     };
 
 protected:
@@ -128,7 +128,7 @@ public:
         std::string path;
         size_t size;
         size_t idx;
-        long frame;
+        fileseq::Frame frame;
         std::string expected;
     };
 

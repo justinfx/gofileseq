@@ -81,12 +81,12 @@ public:
     /*!
     Return the first frame number in the range
     */
-    int start() const;
+    Frame start() const;
 
     /*!
     Return the last frame number in the range
     */
-    int end() const;
+    Frame end() const;
 
     /*!
     zfill returns the number of "0" fill characters used to
@@ -203,7 +203,7 @@ public:
     returns the original path. If the index is not valid, this will
     return an empty string.
     */
-    std::string index(int idx) const;
+    std::string index(size_t idx) const;
 
     /*!
     Frame returns a path to the given frame in the sequence.
@@ -218,7 +218,7 @@ public:
         seq.Frame("#")
         >> /foo/bar.#.exr
     */
-    std::string frame(int frame) const;
+    std::string frame(Frame frame) const;
 
     /*!
     Frame returns a path to the given frame in the sequence.
