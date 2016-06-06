@@ -3,21 +3,25 @@
 
 namespace fileseq {
 
-FileSequence::FileSequence(const std::string &frange, Status* ok)
+FileSequence::FileSequence() : m_seqData(NULL) , m_frameSet() {
+
+}
+
+FileSequence::FileSequence(const std::string &path, Status* ok)
     : m_seqData(NULL)
     , m_frameSet() {
 
-    init(frange, PadStyleDefault, ok);
+    init(path, PadStyleDefault, ok);
 }
 
-FileSequence::FileSequence(const std::string &frange, PadStyle padStyle, Status* ok)
+FileSequence::FileSequence(const std::string &path, PadStyle padStyle, Status* ok)
     : m_seqData(NULL)
     , m_frameSet() {
 
-    init(frange, padStyle, ok);
+    init(path, padStyle, ok);
 }
 
-void FileSequence::init(const std::string &frange, PadStyle padStyle, Status* ok) {
+void FileSequence::init(const std::string &path, PadStyle padStyle, Status* ok) {
 
 }
 

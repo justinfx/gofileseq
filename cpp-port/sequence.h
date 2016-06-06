@@ -34,12 +34,17 @@ class FileSequence {
 
 public:
     /*!
+    Default constructor creates an invalid FileSequence
+    */
+    FileSequence();
+
+    /*!
     Create a new FrameSet from a given frame range string.
     Uses PadStyleDefault for the padding char style.
     If the range could not be parsed, Status will evaluate to false
     and be filled with the error message
     */
-    explicit FileSequence(const std::string &frange, Status* ok=NULL);
+    explicit FileSequence(const std::string &path, Status* ok=NULL);
 
     /*!
     Create a new FrameSet from a given frame range string, and a specific
@@ -47,7 +52,7 @@ public:
     If the range could not be parsed, Status will evaluate to false
     and be filled with the error message
     */
-    FileSequence(const std::string &frange, PadStyle padStyle, Status* ok=NULL);
+    FileSequence(const std::string &path, PadStyle padStyle, Status* ok=NULL);
 
     virtual ~FileSequence();
 
