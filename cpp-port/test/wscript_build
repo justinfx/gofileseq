@@ -7,6 +7,7 @@ gtestBin.source = bld.path.ant_glob(['main.cc', 'Test*.cc'])
 gtestBin.features = ['gtest']
 gtestBin.use = ["fileseq_static", 'GTEST_static']
 gtestBin.cxxflags = ["-Wno-undef"]
+gtestBin.defines = ["FILESEQ_TEST_DIR=%s" % bld.path.abspath()]
 
 bld.def_gtest_objects = True
 
