@@ -182,7 +182,7 @@ void testFindSequencesOnDisk(bool singleFiles) {
                                         );
 
     ASSERT_TRUE(stat) << "Failed to find seqs in location 'testdata': " << stat;
-    ASSERT_NE(0, seqs.size()) << "Empty sequence search results";
+    ASSERT_NE(size_t(0), seqs.size()) << "Empty sequence search results";
 
     std::map<std::string, bool>::iterator mapIt;
 
@@ -217,7 +217,7 @@ TEST( TestFindSequencesOnDisk, HandleSymlinksOnDisk ) {
     stat = fileseq::findSequencesOnDisk(seqs, "testdata/versions");
 
     ASSERT_TRUE(stat) << "Failed to find seqs in location 'testdata/versions': " << stat;
-    ASSERT_EQ(1, seqs.size()) << "Did not find expected number of seqs";
+    ASSERT_EQ(size_t(1), seqs.size()) << "Did not find expected number of seqs";
 
     std::string expected = "testdata/versions/seq.1-10#.ext";
     ASSERT_EQ(expected, seqs[0].string());
