@@ -277,10 +277,8 @@ long Ranges::min() const {
 long Ranges::max() const {
     long val = end();
     Blocks::const_iterator it;
-    std::cerr << "looping range: " << string() << " (# blocks: " << m_blocks.size() << ")" << std::endl;
     for (it = m_blocks.begin(); it != m_blocks.end(); ++it) {
-        std::cerr << "  block: " << (*it)->string() << std::endl;
-        val = std::max((*it)->min(), val);
+        val = std::max((*it)->max(), val);
     }
     return val;
 }
@@ -450,7 +448,6 @@ void Ranges::normalized(Ranges &outRanges, bool invert) const {
     Ranges normalizedRange;
 
     Range totalRange(min(), max(), 1);
-    std::cerr << "DEBUG: " << string() << "  ;  " << totalRange.string() << std::endl;
     RangeIterator rangeIt = totalRange.iterValues();
 
     while (rangeIt.next()) {

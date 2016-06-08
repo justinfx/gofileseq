@@ -582,10 +582,6 @@ TEST( TestRanges, Inverted ) {
             r.appendUnique(tt.params[i][0], tt.params[i][1], tt.params[i][2]);
         }
 
-        std::cerr << "DEBUG: for seq: " << r.string()
-                  << ", min = " << r.min() << ", max = " << r.max()
-                  << std::endl;
-
         fileseq::Ranges inverted;
         r.inverted(inverted);
 
