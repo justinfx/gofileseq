@@ -1,24 +1,24 @@
 #ifndef FILESEQ_FRAMESET_P_H_
 #define FILESEQ_FRAMESET_P_H_
 
+#include "ranges.h"
+
 #include <string>
 
+
 namespace fileseq {
+
 
 class FrameSetData {
 
 public:
-    FrameSetData()
-        : frange()
-        // , rangePtr(NULL)
-        {
+    FrameSetData() : frameRange(), ranges() {}
 
-    }
-
-    std::string frange;
-    // InclusiveRanges* rangePtr
+    std::string frameRange;
+    Ranges ranges;
 };
 
-}
+
+} // fileseq
 
 #endif // FILESEQ_FRAMESET_P_H_
