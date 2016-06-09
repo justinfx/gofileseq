@@ -1,5 +1,5 @@
 #include "common.h"
-#include "../private/ranges.h"
+#include "../ranges/ranges.h"
 
 #include <gtest/gtest.h>
 
