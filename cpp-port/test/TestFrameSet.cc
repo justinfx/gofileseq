@@ -83,9 +83,11 @@ TEST_F( TestFrameSetRanges, NewFrameSet ) {
             << "#" << i << ": did not validate as a frame range: " << t.range;
 
         fileseq::FrameSet s(t.range, &stat);
-        ASSERT_TRUE(stat) << "#" << i << ": Failed to parse " << t.range << " : " << stat;
+        ASSERT_TRUE(stat)
+            << "#" << i << ": Failed to parse " << t.range << " : " << stat;
 
-        EXPECT_NE("", s.frameRange()) << "#" << i << ": Got an empty frange field on FrameSet";
+        EXPECT_NE("", s.frameRange())
+            << "#" << i << ": Got an empty frange field on FrameSet";
 
         EXPECT_EQ(t.frames.size(), s.length());
 
@@ -103,16 +105,22 @@ TEST_F( TestFrameSetRanges, Lookup ) {
         Case t = m_cases[i];
 
         fileseq::FrameSet s(t.range, &stat);
-        ASSERT_TRUE(stat) << "#" << i << ": Failed to parse " << t.range << " : " << stat;
+        ASSERT_TRUE(stat)
+            << "#" << i << ": Failed to parse " << t.range << " : " << stat;
 
         ASSERT_EQ(t.frames.front(), s.start()) << "Start frame did not match";
         ASSERT_EQ(t.frames.back(), s.end()) << "End frame did not match";
 
-        for (size_t idx=0; i < t.frames.size(); ++i) {
-            fileseq::Frame frame = t.frames[i];
+        for (size_t idx=0; idx < t.frames.size(); ++idx) {
+            fileseq::Frame frame = t.frames[idx];
 
-            ASSERT_TRUE(s.hasFrame(frame)) << "Expected frame " << frame << " to be in frames";
-            ASSERT_EQ(idx, s.index(frame)) << "Index of frame " << frame << " did not match";
+            ASSERT_TRUE(s.hasFrame(frame))
+                << "Expected frame " << frame
+                << " to be in frame range " << t.range;
+
+            ASSERT_EQ(idx, s.index(frame))
+                << "Index of frame " << frame
+                << " did not match in range " << t.range;
 
             fileseq::Frame actualFrame = s.frame(idx, &stat);
             ASSERT_TRUE(stat) << stat;

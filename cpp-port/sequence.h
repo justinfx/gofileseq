@@ -9,7 +9,12 @@
 namespace fileseq {
 
 // Fwd Decl
+namespace internal {
+
 class FileSequenceData;
+
+} // internal
+
 
 /*! \class FileSequence
 Represents a path to a sequence of files,
@@ -260,7 +265,7 @@ private:
                                       bool singleFiles,
                                       PadStyle style);
 private:
-    FileSequenceData* m_seqData;
+    internal::FileSequenceData* m_seqData;
     FrameSet m_frameSet;
 
 };

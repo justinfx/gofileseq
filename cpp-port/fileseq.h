@@ -28,17 +28,6 @@ range format. Any padding characters, such as '#' and '@' are ignored.
 bool isFrameRange(const std::string &frange);
 
 /*!
-padFrameRange takes a frame range string and returns a new range
-with each number padded out with zeros to a given width
-*/
-std::string padFrameRange(const std::string &frange, int pad);
-
-/*!
-Returns the proper padding characters, given an amount of padding.
-*/
-std::string getPaddingChars(int pad);
-
-/*!
 FindSequenceOnDisk takes a string that is a compatible/parsible
 FileSequence pattern, and finds a sequence on disk which matches
 the basename and extension.
