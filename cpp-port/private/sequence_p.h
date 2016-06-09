@@ -5,6 +5,9 @@
 
 namespace fileseq {
 
+namespace internal {
+
+
 class FileSequenceData {
 
 public:
@@ -26,6 +29,8 @@ public:
     int zfill;
 };
 
-}
+
+} // internal
+} // fileseq
 
 #endif // FILESEQ_SEQUENCE_P_H_

@@ -1,6 +1,8 @@
 #ifndef FILESEQ_TYPES_H_
 #define FILESEQ_TYPES_H_
 
+#include "pad.h"
+
 #include <ostream>
 #include <vector>
 
@@ -14,14 +16,6 @@ typedef long Frame;
 typedef std::vector<Frame> Frames;
 typedef std::vector<FileSequence> FileSequences;
 
-// Constants defining the style of padding to use
-// when converting between padding characters ('#', '##', '@@@')
-// and their equivalent numeric padding width
-enum PadStyle {
-    PadStyleHash1 = 0,
-    PadStyleHash4 = 1,
-    PadStyleDefault = PadStyleHash4
-};
 
 /*!
 Status is used to communicate whether various calls

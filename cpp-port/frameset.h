@@ -2,18 +2,29 @@
 #define FILESEQ_FRAMESET_H_
 
 #include "types.h"
+#include "ranges/ranges.h"
 
 #include <inttypes.h>
 #include <ostream>
 #include <string>
 #include <vector>
 
+
 namespace fileseq {
 
 // Fordward decl
 class Status;
 class FileSequence;
+
+
+namespace internal {
+
+// Fordward decl
 class FrameSetData;
+struct RangePatternMatch;
+
+} // internal
+
 
 /*!
 FrameSet wraps a sequence of frames in container that exposes
@@ -69,10 +80,26 @@ public:
     /*!
     Frames returns a slice of the frame numbers that were parsed from the
     original frame range string.
+
     Warning: This allocates a slice containing number of elements equal
-    to the Len() of the range. TODO: Support frame iteration.
+    to the length() of the range. It is better to use iterFrames() for
+    large ranges.
     */
     void frames(Frames &frames) const;
+
+    /*!
+    Returns an iterator that can loop over all frame numbers that were
+    parsed from the original frame range string. This is more efficient
+    than calling frames() for larger sequences.
+
+    Examples:
+        RangesIterator it = frameSet.iterFrames();
+        while(it.next()) {
+            Frame f = *it;
+        }
+
+    */
+    RangesIterator iterFrames() const;
 
     //! HasFrame returns true if the FrameSet contains the given frame value.
     bool hasFrame(Frame frame) const;
@@ -107,7 +134,13 @@ public:
     FrameSet normalized() const;
 
 private:
-    FrameSetData* m_frameData;
+    // Process a rangePattern match group
+    void handleMatch(const internal::RangePatternMatch* match, Status* ok);
+
+    // Reset the FrameSet to an invalid state;
+    void setInvalid();
+
+    internal::FrameSetData* m_frameData;
 
 private:
     friend class FileSequence;
