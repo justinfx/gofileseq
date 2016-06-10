@@ -1,6 +1,6 @@
 
 #include "ranges.h"
-#include "util.h"
+#include "../private/util.h"
 
 #include <cmath>
 #include <algorithm>
@@ -219,6 +219,17 @@ bool RangeIterator::next() {
 Ranges::~Ranges() {
     // Delete the range list
     while (!m_blocks.empty()) delete m_blocks.back(), m_blocks.pop_back();
+}
+
+
+Ranges::Ranges(const Ranges& other) : m_blocks() {
+    m_blocks.reserve(other.m_blocks.size());
+    Blocks::const_iterator it;
+
+    // Copy the block list of ranges
+    for (it = other.m_blocks.begin(); it != other.m_blocks.end(); ++it) {
+        m_blocks.push_back( new Range( *(*it) ) );
+    }
 }
 
 
