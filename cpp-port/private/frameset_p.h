@@ -20,7 +20,14 @@ class FrameSetData {
 
 public:
     FrameSetData() : frameRange(), ranges() {}
-    FrameSetData(const std::string &range) : frameRange(range), ranges() {}
+
+    explicit FrameSetData(const std::string &range)
+        : frameRange(range)
+        , ranges() {}
+
+    explicit FrameSetData(const Ranges &rangeArg, const std::string &frangeArg="")
+        : frameRange(frangeArg.empty() ? rangeArg.string() : frangeArg)
+        , ranges(rangeArg) {}
 
     std::string frameRange;
     Ranges ranges;

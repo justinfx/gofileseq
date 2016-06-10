@@ -165,9 +165,11 @@ TEST_F( TestFrameSetPadding, Padding ) {
         Case t = m_cases[i];
 
         fileseq::FrameSet s(t.input, &stat);
-        ASSERT_TRUE(stat) << "#" << i << ": Failed to parse " << t.input << " : " << stat;
+        ASSERT_TRUE(stat)
+            << "#" << i << ": Failed to parse " << t.input << " : " << stat;
 
-        EXPECT_EQ(t.output, s.frameRange(t.pad)) << "Given pad " << t.pad;
+        EXPECT_EQ(t.output, s.frameRange(t.pad))
+            << "Given pad " << t.pad << ", and input " << t.input;
     }
 };
 
@@ -198,7 +200,7 @@ TEST_F( TestFrameSetNormalize, Normalize ) {
         fileseq::FrameSet s(t.input, &stat);
         ASSERT_TRUE(stat) << "#" << i << ": Failed to parse " << t.input << " : " << stat;
 
-        EXPECT_EQ(t.output, s.normalized().frameRange());
+        EXPECT_EQ(t.output, s.normalized().frameRange()) << "Given range: " << t.input;
     }
 };
 
@@ -238,7 +240,9 @@ TEST_F( TestFrameSetInverted, Inverted ) {
         Case t = m_cases[i];
 
         fileseq::FrameSet s(t.range);
-        EXPECT_EQ(t.expected, s.invertedFrameRange(t.zfill)) << "Given zfill " << t.zfill;
+
+        EXPECT_EQ(t.expected, s.invertedFrameRange(t.zfill))
+            << "Given invertedFrameRange(pad=" << t.zfill << ") on range " << t.range;
     }
 };
 

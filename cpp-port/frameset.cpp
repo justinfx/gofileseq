@@ -3,6 +3,7 @@
 
 #include "private/frameset_p.h"
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 
@@ -58,7 +59,7 @@ FrameSet::~FrameSet() {
 }
 
 void FrameSet::setInvalid() {
-    if ( m_frameData ) {
+    if ( m_frameData != NULL ) {
         delete m_frameData;
         m_frameData = NULL;
     }
@@ -250,9 +251,10 @@ FrameSet FrameSet::inverted() const {
     Ranges ranges;
     m_frameData->ranges.inverted(ranges);
 
+    // Create a new internal data member and swap in our ranges
     newFrameSet.m_frameData = new internal::FrameSetData();
-    newFrameSet.m_frameData->ranges = ranges;
     newFrameSet.m_frameData->frameRange = ranges.string();
+    std::swap(newFrameSet.m_frameData->ranges, ranges);
 
     return newFrameSet;
 };
@@ -285,9 +287,10 @@ FrameSet FrameSet::normalized() const {
     Ranges ranges;
     m_frameData->ranges.normalized(ranges);
 
+    // Create a new internal data member and swap in our ranges
     newFrameSet.m_frameData = new internal::FrameSetData();
-    newFrameSet.m_frameData->ranges = ranges;
     newFrameSet.m_frameData->frameRange = ranges.string();
+    std::swap(newFrameSet.m_frameData->ranges, ranges);
 
     return newFrameSet;
 };

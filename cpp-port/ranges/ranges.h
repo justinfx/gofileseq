@@ -1,6 +1,7 @@
 #ifndef FILESEQ_RANGES_P_H_
 #define FILESEQ_RANGES_P_H_
 
+#include <algorithm>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -180,6 +181,22 @@ public:
     Ranges() : m_blocks() {}
 
     ~Ranges();
+
+    // Copy constructor
+    Ranges(const Ranges& rhs);
+
+    // Assignment
+    Ranges& operator=(Ranges rhs) {
+        swap(*this, rhs);
+        return *this;
+    }
+
+    // Swap functionality
+    friend void swap(Ranges &first, Ranges &second) {
+        using std::swap;
+
+        swap(first.m_blocks, second.m_blocks);
+    }
 
     // returns the formatted representation of
     // the combination of all internal InclusiveRange instances

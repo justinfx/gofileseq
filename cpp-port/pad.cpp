@@ -49,31 +49,27 @@ std::string padFrameRange(const std::string &frange, size_t pad) {
 
         case 2:
             // Simple frame range match: 1-10
-            rangeFormatter.clear();
+            rangeFormatter.str(std::string());
             rangeFormatter << internal::zfill(rxMatch.start, pad)
                            << "-"
                            << internal::zfill(rxMatch.end, pad);
+
             parts.push_back(rangeFormatter.str());
             break;
 
         case 4:
             // Frame range with stepping:  1-10x2
-            rangeFormatter.clear();
+            rangeFormatter.str(std::string());
             rangeFormatter << internal::zfill(rxMatch.start, pad)
                            << "-"
                            << internal::zfill(rxMatch.end, pad)
                            << rxMatch.stepMod
                            << rxMatch.step;
+
+            parts.push_back(rangeFormatter.str());
             break;
 
-        default:
-            // No match. Try the next pattern
-            continue;
-
         }
-        // If we got here, we matched a case and can stop
-        // checking the rest of the patterns
-        break;
 
     }
 
