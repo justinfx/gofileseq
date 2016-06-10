@@ -53,7 +53,7 @@ public:
     virtual ~PaddingMapper() {}
 
     // Return all supported padding characters
-    void getAllChars(std::vector<std::string> &chars) const;
+    std::string getAllChars() const;
 
     // Return a width for a string of pad characters
     size_t getPaddingCharsSize(const std::string &chars) const;
@@ -62,14 +62,14 @@ public:
     virtual std::string getPaddingChars(long width) const = 0;
 
 protected:
-    typedef std::map<const std::string, size_t> CharSizeMap;
+    typedef std::map<char, size_t> CharSizeMap;
 
     // Mapping pad characters to their width
     // CharSizeMap* m_charToSize;
     CharSizeMap m_charToSize;
 
     // The default padding character to use
-    std::string m_defaultChar;
+    char m_defaultChar;
 };
 
 

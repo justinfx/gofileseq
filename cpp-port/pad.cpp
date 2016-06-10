@@ -115,26 +115,23 @@ const PaddingMapper& getPadMapperForStyle(PadStyle style) {
 // PaddingMapper
 //
 
-void PaddingMapper::getAllChars(std::vector<std::string> &chars) const {
-    chars.clear();
+std::string PaddingMapper::getAllChars() const {
+    std::stringstream ss;
     CharSizeMap::const_iterator it;
     for (it = m_charToSize.begin(); it != m_charToSize.end(); ++it) {
-        chars.push_back(it->first);
+        ss << it->first;
     }
+    return ss.str();
 }
 
 size_t PaddingMapper::getPaddingCharsSize(const std::string &chars) const {
     size_t size = 0;
+
     CharSizeMap::const_iterator found;
-
-    std::string key;
-    key.reserve(1);
-
     std::string::const_iterator strIt;
 
     for (strIt = chars.begin(); strIt != chars.end(); ++strIt) {
-        key.assign(1, *strIt);
-        found = m_charToSize.find(key);
+        found = m_charToSize.find(*strIt);
         if (found != m_charToSize.end()) {
             size += found->second;
         }
@@ -148,15 +145,16 @@ size_t PaddingMapper::getPaddingCharsSize(const std::string &chars) const {
 //
 
 SingleHashPad::SingleHashPad() : PaddingMapper() {
-    m_defaultChar = "#";
-    m_charToSize["@"] = 1;
-    m_charToSize["#"] = 1;
+    m_defaultChar = '#';
+    m_charToSize['@'] = 1;
+    m_charToSize['#'] = 1;
 }
 
 std::string SingleHashPad::getPaddingChars(long width) const {
     if (width <= 0) {
-        return m_defaultChar;
+        return std::string(1, m_defaultChar);
     }
+
     std::stringstream ss;
     for (long i=0; i < width; ++i) {
         ss << m_defaultChar;
@@ -169,14 +167,14 @@ std::string SingleHashPad::getPaddingChars(long width) const {
 //
 
 MultiHashPad::MultiHashPad() : PaddingMapper() {
-    m_defaultChar = "@";
-    m_charToSize["@"] = 1;
-    m_charToSize["#"] = 4;
+    m_defaultChar = '@';
+    m_charToSize['@'] = 1;
+    m_charToSize['#'] = 4;
 }
 
 std::string MultiHashPad::getPaddingChars(long width) const {
     if (width <= 0) {
-        return m_defaultChar;
+        return std::string(1, m_defaultChar);
     }
     if (width % 4 == 0) {
         return std::string(width/4, '#');
