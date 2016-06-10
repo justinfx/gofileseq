@@ -11,7 +11,7 @@ namespace fileseq {
 std::string framesToFrameRange(const Frames &frames,
                                bool sorted, int zfill) {
 
-    size_t count = frames.size();
+    Frames::size_type count = frames.size();
     if (count == 0) {
         return "";
     }
@@ -20,24 +20,30 @@ std::string framesToFrameRange(const Frames &frames,
         return internal::zfill(frames[0], zfill);
     }
 
-    const Frames* framesPtr = &frames;
+    Frames::const_iterator framesIt = frames.begin();
+    Frames::const_iterator framesEnd = frames.end();
+
+    Frames sortedFrames;
 
     if (sorted) {
-        Frames sortedFrames = frames;
+        // Copy
+        sortedFrames = frames;
+
+        // Sort
         std::sort(sortedFrames.begin(), sortedFrames.end());
-        framesPtr = &sortedFrames;
+
+        framesIt = sortedFrames.begin();
+        framesEnd = sortedFrames.end();
     }
 
-    size_t i = 0;
     long step = 0;
     bool hasWritten = false;
+    Frames::size_type i = 0;
+
     std::string start, end;
     std::stringstream buf;
 
-    Frames::const_iterator framesIt = framesPtr->begin();
-    Frames::const_iterator framesEnd = framesPtr->end();
-
-    while (framesIt < framesEnd) {
+    while (framesIt != framesEnd) {
 
         // Items left
         count = std::distance(framesIt, framesEnd);
@@ -53,15 +59,21 @@ std::string framesToFrameRange(const Frames &frames,
             hasWritten = true;
             break;
         }
+
         // At this point, we have 3 or more frames to check.
         // Scan the current window of the slice to see how
         // many frames we can consume into a group
         step = framesIt[1] - framesIt[0];
+
+        // Scan and update the pointer index until we get
+        // to a point where the step changes
         for (i = 0; i < (count-1); ++i) {
-            // We have scanned as many frames as we can
-            // for this group. Now write them and stop
-            // looping on this window
+
             if ((framesIt[i+1] - framesIt[i]) != step) {
+                // We have scanned as many frames as we can
+                // for this group. Now write them and stop
+                // looping on this window, because the step
+                // has changed.
                 break;
             }
         }
@@ -99,11 +111,16 @@ std::string framesToFrameRange(const Frames &frames,
         start = internal::zfill(framesIt[0], zfill);
         end = internal::zfill(framesIt[i], zfill);
         buf << start << "-" << end;
+
         if (step > 1) {
             buf << "x" << step;
         }
-        framesIt++;
+
         hasWritten = true;
+
+        // Advance our iterator to the end of the current window
+        // so that we can test the next available number
+        framesIt += (i+1);
     }
 
     return buf.str();
