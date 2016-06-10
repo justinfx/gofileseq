@@ -1,13 +1,15 @@
 #ifndef FILESEQ_FILESEQ_H_
 #define FILESEQ_FILESEQ_H_
 
+#include "error.h"
 #include "frameset.h"
 #include "sequence.h"
-#include "types.h"
 
 #include <vector>
 
+
 namespace fileseq {
+
 
 /*!
 Takes a vector of frame numbers and
@@ -64,6 +66,7 @@ Status findSequencesOnDisk(FileSequences &seqs,
                            bool hiddenFiles=false,
                            bool singleFiles=false,
                            PadStyle style=PadStyleDefault);
+
 
 } // fileseq
 

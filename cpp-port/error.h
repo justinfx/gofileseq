@@ -1,20 +1,12 @@
-#ifndef FILESEQ_TYPES_H_
-#define FILESEQ_TYPES_H_
+#ifndef FILESEQ_ERROR_H_
+#define FILESEQ_ERROR_H_
 
-#include "pad.h"
-
+#include <iostream>
 #include <ostream>
-#include <vector>
+#include <string>
+
 
 namespace fileseq {
-
-// Fwd Decl
-class FileSequence;
-
-// Typedefs
-typedef long Frame;
-typedef std::vector<Frame> Frames;
-typedef std::vector<FileSequence> FileSequences;
 
 
 /*!
@@ -56,7 +48,14 @@ private:
 };
 
 
+namespace internal {
+
+void handleErrorStatus(const std::string &msg, Status* stat=NULL);
+
+} // internal
+
+
 } // fileseq
 
-#endif // FILESEQ_TYPES_H_
+#endif // FILESEQ_ERROR_H_
 

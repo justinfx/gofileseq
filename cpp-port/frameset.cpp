@@ -1,5 +1,6 @@
 #include "frameset.h"
-#include "types.h"
+#include "error.h"
+#include "pad.h"
 
 #include "private/frameset_p.h"
 
