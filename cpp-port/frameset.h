@@ -1,7 +1,6 @@
 #ifndef FILESEQ_FRAMESET_H_
 #define FILESEQ_FRAMESET_H_
 
-#include "types.h"
 #include "ranges/ranges.h"
 
 #include <inttypes.h>
@@ -24,6 +23,11 @@ class FrameSetData;
 struct RangePatternMatch;
 
 } // internal
+
+
+// typedefs
+typedef long Frame;
+typedef std::vector<Frame> Frames;
 
 
 /*!

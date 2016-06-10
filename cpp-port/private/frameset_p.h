@@ -1,7 +1,7 @@
 #ifndef FILESEQ_FRAMESET_P_H_
 #define FILESEQ_FRAMESET_P_H_
 
-#include "../types.h"
+#include "../frameset.h"
 #include "../ranges/ranges.h"
 
 #include <pcrecpp.h>

@@ -1,7 +1,7 @@
 #ifndef FILESEQ_CPP_GTEST_COMMON_H
 #define FILESEQ_CPP_GTEST_COMMON_H
 
-#include "../types.h"
+#include "../fileseq.h"
 
 #define TODO() FAIL() << "Not Implemented"
 

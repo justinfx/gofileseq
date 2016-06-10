@@ -1,7 +1,8 @@
 
 #include "frameset_p.h"
 
-#include "../types.h"
+#include "../error.h"
+#include "../pad.h"
 
 #include <iomanip>
 #include <sstream>

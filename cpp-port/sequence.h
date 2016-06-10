@@ -2,11 +2,15 @@
 #define FILESEQ_SEQUENCE_H_
 
 #include "frameset.h"
-#include "types.h"
+#include "pad.h"
 
 #include <ostream>
+#include <vector>
 
 namespace fileseq {
+
+class FileSequence;
+
 
 // Fwd Decl
 namespace internal {
@@ -14,6 +18,11 @@ namespace internal {
 class FileSequenceData;
 
 } // internal
+
+
+// typedefs
+typedef std::vector<FileSequence> FileSequences;
+
 
 
 /*! \class FileSequence

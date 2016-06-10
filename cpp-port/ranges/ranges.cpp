@@ -1,6 +1,6 @@
 
 #include "ranges.h"
-#include "../private/util.h"
+#include "../error.h"
 
 #include <cmath>
 #include <algorithm>
