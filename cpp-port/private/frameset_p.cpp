@@ -49,21 +49,19 @@ Status frameRangeMatches(RangeMatches &matches, std::string range) {
     static const PaddingMapper &mapper = getPadMapperForStyle(PadStyleDefault);
 
     Status stat;
-    // stat.setError("Not implemented");
 
     matches.clear();
 
-    std::vector<std::string> chars;
-    mapper.getAllChars(chars);
-
-    chars.push_back(" "); // whitespace
+    std::string chars = mapper.getAllChars();
+    chars.append(" "); // whitespace
 
     // Remove all padding characters and whitespace from string
     size_t found;
-    for (size_t i=0; i < chars.size(); ++i) {
+    std::string::const_iterator it;
+    for (it = chars.begin(); it != chars.end(); ++it) {
 
-        while (found = range.find(chars[i]), found != std::string::npos) {
-            range.erase(found, chars[i].length());
+        while (found = range.find(*it), found != std::string::npos) {
+            range.erase(found, 1);
         }
     }
 
