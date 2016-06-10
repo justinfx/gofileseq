@@ -59,10 +59,10 @@ public:
     size_t getPaddingCharsSize(const std::string &chars) const;
 
     // Return the padding string sequence representing a width
-    virtual std::string getPaddingChars(size_t width) const = 0;
+    virtual std::string getPaddingChars(long width) const = 0;
 
 protected:
-    typedef std::map<std::string, size_t> CharSizeMap;
+    typedef std::map<const std::string, size_t> CharSizeMap;
 
     // Mapping pad characters to their width
     // CharSizeMap* m_charToSize;
@@ -78,7 +78,7 @@ class SingleHashPad : public PaddingMapper {
 public:
     SingleHashPad();
 
-    virtual std::string getPaddingChars(size_t width) const;
+    virtual std::string getPaddingChars(long width) const;
 };
 
 
@@ -87,7 +87,7 @@ class MultiHashPad : public PaddingMapper {
 public:
     MultiHashPad();
 
-    virtual std::string getPaddingChars(size_t width) const;
+    virtual std::string getPaddingChars(long width) const;
 };
 
 

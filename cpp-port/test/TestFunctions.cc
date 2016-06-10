@@ -1,5 +1,7 @@
 #include "common.h"
+
 #include "../fileseq.h"
+#include "../pad.h"
 
 #include <gtest/gtest.h>
 
@@ -103,12 +105,14 @@ protected:
 
 
 TEST_F( TestPaddingChars, Chars ) {
-    TODO();
+    using fileseq::internal::PaddingMapper;
+    using fileseq::internal::getPadMapperForStyle;
 
     for (size_t i=0; i < m_cases.size(); ++i) {
         Case t = m_cases[i];
 
-        // TODO: When PadMapper function types are available to test
+        const PaddingMapper &mapper = getPadMapperForStyle(t.padStyle);
+        EXPECT_EQ(t.padChars, mapper.getPaddingChars(t.pad));
     }
 }
 
@@ -119,7 +123,7 @@ public:
     struct Case {
         fileseq::PadStyle padStyle;
         std::string padChars;
-        int pad;
+        size_t pad;
     };
 
 protected:
@@ -152,12 +156,17 @@ protected:
 
 
 TEST_F( TestPaddingCharsSize, CharsSize ) {
-    TODO();
+    using fileseq::internal::PaddingMapper;
+    using fileseq::internal::getPadMapperForStyle;
 
     for (size_t i=0; i < m_cases.size(); ++i) {
         Case t = m_cases[i];
 
-        // TODO: When PadMapper function types are available to test
+        const PaddingMapper &mapper = getPadMapperForStyle(t.padStyle);
+
+        EXPECT_EQ(t.pad, mapper.getPaddingCharsSize(t.padChars))
+            << "Given chars '"<< t.padChars << "' and pad style "
+            << std::string((t.padStyle == fileseq::PadStyleHash1) ? "hash1" : "hash4");
     }
 }
 

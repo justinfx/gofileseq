@@ -126,11 +126,20 @@ void PaddingMapper::getAllChars(std::vector<std::string> &chars) const {
 size_t PaddingMapper::getPaddingCharsSize(const std::string &chars) const {
     size_t size = 0;
     CharSizeMap::const_iterator found;
-    for (size_t i=0; i < chars.size(); ++i) {
-        if (found = m_charToSize.find(&(chars[i])), found != m_charToSize.end()) {
+
+    std::string key;
+    key.reserve(1);
+
+    std::string::const_iterator strIt;
+
+    for (strIt = chars.begin(); strIt != chars.end(); ++strIt) {
+        key.assign(1, *strIt);
+        found = m_charToSize.find(key);
+        if (found != m_charToSize.end()) {
             size += found->second;
         }
     }
+
     return size;
 }
 
@@ -144,11 +153,15 @@ SingleHashPad::SingleHashPad() : PaddingMapper() {
     m_charToSize["#"] = 1;
 }
 
-std::string SingleHashPad::getPaddingChars(size_t width) const {
+std::string SingleHashPad::getPaddingChars(long width) const {
     if (width <= 0) {
         return m_defaultChar;
     }
-    return std::string(m_defaultChar, width);
+    std::stringstream ss;
+    for (long i=0; i < width; ++i) {
+        ss << m_defaultChar;
+    }
+    return ss.str();
 }
 
 
@@ -161,7 +174,7 @@ MultiHashPad::MultiHashPad() : PaddingMapper() {
     m_charToSize["#"] = 4;
 }
 
-std::string MultiHashPad::getPaddingChars(size_t width) const {
+std::string MultiHashPad::getPaddingChars(long width) const {
     if (width <= 0) {
         return m_defaultChar;
     }
