@@ -494,6 +494,7 @@ func TestToRange(t *testing.T) {
 
 func TestFindSequencesOnDisk(t *testing.T) {
 	expected := map[string]int{
+		"seqD.2-10@.gif":                   0,
 		"seqC.-5-2,4-10,20-21,27-30@@.tif": 0,
 		"seqB.5-14,16-18,20#.jpg":          0,
 		"seqA.1,3-6,8-10#.exr":             0,
@@ -525,6 +526,7 @@ func TestFindSequencesOnDisk(t *testing.T) {
 
 func TestListFiles(t *testing.T) {
 	expected := map[string]int{
+		"seqD.2-10@.gif":                   0,
 		"seqC.-5-2,4-10,20-21,27-30@@.tif": 0,
 		"seqB.5-14,16-18,20#.jpg":          0,
 		"seqA.1,3-6,8-10#.exr":             0,
