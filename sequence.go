@@ -660,6 +660,9 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 			padMap[key] = padder.PaddingChars(len(match[2]))
 		} else {
 			frames = append(frames, frame)
+			if p := padder.PaddingChars(len(match[2])); len(padMap[key]) > len(p) {
+				padMap[key] = p
+			}
 		}
 		seqs[key] = frames
 	}
