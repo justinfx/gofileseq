@@ -589,6 +589,7 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 
 	seqs := make(map[[2]string][]int)
 	padMap := make(map[[2]string]string)
+	minWidthMap := make(map[[2]string]int)
 
 	var files FileSequences
 	if singleFiles {
@@ -657,11 +658,13 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 		frames, ok := seqs[key]
 		if !ok {
 			frames = []int{frame}
-			padMap[key] = padder.PaddingChars(len(match[2]))
+			minWidthMap[key] = len(match[2])
+			padMap[key] = padder.PaddingChars(minWidthMap[key])
 		} else {
 			frames = append(frames, frame)
-			if p := padder.PaddingChars(len(match[2])); len(padMap[key]) > len(p) {
-				padMap[key] = p
+			if w := len(match[2]); minWidthMap[key] > w {
+				minWidthMap[key] = w
+				padMap[key] = padder.PaddingChars(w)
 			}
 		}
 		seqs[key] = frames
