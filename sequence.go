@@ -660,15 +660,12 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 		frame, _ := strconv.Atoi(match[2])
 		key := [2]string{match[1], match[3]}
 		seq, ok := seqs[key]
+		seq.Frames = append(seq.Frames, frame)
 		frameWidth := len(match[2])
 		if !ok {
-			seq = seqInfo{
-				Frames:   []int{frame},
-				Padding:  padder.PaddingChars(frameWidth),
-				MinWidth: frameWidth,
-			}
+			seq.MinWidth = frameWidth
+			seq.Padding = padder.PaddingChars(frameWidth)
 		} else {
-			seq.Frames = append(seq.Frames, frame)
 			if seq.MinWidth > frameWidth {
 				seq.MinWidth = frameWidth
 				seq.Padding = padder.PaddingChars(frameWidth)
