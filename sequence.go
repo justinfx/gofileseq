@@ -554,6 +554,12 @@ func ListFiles(path string) (FileSequences, error) {
 	return findSequencesOnDisk(path, SingleFiles)
 }
 
+type seqInfo struct {
+	Frames   []int
+	Padding  string
+	MinWidth int
+}
+
 func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error) {
 	root, err := os.Open(path)
 	if err != nil {
@@ -587,9 +593,7 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 
 	padder := padders[padStyle]
 
-	seqs := make(map[[2]string][]int)
-	padMap := make(map[[2]string]string)
-	minWidthMap := make(map[[2]string]int)
+	seqs := make(map[[2]string]seqInfo)
 
 	var files FileSequences
 	if singleFiles {
@@ -655,19 +659,22 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 
 		frame, _ := strconv.Atoi(match[2])
 		key := [2]string{match[1], match[3]}
-		frames, ok := seqs[key]
+		seq, ok := seqs[key]
+		frameWidth := len(match[2])
 		if !ok {
-			frames = []int{frame}
-			minWidthMap[key] = len(match[2])
-			padMap[key] = padder.PaddingChars(minWidthMap[key])
+			seq = seqInfo{
+				Frames:   []int{frame},
+				Padding:  padder.PaddingChars(frameWidth),
+				MinWidth: frameWidth,
+			}
 		} else {
-			frames = append(frames, frame)
-			if w := len(match[2]); minWidthMap[key] > w {
-				minWidthMap[key] = w
-				padMap[key] = padder.PaddingChars(w)
+			seq.Frames = append(seq.Frames, frame)
+			if seq.MinWidth > frameWidth {
+				seq.MinWidth = frameWidth
+				seq.Padding = padder.PaddingChars(frameWidth)
 			}
 		}
-		seqs[key] = frames
+		seqs[key] = seq
 	}
 
 	var i int
@@ -675,13 +682,13 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 	fseqs := make(FileSequences, len(seqs))
 
 	// Convert groups into sequences
-	for key, frames := range seqs {
+	for key, seq := range seqs {
 		name, ext := key[0], key[1]
-		pad := padMap[key]
+		pad := seq.Padding
 
 		var frange string
-		if len(frames) == 1 {
-			frange = strconv.Itoa(frames[0])
+		if len(seq.Frames) == 1 {
+			frange = strconv.Itoa(seq.Frames[0])
 			if name != "" {
 				// Make sure a non-sequence file doesn't accidentally
 				// get reparsed as a range.
@@ -698,7 +705,7 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 				}
 			}
 		} else {
-			frange = FramesToFrameRange(frames, true, 0)
+			frange = FramesToFrameRange(seq.Frames, true, 0)
 		}
 
 		buf.WriteString(name)
