@@ -1,5 +1,9 @@
 Changes:
 
+2.2.3
+----------------
+* #8 - Bug: Use deterministic resolution of the padding character in findSequencesOnDisk()
+
 2.2.2
 ----------------
 * cmd/seqinfo - New tool for parsing and printing info about one or more file seq patterns
