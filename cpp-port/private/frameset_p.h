@@ -4,8 +4,6 @@
 #include "../frameset.h"
 #include "../ranges/ranges.h"
 
-#include <pcrecpp.h>
-
 #include <string>
 #include <vector>
 
@@ -74,7 +72,9 @@ std::string zfill(Frame value, size_t z);
 // range string is a valid modifier symbol
 bool isRangeModifier(const std::string &s);
 
+
 } // internal
+
 } // fileseq
 
 #endif // FILESEQ_FRAMESET_P_H_

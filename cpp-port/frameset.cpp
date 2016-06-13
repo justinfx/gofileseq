@@ -11,7 +11,7 @@
 namespace fileseq {
 
 
-FrameSet::FrameSet() : m_frameData(NULL) {
+FrameSet::FrameSet() : m_frameData(new internal::FrameSetData) {
 
 }
 
@@ -58,6 +58,16 @@ FrameSet::FrameSet(const std::string &frange, Status* ok)
 FrameSet::~FrameSet() {
     setInvalid();
 }
+
+
+FrameSet::FrameSet(const FrameSet& other)
+    : m_frameData(new internal::FrameSetData) {
+
+    if (other.m_frameData != NULL) {
+        (*m_frameData) = *(other.m_frameData);
+    }
+}
+
 
 void FrameSet::setInvalid() {
     if ( m_frameData != NULL ) {

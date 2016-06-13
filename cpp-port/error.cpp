@@ -15,6 +15,12 @@ void handleErrorStatus(const std::string &msg, Status* stat) {
 }
 
 
+void setError(const std::string &msg, Status* stat) {
+    if (stat != NULL) {
+        stat->setError(msg);
+    }
+}
+
 } // internal
 
 } // fileseq

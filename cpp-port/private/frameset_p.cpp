@@ -4,6 +4,8 @@
 #include "../error.h"
 #include "../pad.h"
 
+#include <pcrecpp.h>
+
 #include <iomanip>
 #include <sstream>
 #include <string>
