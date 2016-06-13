@@ -3,6 +3,7 @@
 
 #include "ranges/ranges.h"
 
+#include <algorithm>
 #include <inttypes.h>
 #include <ostream>
 #include <string>
@@ -48,10 +49,25 @@ public:
     /*! Default Constructor - Invalid FrameSet */
     FrameSet();
 
+    // Destructor
     virtual ~FrameSet();
 
-    // FrameSet(const FrameSet& rhs);
-    // FrameSet& operator=(const FrameSet& rhs);
+    // Copy constructor
+    FrameSet(const FrameSet& rhs);
+
+    // Assignment
+    FrameSet& operator=(FrameSet rhs) {
+        // Swap with copied arg
+        swap(*this, rhs);
+        return *this;
+    }
+
+    // Swap functionality
+    friend void swap(FrameSet &first, FrameSet &second) {
+        using std::swap;
+
+        swap(first.m_frameData, second.m_frameData);
+    }
 
     //! Return whether the FrameSet is properly parsed and valid as a range.
     bool isValid() const;

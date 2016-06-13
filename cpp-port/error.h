@@ -52,6 +52,8 @@ namespace internal {
 
 void handleErrorStatus(const std::string &msg, Status* stat=NULL);
 
+void setError(const std::string &msg, Status* stat);
+
 } // internal
 
 

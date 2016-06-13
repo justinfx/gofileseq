@@ -110,13 +110,16 @@ TEST_F( TestNewFileSequences, New ) {
         Case t = m_cases[i];
 
         fileseq::FileSequence s(t.path, &stat);
-        ASSERT_TRUE(stat) << "#" << i << ": Failed to parse " << t.path << " : " << stat;
+        if (!stat) {
+            ADD_FAILURE() << "#" << i << stat;
+            continue;
+        }
 
-        EXPECT_EQ(t.outPath, s.string());
-        EXPECT_EQ(t.start, s.start());
-        EXPECT_EQ(t.end, s.end());
-        EXPECT_EQ(t.zfill, s.zfill());
-        EXPECT_EQ(t.frameCount, s.length());
+        EXPECT_EQ(t.outPath, s.string()) << "Str does not match, Given " << t.path;
+        EXPECT_EQ(t.start, s.start()) << "start does not match, Given " << t.path;
+        EXPECT_EQ(t.end, s.end()) << "end does not match, Given " << t.path;
+        EXPECT_EQ(t.zfill, s.zfill()) << "zfill does not match, Given " << t.path;
+        EXPECT_EQ(t.frameCount, s.length()) << "length does not match, Given " << t.path;
     }
 }
 

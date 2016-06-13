@@ -53,22 +53,63 @@ public:
     FileSequence();
 
     /*!
-    Create a new FrameSet from a given frame range string.
-    Uses PadStyleDefault for the padding char style.
-    If the range could not be parsed, Status will evaluate to false
-    and be filled with the error message
+    Create a FileSequence from a string sequence path.
+    The path should be a valid sequence, expressing a frame range,
+    or a single file path.
+
+    If error is non-nil, then the given sequence string could not
+    be successfully parsed.
+
+    PadStyleDefault is used as the padding character formatter
+
+    Example paths:
+        /path/to/image_foo.1-10x2#.jpg
+        /path/to/single_image.0100.jpg
     */
     explicit FileSequence(const std::string &path, Status* ok=NULL);
 
     /*!
-    Create a new FrameSet from a given frame range string, and a specific
-    style of converting between padding chars and their numberic width.
-    If the range could not be parsed, Status will evaluate to false
-    and be filled with the error message
+    Create a FileSequence from a string sequence path.
+    The path should be a valid sequence, expressing a frame range,
+    or a single file path.
+
+    If error is non-nil, then the given sequence string could not
+    be successfully parsed.
+
+    The sequence uses the style of padding given, in
+    order to convert between padding characters and their numeric width.
+
+    Example path w/ PadStyleHash1:
+        /path/to/image_foo.1-10x2#.jpg => /path/to/image_foo.1.jpg ...
+        /path/to/image_foo.1-10x2@.jpg => /path/to/image_foo.1.jpg ...
+        /path/to/image_foo.1-10x2##.jpg => /path/to/image_foo.01.jpg ...
+
+    Example path w/ PadStyleHash4:
+        /path/to/image_foo.1-10x2#.jpg => /path/to/image_foo.0001.jpg ...
+        /path/to/image_foo.1-10x2@.jpg => /path/to/image_foo.1.jpg ...
+        /path/to/image_foo.1-10x2##.jpg => /path/to/image_foo.00000001.jpg ...
     */
     FileSequence(const std::string &path, PadStyle padStyle, Status* ok=NULL);
 
     virtual ~FileSequence();
+
+    // Copy constructor
+    FileSequence(const FileSequence& rhs);
+
+    // Assignment
+    FileSequence& operator=(FileSequence rhs) {
+        // Swap with copied arg
+        swap(*this, rhs);
+        return *this;
+    }
+
+    // Swap functionality
+    friend void swap(FileSequence &first, FileSequence &second) {
+        using std::swap;
+
+        swap(first.m_seqData, second.m_seqData);
+        swap(first.m_frameSet, second.m_frameSet);
+    }
 
     /*!
     Return whether the range was properly parsed
@@ -262,7 +303,7 @@ public:
     void setFrameSet(const FrameSet &frameSet);
 
 private:
-    void init(const std::string &frange, PadStyle padStyle, Status* ok=NULL);
+    bool init(const std::string &frange, PadStyle padStyle, Status* ok=NULL);
 
 
     friend FileSequence findSequenceOnDisk(const std::string &pattern, Status* ok);
