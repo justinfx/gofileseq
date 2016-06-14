@@ -57,7 +57,7 @@ bool FileSequence::init(const std::string &path, PadStyle padStyle, Status* ok) 
 
         // We assume the sequence is just a single file path, containing
         // no frame patterns
-        path_split(dir, base, path);
+        fileseq::strings::path_split(dir, base, path);
 
         // See if we can find the file ext
         size_t found = base.find_last_of('.');
@@ -82,10 +82,10 @@ bool FileSequence::init(const std::string &path, PadStyle padStyle, Status* ok) 
                 if (frameSet.isValid()) {
 
                     // Reparse the dir/base to not include the trailing frame
-                    path_split(dir, base, match.base);
+                    fileseq::strings::path_split(dir, base, match.base);
 
                     // Calculate the padding chars
-                    trim_string(match.range);
+                    fileseq::strings::trim(match.range);
                     pad = padder.getPaddingChars(match.range.size());
                 }
 
@@ -97,7 +97,7 @@ bool FileSequence::init(const std::string &path, PadStyle padStyle, Status* ok) 
         // We are dealing with a pattern containing a frame range
 
         frameSet = FrameSet(match.range);
-        path_split(dir, base, match.base);
+        fileseq::strings::path_split(dir, base, match.base);
         pad = match.padChars;
         ext = match.ext;
     }
@@ -179,10 +179,10 @@ std::string FileSequence::dirname() const {
 void FileSequence::setDirname(const std::string& dirname) const {
     m_seqData->dir.assign(dirname);
 
-    if (!dirname.empty() && dirname[dirname.size()-1] != kPathSep) {
+    if (!dirname.empty() && dirname[dirname.size()-1] != fileseq::strings::kPathSep) {
         // A non empty string does not yet end with the path sep.
         // We will add it.
-        m_seqData->dir.append(1, kPathSep);
+        m_seqData->dir.append(1, fileseq::strings::kPathSep);
     }
 }
 
@@ -319,9 +319,75 @@ std::string FileSequence::invertedFrameRange(bool padded) const {
     return m_frameSet.invertedFrameRange(pad);
 }
 
+
+// Template strings for the format() operation
+static const std::string s_tpl_dir = "{{dir}}";
+static const std::string s_tpl_base = "{{base}}";
+static const std::string s_tpl_ext = "{{ext}}";
+static const std::string s_tpl_startf = "{{startf}}";
+static const std::string s_tpl_endf = "{{endf}}";
+static const std::string s_tpl_len = "{{len}}";
+static const std::string s_tpl_pad = "{{pad}}";
+static const std::string s_tpl_zfill = "{{zfill}}";
+static const std::string s_tpl_frange = "{{frange}}";
+static const std::string s_tpl_inverted = "{{inverted}}";
+
+
 std::string FileSequence::format(const std::string &fmt, Status* ok) const {
     if (ok != NULL) ok->clearError();
-    return "";
+
+    if (!isValid() || fmt.empty()) {
+        return string();
+    }
+
+    // Start with a copy
+    std::string out(fmt);
+
+    using namespace fileseq::strings;
+
+    // Do the cheap ones first, since we already have the values
+    replace_all(out, s_tpl_dir, m_seqData->dir);
+    replace_all(out, s_tpl_base, m_seqData->base);
+    replace_all(out, s_tpl_ext, m_seqData->ext);
+    replace_all(out, s_tpl_pad, m_seqData->pad);
+
+    // Do the replacements that are more expensive, so we need
+    // to check first if the pattern exists
+    std::ostringstream ss;
+
+    if (contains(out, s_tpl_frange)) {
+        replace_all(out, s_tpl_frange, frameRange());
+    }
+
+    if (contains(out, s_tpl_inverted)) {
+        replace_all(out, s_tpl_inverted, invertedFrameRange());
+    }
+
+    if (contains(out, s_tpl_zfill)) {
+        ss.str("");
+        ss << m_seqData->zfill;
+        replace_all(out, s_tpl_zfill, ss.str());
+    }
+
+    if (contains(out, s_tpl_startf)) {
+        ss.str("");
+        ss << m_frameSet.start();
+        replace_all(out, s_tpl_startf, ss.str());
+    }
+
+    if (contains(out, s_tpl_endf)) {
+        ss.str("");
+        ss << m_frameSet.end();
+        replace_all(out, s_tpl_endf, ss.str());
+    }
+
+    if (contains(out, s_tpl_len)) {
+        ss.str("");
+        ss << m_frameSet.length();
+        replace_all(out, s_tpl_len, ss.str());
+    }
+
+    return out;
 }
 
 

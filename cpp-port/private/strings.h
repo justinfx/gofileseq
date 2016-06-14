@@ -5,6 +5,7 @@
 
 namespace fileseq {
 
+namespace strings {
 
 // Platform-specific file path sep
 const char kPathSep =
@@ -15,8 +16,24 @@ const char kPathSep =
 #endif
 
 
+// Return whether a string contains another substring
+bool contains(const std::string &str, const std::string &substr) {
+    return (str.find(substr) != std::string::npos);
+}
+
+
+// replace all occurances of "from" with "to" within "str"
+void replace_all(std::string &str, const std::string &from, const std::string &to) {
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+}
+
+
 // Trim left and right side whitespace from a string
-void trim_string(std::string &str) {
+void trim(std::string &str) {
     static const std::string trim_chars(" \t\n\r");
 
     size_t pos;
@@ -56,6 +73,8 @@ void path_split(std::string &dirname, std::string &basename, const std::string &
     }
 }
 
+
+} // strings
 
 } // fileseq
 
