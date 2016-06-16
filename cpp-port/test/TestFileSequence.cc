@@ -3,6 +3,8 @@
 
 #include "../fileseq.h"
 
+#include <ctime>
+
 
 class TestNewFileSequences : public testing::Test {
 
@@ -292,3 +294,44 @@ TEST_F( TestNewFileSequenceFormat, Format ) {
     }
 }
 
+
+// TEST( Benchmark, FileSequence ) {
+//     const std::string path = "/path/to/file/sequence/name_a_b_c_d_description.1-100x2,200-300y3,500,-10-0.ext";
+
+//     fileseq::Status ok;
+//     fileseq::FileSequence fs;
+
+//     std::string dir, base, frange, invert;
+//     fileseq::Frame start, end;
+//     size_t length;
+
+//     using namespace std;
+//     clock_t begin = clock();
+
+//     const int N = 100000;
+
+//     for (int i=0; i < N; ++i) {
+
+//         fs = fileseq::FileSequence(path, &ok);
+//         ASSERT_TRUE(ok);
+
+//         dir = fs.dirname();
+//         base = fs.basename();
+//         frange = fs.frameRange();
+//         start = fs.start();
+//         end = fs.end();
+//         length = fs.length();
+
+//         invert = fs.invertedFrameRange();
+//     }
+
+//     clock_t stop = clock();
+//     double elapsed_secs = double(stop - begin) / CLOCKS_PER_SEC;
+
+//     // No warnings about unused vars
+//     (void)start;
+//     (void)end;
+//     (void)length;
+
+//     std::cerr << "Total secs: " << elapsed_secs << "\n";
+// }
