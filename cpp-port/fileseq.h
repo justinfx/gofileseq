@@ -74,7 +74,7 @@ inline FindSequenceOpts operator&(FindSequenceOpts a, FindSequenceOpts b) {
 }
 
 /*!
-\deprecated { Use findSequencesOnDisk overload that accepts FindSequenceOpts }
+\deprecated Use findSequencesOnDisk overload that accepts FindSequenceOpts
 
 FindSequencesOnDisk searches a given directory path and sorts all
 valid sequence-compatible files into a list of FileSequence matches.
