@@ -1,5 +1,9 @@
 Changes:
 
+2.3.0
+----------------
+* cpp - pure c++ port now available
+
 2.2.3
 ----------------
 * #8 - Bug: Use deterministic resolution of the padding character in findSequencesOnDisk()
@@ -33,7 +37,7 @@ handle arbitrarily large ranges. Avoids memory allocation crashes, and very slow
 
 Known Issues:
 * While creating a FrameSet from a massive range like "1-10000000000x2" will be very quick, creating
-FrameSets from multi-ranges with massive components like "20,50,60-10000000000" may be slow. 
+FrameSets from multi-ranges with massive components like "20,50,60-10000000000" may be slow.
 Improvements are still needed to the process of detecting unique values in the previously added
 range components.
 * Invert/Normalize functions are not as optimized as they could be. While they are much faster now for the common case of source
