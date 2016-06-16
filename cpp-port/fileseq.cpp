@@ -205,6 +205,8 @@ Status findSequencesOnDisk(FileSequences &seqs,
 }
 
 
+namespace internal {
+
 // Wrapper to make sure a DIR* is closed properly
 // when it goes out of scope
 class DirCloser {
@@ -261,6 +263,9 @@ public:
 private:
     SeqsMap* m_map;
 };
+
+
+} // internal
 
 
 Status findSequencesOnDisk(FileSequences &seqs,
