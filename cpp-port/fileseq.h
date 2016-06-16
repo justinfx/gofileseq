@@ -10,7 +10,6 @@
 
 namespace fileseq {
 
-
 /*!
 Takes a vector of frame numbers and
 compresses them into a frame range string.
@@ -54,6 +53,43 @@ FileSequence findSequenceOnDisk(const std::string &pattern,
                                 Status* ok=NULL);
 
 /*!
+FindSequenceOpts enums define behavior of finding
+sequences on disk.
+*/
+enum FindSequenceOpts {
+    // Default flag - No options
+    kNoOpt          = 0,
+    /// Return hidden files
+    kOptHiddenFiles = 1 << 0,
+    /// Return single files that have no frame range
+    kOptSingleFiles = 1 << 1,
+};
+
+inline FindSequenceOpts operator|(FindSequenceOpts a, FindSequenceOpts b) {
+    return static_cast<FindSequenceOpts>(static_cast<int>(a) | static_cast<int>(b));
+}
+
+inline FindSequenceOpts operator&(FindSequenceOpts a, FindSequenceOpts b) {
+    return static_cast<FindSequenceOpts>(static_cast<int>(a) & static_cast<int>(b));
+}
+
+/*!
+\deprecated { Use findSequencesOnDisk overload that accepts FindSequenceOpts }
+
+FindSequencesOnDisk searches a given directory path and sorts all
+valid sequence-compatible files into a list of FileSequence matches.
+By default, only non-hidden sequences of files will be returned.
+Extra options may be given to control whether things like hidden
+files, or single (non-sequence) files should be included in the
+search results.
+*/
+DEPRECATED(Status findSequencesOnDisk(FileSequences &seqs,
+                           const std::string &path,
+                           bool hiddenFiles,
+                           bool singleFiles,
+                           PadStyle style=PadStyleDefault));
+
+/*!
 FindSequencesOnDisk searches a given directory path and sorts all
 valid sequence-compatible files into a list of FileSequence matches.
 By default, only non-hidden sequences of files will be returned.
@@ -63,10 +99,8 @@ search results.
 */
 Status findSequencesOnDisk(FileSequences &seqs,
                            const std::string &path,
-                           bool hiddenFiles=false,
-                           bool singleFiles=false,
+                           FindSequenceOpts opts=kNoOpt,
                            PadStyle style=PadStyleDefault);
-
 
 } // fileseq
 
