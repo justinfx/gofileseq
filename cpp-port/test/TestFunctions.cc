@@ -173,11 +173,15 @@ TEST_F( TestPaddingCharsSize, CharsSize ) {
 void testFindSequencesOnDisk(bool singleFiles) {
     std::map<std::string, bool> cases;
 
-    cases["seqC.-5-2,4-10,20-21,27-30@@.tif"] = false;
-    cases["seqB.5-14,16-18,20#.jpg"] = false;
     cases["seqA.1,3-6,8-10#.exr"] = false;
+    cases["seqB.5-14,16-18,20#.jpg"] = false;
+    cases["seqC.-5-2,4-10,20-21,27-30@@.tif"] = false;
+    cases["seqD.2-10@.gif"] = false;
+
+    fileseq::FindSequenceOpts opts = fileseq::kNoOpt;
 
     if (singleFiles) {
+        opts = opts | fileseq::kOptSingleFiles;
         cases["aFile.ext"] = false;
         cases["file_without_ext"] = false;
     }
@@ -185,10 +189,7 @@ void testFindSequencesOnDisk(bool singleFiles) {
     fileseq::Status stat;
     fileseq::FileSequences seqs;
 
-    stat = fileseq::findSequencesOnDisk(seqs, "testdata",
-                                        false,      // Hiden files
-                                        singleFiles // Single files
-                                        );
+    stat = fileseq::findSequencesOnDisk(seqs, "testdata", opts);
 
     ASSERT_TRUE(stat) << "Failed to find seqs in location 'testdata': " << stat;
     ASSERT_NE(size_t(0), seqs.size()) << "Empty sequence search results";
@@ -223,7 +224,7 @@ TEST( TestFindSequencesOnDisk, SeqsOnly ) {
 TEST( TestFindSequencesOnDisk, HandleSymlinksOnDisk ) {
     fileseq::Status stat;
     fileseq::FileSequences seqs;
-    stat = fileseq::findSequencesOnDisk(seqs, "testdata/versions");
+    stat = fileseq::findSequencesOnDisk(seqs, "testdata/versions", fileseq::kNoOpt);
 
     ASSERT_TRUE(stat) << "Failed to find seqs in location 'testdata/versions': " << stat;
     ASSERT_EQ(size_t(1), seqs.size()) << "Did not find expected number of seqs";
