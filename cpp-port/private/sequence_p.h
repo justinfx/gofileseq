@@ -20,12 +20,17 @@ struct SeqPatternMatch {
     std::string ext;
 };
 
-
+// Try to match a valid sequence pattern, containing a frame range, and
+// fill the match instance with the parsed results.
+// Returns true if the match was successful.
 bool getSplitPatternMatch(SeqPatternMatch &match, const std::string &path);
 
+// Try to match a valid single file pattern, containing no frame range, and
+// fill the match instance with the parsed results.
+// Returns true if the match was successful.
 bool getSingleFrameMatch(SeqPatternMatch &match, const std::string &path);
 
-
+// Private data container for FileSequence
 class FileSequenceData {
 
 public:
