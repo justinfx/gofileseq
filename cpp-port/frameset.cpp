@@ -166,15 +166,6 @@ void FrameSet::handleMatch(const internal::RangePatternMatch* match, Status* ok)
     ok->setError(ss.str());
 }
 
-
-// FrameSet::FrameSet(const FrameSet& rhs) : m_valid(false) {
-
-// }
-
-// FrameSet& FrameSet::operator=(const FrameSet& rhs) {
-
-// }
-
 bool FrameSet::isValid() const {
     return m_frameData != NULL;
 }
