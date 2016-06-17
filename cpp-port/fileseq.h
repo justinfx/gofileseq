@@ -49,7 +49,7 @@ If an error occurs while reading the filesystem, it can be
 captured by passing a fileseq::Status pointer.
 */
 FileSequence findSequenceOnDisk(const std::string &pattern,
-                                PadStyle style=PadStyleDefault,
+                                PadStyle style,
                                 Status* ok=NULL);
 
 /*!
