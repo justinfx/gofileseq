@@ -267,10 +267,10 @@ public:
 
     Example:
 
-        seq.Frame(1)
+        seq.frame(1)
         >> /foo/bar.0001.exr
 
-        seq.Frame("#")
+        seq.frame("#")
         >> /foo/bar.#.exr
     */
     std::string frame(Frame frame) const;
@@ -282,10 +282,10 @@ public:
 
     Example:
 
-        seq.Frame(1)
+        seq.frame(1)
         >> /foo/bar.0001.exr
 
-        seq.Frame("#")
+        seq.frame("#")
         >> /foo/bar.#.exr
     */
     std::string frame(const std::string &fillPattern) const;
