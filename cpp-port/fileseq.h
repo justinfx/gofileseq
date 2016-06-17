@@ -57,7 +57,7 @@ FindSequenceOpts enums define behavior of finding
 sequences on disk.
 */
 enum FindSequenceOpts {
-    // Default flag - No options
+    /// Default flag - No options
     kNoOpt          = 0,
     /// Return hidden files
     kOptHiddenFiles = 1 << 0,
