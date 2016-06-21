@@ -56,13 +56,13 @@ public:
     Index returns the index position of the frame value within the frame set.
     If the given frame does not exist, then return -1
     */
-    int index(int frame) const;
+    long index(long frame) const;
 
     /*! Frame returns the frame number value for a given index into
     the frame set. If the index is outside the bounds of the frame
     set range, then an error is returned as a Status
     */
-    int frame(int index, Status* ok=NULL) const;
+    long frame(long index, Status* ok=NULL) const;
 
     /*!
     Frames returns a slice of the frame numbers that were parsed from the
@@ -70,16 +70,16 @@ public:
     Warning: This allocates a slice containing number of elements equal
     to the Len() of the range. TODO: Support frame iteration.
     */
-    void frames(std::vector<int> &frames) const;
+    void frames(std::vector<long> &frames) const;
 
     //! HasFrame returns true if the FrameSet contains the given frame value.
-    bool hasFrame(int frame) const;
+    bool hasFrame(long frame) const;
 
     //! The first frame of the range
-    int start() const;
+    long start() const;
 
     //! The last frame in the range
-    int end() const;
+    long end() const;
 
     /*!
     FrameRange returns the range string that was used to initialize the FrameSet.
