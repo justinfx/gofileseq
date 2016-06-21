@@ -27,7 +27,7 @@ import (
 	"strings"
 )
 
-const Version = "2.2.3"
+const Version = "2.3.0"
 
 var (
 	rangePatterns []*regexp.Regexp
