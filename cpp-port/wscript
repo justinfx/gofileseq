@@ -15,16 +15,24 @@ def options(opt):
 def configure(ctx):
     ctx.load('compiler_cxx')
 
+    ctx.check_cxx(
+        header_name='pcrecpp.h',
+        stlib='pcrecpp',
+        use='PCRE',
+        msg='Checking for static library pcrecpp')
+
 
 def build(bld):
     opts = dict(
         target = APPNAME,
-        source = bld.path.ant_glob(['*.cpp', 'private/*.cpp']),
-        includes = ['.', 'private'],
+        source = bld.path.ant_glob(['*.cpp', 'ranges/*.cpp', 'private/*.cpp']),
+        includes = ['.', 'ranges', 'private'],
         cxxflags = ["-fPIC"],
+        use = "PCRE",
+        stlib = "pcrecpp",
     )
 
-    # bld.shlib(name="fileseq_shared", **opts)
+    bld.shlib(name="fileseq_shared", **opts)
     bld.stlib(name="fileseq_static", **opts)
 
     # Install headers
