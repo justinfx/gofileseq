@@ -6,6 +6,7 @@
 ### Build Requirements
 
 * [waf](https://waf.io)
+* [Google Test](https://github.com/google/googletest) - If you want to run the unittests
 
 ### Runtime Dependencies
 
