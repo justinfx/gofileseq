@@ -167,7 +167,15 @@ void FrameSet::handleMatch(const internal::RangePatternMatch* match, Status* ok)
 }
 
 bool FrameSet::isValid() const {
-    return m_frameData != NULL;
+    if ( m_frameData == NULL ) {
+        return false;
+    }
+
+    if ( m_frameData->ranges.length() == 0 ) {
+        return false;
+    }
+
+    return true;
 }
 
 std::string FrameSet::string() const {

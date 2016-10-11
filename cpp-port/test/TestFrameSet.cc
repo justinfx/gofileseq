@@ -86,6 +86,9 @@ TEST_F( TestFrameSetRanges, NewFrameSet ) {
         ASSERT_TRUE(stat)
             << "#" << i << ": Failed to parse " << t.range << " : " << stat;
 
+        ASSERT_TRUE(s.isValid())
+            << "#" << i << ": Expected valid FrameSet for '" << t.range << "'";
+
         EXPECT_NE("", s.frameRange())
             << "#" << i << ": Got an empty frange field on FrameSet";
 
@@ -97,6 +100,35 @@ TEST_F( TestFrameSetRanges, NewFrameSet ) {
     }
 };
 
+TEST( TestFrameSet, Invalid ) {
+    std::vector<TestFrameSetRanges::Case> cases;
+    fileseq::Frames empty;
+
+    {
+        TestFrameSetRanges::Case t = {"", empty};
+        cases.push_back(t);
+    }
+    {
+        TestFrameSetRanges::Case t = {"abc", empty};
+        cases.push_back(t);
+    }
+    {
+        TestFrameSetRanges::Case t = {"1-abc", empty};
+        cases.push_back(t);
+    }
+    {
+        TestFrameSetRanges::Case t = {"    ", empty};
+        cases.push_back(t);
+    }
+
+    for (size_t i=0; i < cases.size(); ++i) {
+        TestFrameSetRanges::Case t = cases[i];
+
+        fileseq::FrameSet s(t.range);
+        EXPECT_FALSE(s.isValid())
+            << "#" << i << ": Expected invalid FrameSet for '" << t.range << "'";
+    }
+}
 
 TEST_F( TestFrameSetRanges, Lookup ) {
     fileseq::Status stat;
