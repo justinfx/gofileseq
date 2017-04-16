@@ -7,6 +7,8 @@ used in VFX and animation applications.
 Ported from the original fileseq Python library:
 https://github.com/sqlboy/fileseq
 
+For C++, see [C++ Support](#c-support)
+
 Documentation
 -------------
 
@@ -54,9 +56,9 @@ seql some/images
 # some/images/file_foo.1-100@@@.tif
 ```
 
-C++ Bindings
+C++ Support
 ------------
 
-C++ bindings on top of gofileseq are also available in the [cpp](https://github.com/justinfx/gofileseq/tree/master/cpp) dir
-
 A C++ pure port of gofileseq is also available in the [cpp-port](https://github.com/justinfx/gofileseq/tree/master/cpp-port) dir
+
+C++ bindings on top of gofileseq are also available in the [cpp](https://github.com/justinfx/gofileseq/tree/master/cpp) dir
