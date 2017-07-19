@@ -39,7 +39,7 @@ void test_frameset() {
         if (!ok) std::cout << " (error was: " << ok << ")";
         std::cout << std::endl;
 
-    std::vector<int> frames;
+    fileseq::Frames frames;
 
     fileseq::FrameSet fsEmpty("", &ok);
     fsEmpty.frames(frames);
@@ -184,7 +184,7 @@ void test_find_seqs() {
     std::cout << "findSequencesOnDisk for " << path << std::endl;
     fileseq::FileSequences seqs;
     seqs.push_back(fileseq::FileSequence("existing.1-100#.ext"));
-    ok = fileseq::findSequencesOnDisk(seqs, path, true, true);
+    ok = fileseq::findSequencesOnDisk(seqs, path, fileseq::kOptHiddenFiles|fileseq::kOptSingleFiles);
     assert (ok);
     if (!ok) {
         std::cout << "  Error: " << ok << std::endl;
@@ -212,9 +212,9 @@ void test_functions() {
     assert (fileseq::padFrameRange("1-100", 4) == "0001-0100");
     assert (fileseq::padFrameRange("10-100", 3) == "010-100");
 
-    std::vector<int> frames;
+    fileseq::Frames frames;
 
-    for (int i=0; i <= 100; ++i) {
+    for (fileseq::Frame i=0; i <= 100; ++i) {
         if (i % 2 == 0) {
             frames.push_back(i);
         }

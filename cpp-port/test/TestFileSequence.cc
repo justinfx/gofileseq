@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include "../fileseq.h"
+#include "../private/strings.h"
 
 #include <ctime>
 
@@ -293,6 +294,56 @@ TEST_F( TestNewFileSequenceFormat, Format ) {
         EXPECT_EQ(t.expected, actual) << "Given format: " << t.format;
     }
 }
+
+
+class TestSplitPatternChars : public testing::Test {
+
+public:
+    struct Case {
+        std::string path;
+        std::string base;
+        fileseq::Frame start;
+        fileseq::Frame end;
+        std::string pad;
+    };
+
+protected:
+    void SetUp() {
+        {Case t = {"/path/to/file%s1-1x1#.exr", "file%s", 1, 1, "#"}; m_cases.push_back(t);}
+        {Case t = {"/path/to/file%s_1-100x10@@.exr", "file%s_", 1, 91, "@@"}; m_cases.push_back(t);}
+        {Case t = {"/path/to/file%s.-10--1x2##.exr", "file%s.", -10, -2, "##"}; m_cases.push_back(t);}
+        {Case t = {"/path/to/file%s1,2,3,5-10,20-30#.exr", "file%s", 1, 30, "#"}; m_cases.push_back(t);}
+    }
+    fileseq::FileSequence m_seq;
+    std::vector<Case> m_cases;
+};
+
+TEST_F( TestSplitPatternChars, SplitPattern ) {
+    fileseq::Status stat;
+
+    const std::string chars = ":xy,";
+
+    for (size_t i=0; i < m_cases.size(); ++i) {
+        Case t = m_cases[i];
+
+        for (size_t j=0; j < chars.size(); ++j) {
+            std::string path( t.path );
+            fileseq::strings::replace_all(path, "%s", std::string(1, chars[j]));
+
+            m_seq = fileseq::FileSequence(path, &stat);
+            ASSERT_TRUE(stat) << stat;
+
+            std::string base( t.base );
+            fileseq::strings::replace_all(base, "%s", std::string(1, chars[j]));
+
+            EXPECT_EQ(path, m_seq.string());
+            EXPECT_EQ(base, m_seq.basename());
+            EXPECT_EQ(t.start, m_seq.start());
+            EXPECT_EQ(t.end, m_seq.end());
+            EXPECT_EQ(t.pad, m_seq.padding());
+        }
+    }
+};
 
 
 // TEST( Benchmark, FileSequence ) {

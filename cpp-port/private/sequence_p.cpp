@@ -16,7 +16,7 @@ bool getSplitPatternMatch(SeqPatternMatch &match, const std::string &path) {
     // Example:
     //     /film/shot/renders/hero_bty.1-100#.exr
     //     /film/shot/renders/hero_bty.@@.exr
-    static const std::string pattern = "^(.*?)([:xy\\d,-]*)?([#@]+)(\\.[a-zA-Z0-9]+)?$";
+    static const std::string pattern = "^(.*?)([\\d-][:xy\\d,-]*)?([#@]+)(\\.[a-zA-Z0-9]+)?$";
     static const pcrecpp::RE* rx = new pcrecpp::RE(pattern);
 
     return rx->FullMatch(path, &(match.base), &(match.range),
