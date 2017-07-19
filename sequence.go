@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"text/template"
@@ -554,30 +555,52 @@ func ListFiles(path string) (FileSequences, error) {
 	return findSequencesOnDisk(path, SingleFiles)
 }
 
-type seqInfo struct {
-	Frames   []int
-	Padding  string
-	MinWidth int
-}
-
 func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error) {
+	type FrameInfo struct {
+		Frame    string
+		FrameNum int
+		MinWidth int
+	}
+
+	type SeqInfo struct {
+		Frames   []FrameInfo
+		Padding  string
+		MinWidth int
+	}
+
+	type SeqKey [2]string
+
+	frameMinSize := func(frame string) int {
+		frameSize := len(frame)
+		frameNum, _ := strconv.Atoi(frame)
+		frameNumSize := len(strconv.Itoa(frameNum))
+		if frameSize == frameNumSize {
+			return 1
+		}
+		return frameSize
+	}
+
 	root, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	defer root.Close()
 
 	infos, err := root.Readdir(-1)
+	root.Close()
 	if err != nil {
 		return nil, err
 	}
+
+	// map key for sequences: basename, padWidth, ext
+	seqs := make(map[SeqKey]SeqInfo)
 
 	// Get options
 	var (
 		singleFiles bool
 		hiddenFiles bool
-		padStyle    PadStyle = PadStyleDefault
+		padStyle    = PadStyleDefault
 	)
+
 	for _, opt := range opts {
 		switch opt {
 		case HiddenFiles:
@@ -592,8 +615,6 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 	}
 
 	padder := padders[padStyle]
-
-	seqs := make(map[[2]string]seqInfo)
 
 	var files FileSequences
 	if singleFiles {
@@ -610,8 +631,15 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 
 	size := buf.Len()
 
-	// Read dir and sort files into groups
-	var match []string
+	// Read dir and sort files into groups based on their name
+	// and file extension
+	var (
+		match      []string
+		frameStr   string
+		frameNum   int
+		frameWidth int
+		seqCount   int
+	)
 
 	for _, info := range infos {
 		if info.IsDir() {
@@ -657,35 +685,76 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 			continue
 		}
 
-		frame, _ := strconv.Atoi(match[2])
-		key := [2]string{match[1], match[3]}
+		frameStr = match[2]
+		frameNum, _ = strconv.Atoi(frameStr)
+		frameWidth = len(frameStr)
+
+		// basename, ext
+		key := SeqKey{match[1], match[3]}
+
 		seq, ok := seqs[key]
-		seq.Frames = append(seq.Frames, frame)
-		frameWidth := len(match[2])
+
+		seq.Frames = append(seq.Frames, FrameInfo{
+			Frame:    frameStr,
+			FrameNum: frameNum,
+			MinWidth: frameMinSize(frameStr),
+		})
+
 		if !ok {
+			seqCount++
+		}
+
+		if !ok || frameWidth < seq.MinWidth {
 			seq.MinWidth = frameWidth
 			seq.Padding = padder.PaddingChars(frameWidth)
-		} else {
-			if seq.MinWidth > frameWidth {
-				seq.MinWidth = frameWidth
-				seq.Padding = padder.PaddingChars(frameWidth)
-			}
 		}
+
 		seqs[key] = seq
 	}
 
-	var i int
+	var (
+		i                      int
+		frameInfo              FrameInfo
+		name, frange, pad, ext string
+		appendErr              error
+	)
 
-	fseqs := make(FileSequences, len(seqs))
+	fseqs := make(FileSequences, 0, seqCount)
 
-	// Convert groups into sequences
+	appendSeq := func() error {
+		buf.WriteString(name)
+		buf.WriteString(frange)
+		buf.WriteString(pad)
+		buf.WriteString(ext)
+
+		fs, err := NewFileSequencePad(buf.String(), padStyle)
+		if err != nil {
+			return err
+		}
+		if pad == "" {
+			fs.SetFrameSet(nil)
+		}
+		fseqs = append(fseqs, fs)
+
+		buf.Truncate(size)
+		i++
+
+		return nil
+	}
+
+	// Convert groups into sequences based on padding
 	for key, seq := range seqs {
-		name, ext := key[0], key[1]
-		pad := seq.Padding
 
-		var frange string
+		if len(seq.Frames) == 0 {
+			continue
+		}
+
+		name, ext = key[0], key[1]
+		pad = seq.Padding
+
+		// Handle single frame sequences
 		if len(seq.Frames) == 1 {
-			frange = strconv.Itoa(seq.Frames[0])
+			frange = seq.Frames[0].Frame
 			if name != "" {
 				// Make sure a non-sequence file doesn't accidentally
 				// get reparsed as a range.
@@ -701,26 +770,52 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 					pad = ""
 				}
 			}
-		} else {
-			frange = FramesToFrameRange(seq.Frames, true, 0)
+
+			if appendErr = appendSeq(); appendErr != nil {
+				return nil, appendErr
+			}
 		}
 
-		buf.WriteString(name)
-		buf.WriteString(frange)
-		buf.WriteString(pad)
-		buf.WriteString(ext)
+		// Multi-frame sequences
+		//
 
-		fs, err := NewFileSequencePad(buf.String(), padStyle)
-		if err != nil {
-			return nil, err
-		}
-		if pad == "" {
-			fs.SetFrameSet(nil)
-		}
-		fseqs[i] = fs
+		// Sort list by their required padding
+		sort.Slice(seq.Frames, func(i, j int) bool {
+			return len(seq.Frames[i].Frame) < len(seq.Frames[j].Frame)
+		})
 
-		buf.Truncate(size)
-		i++
+		var frames []int
+		currentWidth := len(seq.Frames[0].Frame)
+		pad = padder.PaddingChars(currentWidth)
+
+		// Walk the sorted frames, trying to group sequences with
+		// compatible padding. Start a new sequence each time a new
+		// padding has to be used.
+		for _, frameInfo = range seq.Frames {
+
+			if len(frameInfo.Frame) != currentWidth && frameInfo.MinWidth > currentWidth {
+				// Commit current frame range and start over
+				frange = FramesToFrameRange(frames, true, 0)
+				if appendErr = appendSeq(); appendErr != nil {
+					return nil, appendErr
+				}
+
+				frames = nil
+				currentWidth = len(frameInfo.Frame)
+				pad = padder.PaddingChars(currentWidth)
+			}
+
+			frames = append(frames, frameInfo.FrameNum)
+		}
+
+		// Append a remaining sequence
+		if len(frames) > 0 {
+			frange = FramesToFrameRange(frames, true, 0)
+			if appendErr = appendSeq(); appendErr != nil {
+				return nil, appendErr
+			}
+			frames = nil
+		}
 	}
 
 	if singleFiles {

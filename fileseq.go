@@ -1,5 +1,5 @@
 /*
-package fileseq is a library for parsing file sequence strings commonly
+Package fileseq is a library for parsing file sequence strings commonly
 used in VFX and animation applications.
 
 Frame Range Shorthand
@@ -27,7 +27,7 @@ import (
 	"strings"
 )
 
-const Version = "2.3.0"
+const Version = "2.4.0"
 
 var (
 	rangePatterns []*regexp.Regexp
@@ -102,7 +102,7 @@ func FramesToFrameRange(frames []int, sorted bool, zfill int) string {
 		// If we get to the last element, just write it
 		// and end
 		if count <= 2 {
-			for i, frame = range frames {
+			for _, frame = range frames {
 				if buf.Len() > 0 {
 					buf.WriteString(",")
 				}

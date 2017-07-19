@@ -3,6 +3,7 @@ package fileseq
 import (
 	"path/filepath"
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -493,33 +494,42 @@ func TestToRange(t *testing.T) {
 }
 
 func TestFindSequencesOnDisk(t *testing.T) {
-	expected := map[string]int{
-		"seqD.2-10@.gif":                   0,
-		"seqC.-5-2,4-10,20-21,27-30@@.tif": 0,
-		"seqB.5-14,16-18,20#.jpg":          0,
-		"seqA.1,3-6,8-10#.exr":             0,
+	table := map[string][]string{
+		"testdata": {
+			"seqD.2-10@.gif",
+			"seqC.-5-2,4-10,20-21,27-30@@.tif",
+			"seqB.5-14,16-18,20#.jpg",
+			"seqA.1,3-6,8-10#.exr",
+		},
+		"testdata/mixed": {
+			"seq.-1-5@@.ext",
+			"seq.-1-5,1001#.ext",
+			"seq.-1-5@@@@@.ext",
+		},
 	}
 
-	seqs, err := FindSequencesOnDisk("testdata")
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	if len(seqs) != len(expected) {
-		t.Fatalf("Expected %d seqs ; got %d", len(expected), len(seqs))
-	}
-
-	for _, s := range seqs {
-		name := filepath.Base(s.String())
-		if _, ok := expected[name]; !ok {
-			t.Fatalf("Parsed seq %q not in expected list", name)
+	for dir, expected := range table {
+		seqs, err := FindSequencesOnDisk(dir)
+		if err != nil {
+			t.Fatal(err.Error())
 		}
-		expected[name]++
-	}
 
-	for name, count := range expected {
-		if count != 1 {
-			t.Errorf("Got # of matchs %d instead of 1, for seq %q", count, name)
+		actual := make([]string, 0, len(seqs))
+		for _, seq := range seqs {
+			actual = append(actual, filepath.Base(seq.String()))
+		}
+
+		sort.Strings(actual)
+		sort.Strings(expected)
+
+		if len(actual) != len(expected) {
+			t.Logf("\nExpect: %v\nActual: %v", expected, actual)
+			t.Errorf("For dir %q, expected %d seqs ; got %d", dir, len(expected), len(actual))
+			continue
+		}
+
+		if !reflect.DeepEqual(actual, expected) {
+			t.Errorf("For dir %q, expected %v, got %v", dir, expected, actual)
 		}
 	}
 }
