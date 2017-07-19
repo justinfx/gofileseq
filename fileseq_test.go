@@ -1,6 +1,7 @@
 package fileseq
 
 import (
+	"fmt"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -167,6 +168,54 @@ func TestFrameSetInverted(t *testing.T) {
 		actual := s.InvertedFrameRange(tt.zfill)
 		if actual != tt.expected {
 			t.Errorf("Expected range %q, got %q", tt.expected, actual)
+		}
+	}
+}
+
+func TestFrameSetSplitPattern(t *testing.T) {
+	var table = []struct {
+		path  string
+		base  string
+		start int
+		end   int
+		pad   string
+	}{
+		{"/path/to/file%s1-1x1#.exr", "file%s", 1, 1, "#"},
+		{"/path/to/file%s_1-100x10@@.exr", "file%s_", 1, 91, "@@"},
+		{"/path/to/file%s.-10--1x2##.exr", "file%s.", -10, -2, "##"},
+		{"/path/to/file%s1,2,3,5-10,20-30#.exr", "file%s", 1, 30, "#"},
+	}
+
+	// ref: splitPattern range directive chars
+	for i, tt := range table {
+
+		for _, char := range ":xy," {
+
+			expected := fmt.Sprintf(tt.path, string(char))
+			base := fmt.Sprintf(tt.base, string(char))
+
+			t.Run(fmt.Sprintf("%d_%s", i, base), func(t *testing.T) {
+				fs, err := NewFileSequence(expected)
+				if err != nil {
+					t.Fatal(err.Error())
+				}
+
+				if fs.String() != expected {
+					t.Fatalf("Expected String %q, got %q", expected, fs.String())
+				}
+				if fs.Basename() != base {
+					t.Fatalf("Expected basename %q, got %q", base, fs.Basename())
+				}
+				if fs.Start() != tt.start {
+					t.Fatalf("Expected Start %v, got %v", tt.start, fs.Start())
+				}
+				if fs.End() != tt.end {
+					t.Fatalf("Expected End %v, got %v", tt.end, fs.End())
+				}
+				if fs.Padding() != tt.pad {
+					t.Fatalf("Expected Padding %v, got %v", tt.pad, fs.Padding())
+				}
+			})
 		}
 	}
 }

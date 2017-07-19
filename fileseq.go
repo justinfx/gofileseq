@@ -54,7 +54,7 @@ func init() {
 	// Example:
 	//     /film/shot/renders/hero_bty.1-100#.exr
 	//     /film/shot/renders/hero_bty.@@.exr
-	splitPattern = regexp.MustCompile(`^(.*?)([:xy\d,-]*)?([#@]+)(\.[a-zA-Z0-9]+)?$`)
+	splitPattern = regexp.MustCompile(`^(.*?)([\d-][:xy\d,-]*)?([#@]+)(\.[a-zA-Z0-9]+)?$`)
 
 	// /film/shot/renders/hero_bty.100.exr
 	singleFrame = regexp.MustCompile(`^(.*?)(-?\d+)(\.[a-zA-Z0-9]+)?$`)
