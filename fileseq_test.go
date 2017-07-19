@@ -578,13 +578,20 @@ func TestFindSequenceOnDisk(t *testing.T) {
 		{
 			PadStyleHash1,
 			map[string]string{
-				"testdata/seqC.@@.tif":     "testdata/seqC.-5-2,4-10,20-21,27-30##.tif",
-				"testdata/seqC.0010.tif":   "testdata/seqC.-5-2,4-10,20-21,27-30##.tif",
-				"testdata/seqB.#.jpg":      "testdata/seqB.5-14,16-18,20####.jpg",
-				"testdata/seqB.16-18#.jpg": "testdata/seqB.5-14,16-18,20####.jpg",
-				"testdata/seqA.#.exr":      "testdata/seqA.1,3-6,8-10####.exr",
-				"testdata/seqA.@.exr":      "testdata/seqA.1,3-6,8-10####.exr",
-				"testdata/seqA.@.jpg":      "",
+				"testdata/seqC.@@.tif":        "testdata/seqC.-5-2,4-10,20-21,27-30##.tif",
+				"testdata/seqC.0010.tif":      "",
+				"testdata/seqC.10.tif":        "testdata/seqC.-5-2,4-10,20-21,27-30##.tif",
+				"testdata/seqB.####.jpg":      "testdata/seqB.5-14,16-18,20####.jpg",
+				"testdata/seqB.16-18####.jpg": "testdata/seqB.5-14,16-18,20####.jpg",
+				"testdata/seqA.####.exr":      "testdata/seqA.1,3-6,8-10####.exr",
+				"testdata/seqA.@@@@.exr":      "testdata/seqA.1,3-6,8-10####.exr",
+				"testdata/seqA.@.jpg":         "",
+
+				"testdata/mixed/seq.####.ext":  "testdata/mixed/seq.-1-5,1001####.ext",
+				"testdata/mixed/seq.#.ext":     "",
+				"testdata/mixed/seq.@@.ext":    "testdata/mixed/seq.-1-5##.ext",
+				"testdata/mixed/seq.@@@@@.ext": "testdata/mixed/seq.-1-5#####.ext",
+				"testdata/mixed/seq.@.ext":     "",
 			},
 		},
 
@@ -592,24 +599,30 @@ func TestFindSequenceOnDisk(t *testing.T) {
 			PadStyleHash4,
 			map[string]string{
 				"testdata/seqC.@@.tif":     "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
-				"testdata/seqC.0010.tif":   "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
+				"testdata/seqC.0010.tif":   "",
+				"testdata/seqC.10.tif":     "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
 				"testdata/seqB.#.jpg":      "testdata/seqB.5-14,16-18,20#.jpg",
 				"testdata/seqB.16-18#.jpg": "testdata/seqB.5-14,16-18,20#.jpg",
 				"testdata/seqA.#.exr":      "testdata/seqA.1,3-6,8-10#.exr",
-				"testdata/seqA.@.exr":      "testdata/seqA.1,3-6,8-10#.exr",
+				"testdata/seqA.@.exr":      "",
 				"testdata/seqA.@.jpg":      "",
+
+				"testdata/mixed/seq.#.ext":     "testdata/mixed/seq.-1-5,1001#.ext",
+				"testdata/mixed/seq.@@.ext":    "testdata/mixed/seq.-1-5@@.ext",
+				"testdata/mixed/seq.@@@@@.ext": "testdata/mixed/seq.-1-5@@@@@.ext",
+				"testdata/mixed/seq.@.ext":     "",
 			},
 		},
 	}
 
 	for _, tg := range table {
 		for pattern, expected := range tg.tests {
-			seq, err := FindSequenceOnDiskPad(pattern, tg.mapper)
+			seq, err := FindSequenceOnDiskPad(pattern, tg.mapper, StrictPadding)
 			if err != nil {
 				t.Fatal(err.Error())
 			}
 			if seq == nil && expected != "" {
-				t.Fatalf("Expected %q ; got a nil sequence", expected)
+				t.Fatalf("For input %q, expected %q ; got a nil sequence", pattern, expected)
 			}
 
 			var actual string
@@ -618,7 +631,7 @@ func TestFindSequenceOnDisk(t *testing.T) {
 			}
 
 			if actual != expected {
-				t.Fatalf("Expected %q ; got %q", expected, actual)
+				t.Fatalf("For input %q, expected %q ; got %q", pattern, expected, actual)
 			}
 		}
 	}

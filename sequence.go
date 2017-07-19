@@ -199,6 +199,8 @@ func (s *FileSequence) Format(tpl string) (string, error) {
 	return buf.String(), nil
 }
 
+// Split a non-contigous (i.e. comma-separated) sequence into
+// a list of sequences that each use consistent stepping
 func (s *FileSequence) Split() FileSequences {
 	if s.frameSet == nil {
 		// Return a copy
@@ -518,19 +520,22 @@ func (fs FileSequences) Swap(i, j int) {
 	fs[i], fs[j] = fs[j], fs[i]
 }
 
-// FileOptions indicate how file listings should be performed and returned
+// FileOption indicate how file listings should be performed and returned
 type FileOption int
 
 const (
-	// Include hidden files in file listings
+	// HiddenFiles includes hidden files in file listings
 	HiddenFiles FileOption = iota
-	// Include paths that aren't detected as sequences, and are
+	// SingleFiles includes paths that aren't detected as sequences, and are
 	// just single files
 	SingleFiles
-	// Set the PadStyle to PadStyleHash1
+	// FileOptPadStyleHash1 sets the PadStyle to PadStyleHash1
 	FileOptPadStyleHash1
-	// Set the PadStyle to PadStyleHash4
+	// FileOptPadStyleHash4 sets the PadStyle to PadStyleHash4
 	FileOptPadStyleHash4
+	// StrictPadding instructs FindSequenceOnDisk to consider the padding
+	// length of the search pattern, and to ignore files with a different padding
+	StrictPadding
 )
 
 // FindSequencesOnDisk searches a given directory path and
@@ -828,20 +833,58 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 // FindSequenceOnDisk takes a string that is a compatible/parsible
 // FileSequence pattern, and finds a sequence on disk which matches
 // the Basename and Extension.
+//
+// By default the patterns frame value and padding characters are ignored and
+// replaced by a wildcard '*' glob. If you want to match on a specific frame
+// padding length, pass the option StrictPadding
+//
 // If no match is found, a nil FileSequence is returned.
 // If an error occurs while reading the filesystem, a non-nil error
 // is returned.
-func FindSequenceOnDisk(pattern string) (*FileSequence, error) {
-	return FindSequenceOnDiskPad(pattern, PadStyleDefault)
+//
+// Example:
+//    // Find matches with any frame value
+//    FindSequenceOnDisk("/path/to/seq.#.ext")
+//
+//    // Find matches specifically having 4-padded frames
+//    FindSequenceOnDisk("/path/to/seq.#.ext", StrictPadding)
+func FindSequenceOnDisk(pattern string, opts ...FileOption) (*FileSequence, error) {
+	return FindSequenceOnDiskPad(pattern, PadStyleDefault, opts...)
 }
 
 // FindSequenceOnDiskPad takes a string that is a compatible/parsible
 // FileSequence pattern, and finds a sequence on disk which matches
 // the Basename and Extension. The returned seq will use the given PadStyle.
+//
+// By default the patterns frame value and padding characters are ignored and
+// replaced by a wildcard '*' glob. If you want to match on a specific frame
+// padding length, pass the option StrictPadding
+//
 // If no match is found, a nil FileSequence is returned.
 // If an error occurs while reading the filesystem, a non-nil error
 // is returned.
-func FindSequenceOnDiskPad(pattern string, padStyle PadStyle) (*FileSequence, error) {
+func FindSequenceOnDiskPad(pattern string, padStyle PadStyle, opts ...FileOption) (*FileSequence, error) {
+	optsCopy := make([]FileOption, len(opts))
+	copy(optsCopy, opts)
+
+	var strictPadding bool
+
+	for _, opt := range opts {
+		switch opt {
+
+		case FileOptPadStyleHash1:
+			padStyle = PadStyleHash1
+			optsCopy = append(optsCopy, FileOptPadStyleHash1)
+
+		case FileOptPadStyleHash4:
+			padStyle = PadStyleHash4
+			optsCopy = append(optsCopy, FileOptPadStyleHash4)
+
+		case StrictPadding:
+			strictPadding = true
+		}
+	}
+
 	fs, err := NewFileSequencePad(pattern, padStyle)
 	if err != nil {
 		// Treat a bad pattern as a non-match
@@ -849,20 +892,30 @@ func FindSequenceOnDiskPad(pattern string, padStyle PadStyle) (*FileSequence, er
 		return nil, nil
 	}
 
-	seqs, err := FindSequencesOnDisk(fs.Dirname())
+	seqs, err := FindSequencesOnDisk(fs.Dirname(), optsCopy...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find %q: %s", pattern, err.Error())
 	}
 
 	base := fs.Basename()
 	ext := fs.Ext()
+	pad := fs.Padding()
+	fill := fs.ZFill()
 
 	for _, seq := range seqs {
 		// Find the first match and return it
-		if seq.Basename() == base && seq.Ext() == ext {
-			seq.SetPaddingStyle(padStyle)
-			return seq, nil
+		if seq.Basename() != base || seq.Ext() != ext {
+			continue
 		}
+
+		seq.SetPaddingStyle(padStyle)
+
+		// Strict padding check
+		if strictPadding && pad != "" && seq.ZFill() != fill {
+			continue
+		}
+
+		return seq, nil
 	}
 	// If we get this far, we didn't find a match
 	return nil, nil
