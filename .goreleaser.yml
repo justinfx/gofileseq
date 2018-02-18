@@ -17,6 +17,7 @@ builds:
       - linux
     env:
       - CGO_ENABLED=0
+
 archive:
   wrap_in_directory: true
   format_overrides:
@@ -26,3 +27,14 @@ archive:
     - LICENSE
     - CHANGES
     - README.md
+
+release:
+
+  # You can change the name of the GitHub release.
+  # This is parsed with the Go template engine and the following variables
+  # are available:
+  # - ProjectName
+  # - Tag
+  # - Version (Git tag without `v` prefix)
+  # Default is ``
+  name_template: "-v{{.Version}}"
