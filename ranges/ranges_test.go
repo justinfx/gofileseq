@@ -92,7 +92,7 @@ func TestRangeLookups(t *testing.T) {
 		for idx, expected := range tt.indexToValue {
 			actual, err := r.Value(idx)
 			if err != nil {
-				t.Errorf("Test %d: Failed Value(idx): %s", err.Error())
+				t.Errorf("Test %d: Failed Value(idx): %s", i, err.Error())
 				continue
 			}
 			if actual != expected {
