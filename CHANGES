@@ -1,5 +1,15 @@
 Changes:
 
+2.4.0
+----------------
+* Update FindSequencesOnDisk to sort mixed frame padding into discreet sequence results
+* Allow strict padding length check when filtering files for pattern match in FindSequenceOnDisk
+* go/cpp: Adjust path split regex to better handle range directive chars being used at the end of a base name
+
+2.3.1
+----------------
+* cpp-port: Fix: FrameSet::isValid() would return true even if it had a zero length range
+
 2.3.0
 ----------------
 * cpp - pure c++ port now available
