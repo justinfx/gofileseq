@@ -1,0 +1,28 @@
+builds:
+  - main: ./cmd/seqls/
+    binary: seqls
+    ldflags: -s -w -X main.Version={{.Version}}
+    goos:
+      - windows
+      - darwin
+      - linux
+    env:
+      - CGO_ENABLED=0
+  - main: ./cmd/seqinfo/
+    binary: seqinfo
+    ldflags: -s -w -X main.Version={{.Version}}
+    goos:
+      - windows
+      - darwin
+      - linux
+    env:
+      - CGO_ENABLED=0
+archive:
+  wrap_in_directory: true
+  format_overrides:
+      - goos: windows
+        format: zip
+  files:
+    - LICENSE
+    - CHANGES
+    - README.md
