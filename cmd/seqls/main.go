@@ -24,8 +24,9 @@ var Options struct {
 	Quiet     bool `short:"q" long:"quiet" description:"Don't print errors encountered when reading the file system"`
 }
 
+var Version = fileseq.Version
+
 const (
-	Version      = fileseq.Version
 	DateFmt      = `Jan _2 15:04`
 	ErrorPath    = `Error: Failed reading path`
 	ErrorPattern = `Error: Failed matching pattern`

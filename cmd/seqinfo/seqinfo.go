@@ -14,6 +14,8 @@ import (
 	"github.com/justinfx/gofileseq"
 )
 
+var Version = fileseq.Version
+
 // OptionsType collects flag options
 type OptionsType struct {
 	Dirname  string `short:"d" long:"dirname" description:"Set a new dir name"`
@@ -61,7 +63,7 @@ Format (--format) Options:
 
     Example:
         {{dir}}{{base}}{{frange}}{{pad}}{{ext}}
-`, fileseq.Version)
+`, Version)
 
 func main() {
 	parser := flags.NewParser(&Options, flags.HelpFlag|flags.PrintErrors)
