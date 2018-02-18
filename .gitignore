@@ -1,2 +1,5 @@
 .goxc.local.json
 build/
+.idea/
+*.iml
+
