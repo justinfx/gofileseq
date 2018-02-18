@@ -29,7 +29,10 @@ archive:
     - README.md
 
 release:
-
+  github:
+    owner: justinfx
+    name: gofileseq
+  draft: true
   # You can change the name of the GitHub release.
   # This is parsed with the Go template engine and the following variables
   # are available:
@@ -37,4 +40,16 @@ release:
   # - Tag
   # - Version (Git tag without `v` prefix)
   # Default is ``
-  name_template: "-v{{.Version}}"
+  name_template: "v{{.Version}} Release"
+
+changelog:
+  filters:
+    # commit messages matching the regexp listed here will be removed from
+    # the changelog
+    # Default is empty
+    exclude:
+      - '^docs:'
+      - typo
+      - goreleaser
+      - gitignore
+      
