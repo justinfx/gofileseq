@@ -1,4 +1,4 @@
-Fileseq  ![Travis Build Status](https://api.travis-ci.org/justinfx/gofileseq.svg)
+Fileseq  [![GoDoc](https://godoc.org/github.com/justinfx/gofileseq?status.svg)](https://godoc.org/github.com/justinfx/gofileseq) [![Travis Build Status](https://api.travis-ci.org/justinfx/gofileseq.svg)](https://www.travis-ci.org/justinfx/gofileseq)
 =======
 
 A Go language library for parsing file sequence strings commonly
@@ -8,11 +8,6 @@ Ported from the original fileseq Python library:
 https://github.com/sqlboy/fileseq
 
 For C++, see [C++ Support](#c-support)
-
-Documentation
--------------
-
-http://godoc.org/github.com/justinfx/gofileseq
 
 Frame Range Shorthand
 ---------------------
