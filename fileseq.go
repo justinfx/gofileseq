@@ -18,7 +18,6 @@ Support for:
 package fileseq
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"regexp"
@@ -27,7 +26,7 @@ import (
 	"strings"
 )
 
-const Version = "2.4.0"
+const Version = "2.5.0"
 
 var (
 	rangePatterns []*regexp.Regexp
@@ -94,7 +93,7 @@ func FramesToFrameRange(frames []int, sorted bool, zfill int) string {
 
 	var i, frame, step int
 	var start, end string
-	var buf bytes.Buffer
+	var buf strings.Builder
 
 	// Keep looping until all frames are consumed
 	for len(frames) > 0 {

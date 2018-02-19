@@ -199,7 +199,7 @@ func (s *FileSequence) Format(tpl string) (string, error) {
 	return buf.String(), nil
 }
 
-// Split a non-contigous (i.e. comma-separated) sequence into
+// Split a non-contiguous (i.e. comma-separated) sequence into
 // a list of sequences that each use consistent stepping
 func (s *FileSequence) Split() FileSequences {
 	if s.frameSet == nil {
@@ -213,14 +213,11 @@ func (s *FileSequence) Split() FileSequences {
 		return FileSequences{s.Copy()}
 	}
 
-	var buf bytes.Buffer
+	var buf strings.Builder
 
 	// Write the dir and base components once
 	buf.WriteString(s.dir)
 	buf.WriteString(s.basename)
-
-	// Mark the buffer so we can truncate
-	size := buf.Len()
 
 	list := make(FileSequences, len(franges))
 	var seq *FileSequence
@@ -232,7 +229,7 @@ func (s *FileSequence) Split() FileSequences {
 		seq, _ = NewFileSequence(buf.String())
 		list[i] = seq
 
-		buf.Truncate(size)
+		buf.Reset()
 	}
 	return list
 }
@@ -387,7 +384,7 @@ func (s *FileSequence) Frame(frame interface{}) (string, error) {
 		}
 	}
 
-	var buf bytes.Buffer
+	var buf strings.Builder
 	buf.WriteString(s.dir)
 	buf.WriteString(s.basename)
 	buf.WriteString(zframe)
@@ -401,7 +398,7 @@ func (s *FileSequence) frameInt(frame int) string {
 	if s.frameSet != nil {
 		zframe = zfillInt(frame, s.zfill)
 	}
-	var buf bytes.Buffer
+	var buf strings.Builder
 	buf.WriteString(s.dir)
 	buf.WriteString(s.basename)
 	buf.WriteString(zframe)

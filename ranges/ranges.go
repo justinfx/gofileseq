@@ -17,10 +17,10 @@ Complex ranges:
 package ranges
 
 import (
-	"bytes"
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 )
 
 // Iterator is an interface type that can
@@ -77,7 +77,7 @@ func NewInclusiveRange(start, end, step int) *InclusiveRange {
 // String returns a formatted string representation
 // of the integer range
 func (r *InclusiveRange) String() string {
-	var buf bytes.Buffer
+	var buf strings.Builder
 
 	// Always for a single value
 	buf.WriteString(strconv.Itoa(r.Start()))
@@ -308,7 +308,7 @@ type InclusiveRanges struct {
 // String returns the formatted representation of
 // the combination of all internal InclusiveRange instances
 func (l *InclusiveRanges) String() string {
-	var buf bytes.Buffer
+	var buf strings.Builder
 	for i, b := range l.blocks {
 		if i > 0 {
 			buf.WriteString(`,`)
