@@ -8,9 +8,9 @@ script:
     - go test -v $(go list ./... | grep -v /vendor/)
     
 # whitelist
-branches:
-    only:
-        - master
+#branches:
+#    only:
+#        - master
 
 # calls goreleaser
 deploy:
