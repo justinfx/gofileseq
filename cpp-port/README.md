@@ -2,6 +2,7 @@
 
 #### C++ port of gofileseq
 
+[Latest API Docs](http://justinfx.com/gofileseq/cpp)
 
 ### Build Requirements
 

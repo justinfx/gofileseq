@@ -1,8 +1,23 @@
 language: go
-
+      
 go:
   - "1.10"
   - "1.9" 
+
+# This will run on Travis' 'new' container-based infrastructure
+sudo: false
+
+cache:
+  apt: true
+
+addons:
+  apt:
+    packages:
+      - doxygen
+      - doxygen-doc
+      - doxygen-latex
+      - doxygen-gui
+      - graphviz
 
 script:
   - go test -v $(go list ./... | grep -v /vendor/)
@@ -19,3 +34,15 @@ jobs:
         on:
           tags: true
           condition: $TRAVIS_OS_NAME = linux
+
+    - stage: doxygen 
+      script: cd cpp-port/docs && doxygen && cd $TRAVIS_BUILD_DIR
+      deploy:
+        provider: pages
+        project-name: libfileseq
+        local-dir: cpp-port/docs/build
+        skip_cleanup: true
+        keep-history: true
+        github-token: $GH_REPO_TOKEN
+        on:
+          branch: master
