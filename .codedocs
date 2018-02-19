@@ -28,7 +28,7 @@ TAGLINKS =
 
 PROJECT_NAME = "Fileseq C++ API"
 INHERIT_DOCS = YES
-INPUT = FileseqAPIMain.dox cpp-port cpp-port/ranges
+INPUT = cpp-port/FileseqAPIMain.dox cpp-port cpp-port/ranges
 FILE_PATTERNS = *.h *.hh *.dox
 EXCLUDE = cpp-port/tests/* cpp-port/README.md
 EXAMPLE_PATH = cpp-port/README.md CHANGES
