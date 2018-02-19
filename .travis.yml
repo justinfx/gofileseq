@@ -1,22 +1,21 @@
 language: go
 
 go:
-    - "1.9" 
-    - "1.10"
+  - "1.10"
+  - "1.9" 
 
 script:
-    - go test -v $(go list ./... | grep -v /vendor/)
-    
-# whitelist
-#branches:
-#    only:
-#        - master
+  - go test -v $(go list ./... | grep -v /vendor/)
 
-# calls goreleaser
-deploy:
-- provider: script
-  skip_cleanup: true
-  script: curl -sL http://git.io/goreleaser | bash
-  on:
-    tags: true
-    condition: $TRAVIS_OS_NAME = linux
+jobs:
+  include:
+    - stage: deploy
+      script: skip
+      if: tag =~ ^v\d+
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: curl -sL http://git.io/goreleaser | bash
+        on:
+          tags: true
+          condition: $TRAVIS_OS_NAME = linux
