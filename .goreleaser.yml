@@ -6,6 +6,9 @@ builds:
       - windows
       - darwin
       - linux
+    ignore:
+      - goos: darwin
+        goarch: 386
     env:
       - CGO_ENABLED=0
   - main: ./cmd/seqinfo/
@@ -15,14 +18,21 @@ builds:
       - windows
       - darwin
       - linux
+    ignore:
+      - goos: darwin
+        goarch: 386
     env:
       - CGO_ENABLED=0
 
 archive:
   wrap_in_directory: true
+  replacements:
+    386: 32-bit
+    amd64: 64-bit
+    darwin: osx
   format_overrides:
-      - goos: windows
-        format: zip
+    - goos: windows
+      format: zip
   files:
     - LICENSE
     - CHANGES
@@ -52,5 +62,5 @@ changelog:
       - typo
       - goreleaser
       - gitignore
-      - travis
+      - '[tT]ravis'
       
