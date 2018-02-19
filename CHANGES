@@ -1,5 +1,9 @@
 Changes:
 
+2.5.0
+----------------
+* go: Use strings.Builder instead of bytes.Buffer for less allocations (requires go >= 1.10)
+
 2.4.0
 ----------------
 * Update FindSequencesOnDisk to sort mixed frame padding into discreet sequence results
