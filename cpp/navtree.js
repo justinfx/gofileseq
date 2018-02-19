@@ -2,7 +2,7 @@ var NAVTREE =
 [
   [ "Fileseq C++ API", "index.html", [
     [ "About fileseq", "index.html", null ],
-    [ "CHANGES", "_c_h_a_n_g_e_s.html", null ],
+    [ "CHANGES", "CHANGES.html", null ],
     [ "Classes", null, [
       [ "Class List", "annotated.html", "annotated" ],
       [ "Class Index", "classes.html", null ],

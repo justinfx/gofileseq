@@ -146,10 +146,10 @@ $(document).ready(function(){initNavTree('pad_8h_source.html','');});
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="comment">// PaddingMapper defines behavior for converting between</span></div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="comment">// padding characters and their pad width</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="classfileseq_1_1internal_1_1_padding_mapper.html">   50</a></span>&#160;<span class="keyword">class </span><a class="code" href="classfileseq_1_1internal_1_1_padding_mapper.html">PaddingMapper</a> {</div>
+<div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="classfileseq_1_1internal_1_1PaddingMapper.html">   50</a></span>&#160;<span class="keyword">class </span><a class="code" href="classfileseq_1_1internal_1_1PaddingMapper.html">PaddingMapper</a> {</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classfileseq_1_1internal_1_1_padding_mapper.html">PaddingMapper</a>() {}</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classfileseq_1_1internal_1_1PaddingMapper.html">PaddingMapper</a>() {}</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="comment">// Return all supported padding characters</span></div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    std::string getAllChars() <span class="keyword">const</span>;</div>
@@ -172,19 +172,19 @@ $(document).ready(function(){initNavTree('pad_8h_source.html','');});
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;};</div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;</div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;</div>
-<div class="line"><a name="l00076"></a><span class="lineno"><a class="line" href="classfileseq_1_1internal_1_1_single_hash_pad.html">   76</a></span>&#160;<span class="keyword">class </span><a class="code" href="classfileseq_1_1internal_1_1_single_hash_pad.html">SingleHashPad</a> : <span class="keyword">public</span> <a class="code" href="classfileseq_1_1internal_1_1_padding_mapper.html">PaddingMapper</a> {</div>
+<div class="line"><a name="l00076"></a><span class="lineno"><a class="line" href="classfileseq_1_1internal_1_1SingleHashPad.html">   76</a></span>&#160;<span class="keyword">class </span><a class="code" href="classfileseq_1_1internal_1_1SingleHashPad.html">SingleHashPad</a> : <span class="keyword">public</span> <a class="code" href="classfileseq_1_1internal_1_1PaddingMapper.html">PaddingMapper</a> {</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;</div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <a class="code" href="classfileseq_1_1internal_1_1_single_hash_pad.html">SingleHashPad</a>();</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <a class="code" href="classfileseq_1_1internal_1_1SingleHashPad.html">SingleHashPad</a>();</div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;</div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <span class="keyword">virtual</span> std::string getPaddingChars(<span class="keywordtype">long</span> width) <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;};</div>
 <div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;</div>
 <div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;</div>
-<div class="line"><a name="l00085"></a><span class="lineno"><a class="line" href="classfileseq_1_1internal_1_1_multi_hash_pad.html">   85</a></span>&#160;<span class="keyword">class </span><a class="code" href="classfileseq_1_1internal_1_1_multi_hash_pad.html">MultiHashPad</a> : <span class="keyword">public</span> <a class="code" href="classfileseq_1_1internal_1_1_padding_mapper.html">PaddingMapper</a> {</div>
+<div class="line"><a name="l00085"></a><span class="lineno"><a class="line" href="classfileseq_1_1internal_1_1MultiHashPad.html">   85</a></span>&#160;<span class="keyword">class </span><a class="code" href="classfileseq_1_1internal_1_1MultiHashPad.html">MultiHashPad</a> : <span class="keyword">public</span> <a class="code" href="classfileseq_1_1internal_1_1PaddingMapper.html">PaddingMapper</a> {</div>
 <div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;</div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <a class="code" href="classfileseq_1_1internal_1_1_multi_hash_pad.html">MultiHashPad</a>();</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <a class="code" href="classfileseq_1_1internal_1_1MultiHashPad.html">MultiHashPad</a>();</div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;</div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="keyword">virtual</span> std::string getPaddingChars(<span class="keywordtype">long</span> width) <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;};</div>
@@ -197,9 +197,9 @@ $(document).ready(function(){initNavTree('pad_8h_source.html','');});
 <div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;</div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="preprocessor">#endif // FILESEQ_PAD_H_</span></div>
 <div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="preprocessor"></span></div>
-<div class="ttc" id="classfileseq_1_1internal_1_1_multi_hash_pad_html"><div class="ttname"><a href="classfileseq_1_1internal_1_1_multi_hash_pad.html">fileseq::internal::MultiHashPad</a></div><div class="ttdef"><b>Definition:</b> pad.h:85</div></div>
-<div class="ttc" id="classfileseq_1_1internal_1_1_padding_mapper_html"><div class="ttname"><a href="classfileseq_1_1internal_1_1_padding_mapper.html">fileseq::internal::PaddingMapper</a></div><div class="ttdef"><b>Definition:</b> pad.h:50</div></div>
-<div class="ttc" id="classfileseq_1_1internal_1_1_single_hash_pad_html"><div class="ttname"><a href="classfileseq_1_1internal_1_1_single_hash_pad.html">fileseq::internal::SingleHashPad</a></div><div class="ttdef"><b>Definition:</b> pad.h:76</div></div>
+<div class="ttc" id="classfileseq_1_1internal_1_1SingleHashPad_html"><div class="ttname"><a href="classfileseq_1_1internal_1_1SingleHashPad.html">fileseq::internal::SingleHashPad</a></div><div class="ttdef"><b>Definition:</b> pad.h:76</div></div>
+<div class="ttc" id="classfileseq_1_1internal_1_1MultiHashPad_html"><div class="ttname"><a href="classfileseq_1_1internal_1_1MultiHashPad.html">fileseq::internal::MultiHashPad</a></div><div class="ttdef"><b>Definition:</b> pad.h:85</div></div>
+<div class="ttc" id="classfileseq_1_1internal_1_1PaddingMapper_html"><div class="ttname"><a href="classfileseq_1_1internal_1_1PaddingMapper.html">fileseq::internal::PaddingMapper</a></div><div class="ttdef"><b>Definition:</b> pad.h:50</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

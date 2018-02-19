@@ -1,0 +1,5 @@
+<map id="fileseq::FileSequence::invertedFrameRange" name="fileseq::FileSequence::invertedFrameRange">
+<area shape="rect" id="node2" href="$classfileseq_1_1FileSequence.html#a679aa1ba73ec7886e71a7883b7c77f84" title="fileseq::FileSequence\l::zfill" alt="" coords="205,5,352,46"/>
+<area shape="rect" id="node3" href="$classfileseq_1_1FrameSet.html#ab83503f9f44181f2d742cdbb7d7af803" title="fileseq::FrameSet::\linvertedFrameRange" alt="" coords="207,70,350,111"/>
+<area shape="rect" id="node4" href="$classfileseq_1_1FrameSet.html#af8b4c0a5b86c9400f229eddb8352e307" title="Return whether the FrameSet is properly parsed and valid as a range. " alt="" coords="400,70,533,111"/>
+</map>
