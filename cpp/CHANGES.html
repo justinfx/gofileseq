@@ -102,6 +102,10 @@ $(document).ready(function(){initNavTree('CHANGES.html','');});
 <div class="contents">
 <div class="textblock"><pre class="fragment">Changes:
 
+2.5.0
+----------------
+* go: Use strings.Builder instead of bytes.Buffer for less allocations (requires go &gt;= 1.10)
+
 2.4.0
 ----------------
 * Update FindSequencesOnDisk to sort mixed frame padding into discreet sequence results
