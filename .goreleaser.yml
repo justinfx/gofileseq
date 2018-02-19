@@ -52,4 +52,5 @@ changelog:
       - typo
       - goreleaser
       - gitignore
+      - travis
       
