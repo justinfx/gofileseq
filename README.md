@@ -47,7 +47,7 @@ Also included is a [`seqls`](https://github.com/justinfx/gofileseq/tree/master/c
 
 And [`seqinfo`](https://github.com/justinfx/gofileseq/tree/master/cmd/seqinfo) tool, which can print plain-text or json parsed information about one or more sequence strings.
 
-Download the latest binary release: [![GitHub version](https://badge.fury.io/gh/justinfx%2Fgofileseq.svg)](https://github.com/justinfx/gofileseq/releases/latest)
+Download the latest [binary release](https://github.com/justinfx/gofileseq/releases/latest)
 
 Or install from source:
 ```bash
