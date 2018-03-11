@@ -7,7 +7,7 @@ Frame Range Shorthand
 Support for:
 
     Standard: 1-10
-    Comma Delimted: 1-10,10-20
+    Comma Delimited: 1-10,10-20
     Chunked: 1-100x5
     Filled: 1-100y5
     Staggered: 1-100:3 (1-100x3, 1-100x2, 1-100)
@@ -53,10 +53,12 @@ func init() {
 	// Example:
 	//     /film/shot/renders/hero_bty.1-100#.exr
 	//     /film/shot/renders/hero_bty.@@.exr
-	splitPattern = regexp.MustCompile(`^(.*?)([\d-][:xy\d,-]*)?([#@]+)(\.[a-zA-Z0-9]+)?$`)
+	splitPattern = regexp.MustCompile(
+		`^(?P<name>.*?)(?P<range>[\d-][:xy\d,-]*)?(?P<pad>[#@]+)(?P<ext>(?:\.[a-zA-Z0-9]+)*)$`)
 
 	// /film/shot/renders/hero_bty.100.exr
-	singleFrame = regexp.MustCompile(`^(.*?)(-?\d+)(\.[a-zA-Z0-9]+)?$`)
+	singleFrame = regexp.MustCompile(
+		`^(?P<name>.*?)(?P<frame>-?\d+)(?P<ext>(?:\.[a-zA-Z0-9]+)*)$`)
 }
 
 // IsFrameRange returns true if the given string is a valid frame
