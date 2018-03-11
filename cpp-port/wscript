@@ -1,6 +1,4 @@
-#! /usr/bin/env python
-
-from waflib import Context, Task
+from waflib import Context, Logs, Options, Task
 
 APPNAME = "fileseq"
 
@@ -44,11 +42,9 @@ def build(bld):
         _create_test(bld)
 
 
-
 _is_test = False
 
 def test(bld):
-    from waflib import Options
     Options.commands = ['build'] + Options.commands
 
     global _is_test
@@ -57,15 +53,21 @@ def test(bld):
 
 def _create_test(bld):
     tsk = bld.program(
-            target = 'test_fileseq',
-            source = 'test/raw_tests.cpp',
-            use = 'fileseq_static',
-        )
+        target = 'TestFileseq',
+        source = bld.path.ant_glob([
+            'test/main.cc', 
+            'test/Test*.cc', 
+            'test/gtest/src/gtest-all.cc']),
+        includes = [ "test", "test/gtest/include", "test/gtest", "." ],
+        stlib = ["pcrecpp", "pcre"],
+        use = ["fileseq_static", 'PCRE'],
+        cxxflags = ["-Wno-undef", "-g", "-ggdb"],
+        defines = ["FILESEQ_TEST_DIR=%s" % bld.path.parent.abspath()],
+    )
 
     bld(
         rule="cd %s && ./${SRC}" % bld.variant_dir,
         source=tsk.target,
         use="test_fileseq",
+        always=True,
         )
-
-
