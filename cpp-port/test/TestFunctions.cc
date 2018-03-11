@@ -7,7 +7,14 @@
 
 #include <algorithm>
 #include <cstring>
+#include <iostream>
 #include <map>
+#include <string>
+
+
+// Fwd decl
+std::string basename(const std::string& s);
+
 
 class TestFramesToFrameRange : public testing::Test {
 
@@ -198,7 +205,7 @@ void testFindSequencesOnDisk(bool singleFiles) {
 
     for (size_t i=0; i < seqs.size(); ++i) {
         std::string fullpath = seqs[i].string();
-        std::string name = basename(fullpath.c_str());
+        std::string name = basename(fullpath);
 
         if ((mapIt = cases.find(name)) == cases.end()) {
             ADD_FAILURE() << "Found unexpected seq not in cases: " << name;
@@ -331,3 +338,20 @@ TEST_F( TestFindSequenceOnDisk, FindSeq ) {
         }
     }
 }
+
+// https://www.safaribooksonline.com/library/view/c-cookbook/0596007612/ch10s15.html
+std::string basename(const std::string& s) {
+   char sep = '/';
+
+#ifdef _WIN32
+   sep = '\\';
+#endif
+
+   size_t i = s.rfind(sep, s.length());
+   if (i != std::string::npos) {
+      return(s.substr(i+1, s.length() - i));
+   }
+
+   return "";
+}
+
