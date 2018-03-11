@@ -5,6 +5,7 @@
 #include "../private/strings.h"
 
 #include <ctime>
+#include <string>
 
 
 class TestNewFileSequences : public testing::Test {
@@ -17,87 +18,119 @@ public:
         fileseq::Frame end;
         int zfill;
         size_t frameCount;
+        std::string ext;
     };
 
 protected:
     void SetUp() {
         {
-            Case t = {"/file_path.100.exr", "/file_path.100@@@.exr", 100, 100, 3, 1};
+            Case t = {"/file_path.100.exr", "/file_path.100@@@.exr", 100, 100, 3, 1, ".exr"};
             m_cases.push_back(t);
         }
         {
-            Case t = {"/file_path.0100.exr", "/file_path.0100#.exr", 100, 100, 4, 1};
+            Case t = {"/file_path.0100.exr", "/file_path.0100#.exr", 100, 100, 4, 1, ".exr"};
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f.1-100#.jpeg", "/dir/f.1-100#.jpeg", 1, 100, 4, 100};
+            Case t = {"/dir/f.1-100#.jpeg", "/dir/f.1-100#.jpeg", 1, 100, 4, 100, ".jpeg"};
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f.1-100@@@.f", "/dir/f.1-100@@@.f", 1, 100, 3, 100};
+            Case t = {"/dir/f.1-100@@@.f", "/dir/f.1-100@@@.f", 1, 100, 3, 100, ".f"};
             m_cases.push_back(t);
         }
         {
             Case t = {
                 "/dir/f.1-10,50,60-90x2##.mp4",
                 "/dir/f.1-10,50,60-90x2##.mp4",
-                1, 90, 8, 27
+                1, 90, 8, 27,
+                ".mp4"
             };
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f.exr", "/dir/f.exr", 0, 0, 0, 1};
+            Case t = {"/dir/f.exr", "/dir/f.exr", 0, 0, 0, 1, ".exr"};
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f.100", "/dir/f.100@@@", 100, 100, 3, 1};
+            Case t = {"/dir/f.100", "/dir/f.100@@@", 100, 100, 3, 1, ""};
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f.@@.ext", "/dir/f.@@.ext", 0, 0, 2, 1};
+            Case t = {"/dir/f.@@.ext", "/dir/f.@@.ext", 0, 0, 2, 1, ".ext"};
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f100.ext", "/dir/f100@@@.ext", 100, 100, 3, 1};
+            Case t = {"/dir/f100.ext", "/dir/f100@@@.ext", 100, 100, 3, 1, ".ext"};
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f_100.ext", "/dir/f_100@@@.ext", 100, 100, 3, 1};
+            Case t = {"/dir/f_100.ext", "/dir/f_100@@@.ext", 100, 100, 3, 1, ".ext"};
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/no_frames.ext", "/dir/no_frames.ext", 0, 0, 0, 1};
+            Case t = {"/dir/no_frames.ext", "/dir/no_frames.ext", 0, 0, 0, 1, ".ext"};
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/no_file_extension", "/dir/no_file_extension", 0, 0, 0, 1};
+            Case t = {"/dir/no_file_extension", "/dir/no_file_extension", 0, 0, 0, 1, ""};
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/.hidden", "/dir/.hidden", 0, 0, 0, 1};
+            Case t = {"/dir/.hidden", "/dir/.hidden", 0, 0, 0, 1, ".hidden"};
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/.hidden.100", "/dir/.hidden.100@@@", 100, 100, 3, 1};
+            Case t = {"/dir/.hidden.100", "/dir/.hidden.100@@@", 100, 100, 3, 1, ""};
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/.hidden.100.ext", "/dir/.hidden.100@@@.ext", 100, 100, 3, 1};
+            Case t = {"/dir/.hidden.100.ext", "/dir/.hidden.100@@@.ext", 100, 100, 3, 1, ".ext"};
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/.hidden5.1-10#.7zip", "/dir/.hidden5.1-10#.7zip", 1, 10, 4, 10};
+            Case t = {"/dir/.hidden5.1-10#.7zip", "/dir/.hidden5.1-10#.7zip", 1, 10, 4, 10, ".7zip"};
             m_cases.push_back(t);
         }
         {
-            Case t = {".10000000000", ".10000000000", 0, 0, 0, 1};
+            Case t = {".10000000000", ".10000000000", 0, 0, 0, 1, ".10000000000"};
             m_cases.push_back(t);
         }
         {
             Case t = {
                 ".10000000000.123", ".10000000000@@@@@@@@@@@.123",
-                10000000000, 10000000000, 11, 1
+                10000000000, 10000000000, 11, 1,
+                ".123"
             };
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {
+                "/dir/f.1-10,50,60-90x2##.tar.gz",
+                "/dir/f.1-10,50,60-90x2##.tar.gz",
+                1, 90, 8, 27,
+                ".tar.gz"
+            };
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"/dir/f.tar.gz", "/dir/f.tar.gz", 0, 0, 0, 1, ".gz"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"/dir/f.@@.tar.gz", "/dir/f.@@.tar.gz", 0, 0, 2, 1, ".tar.gz"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"/dir/f100.tar.gz", "/dir/f100@@@.tar.gz", 100, 100, 3, 1, ".tar.gz"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"/dir/f_100.tar.gz", "/dir/f_100@@@.tar.gz", 100, 100, 3, 1, ".tar.gz"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"/dir/no_frames.tar.gz", "/dir/no_frames.tar.gz", 0, 0, 0, 1, ".gz"};
             m_cases.push_back(t);
         }
     }
@@ -123,6 +156,7 @@ TEST_F( TestNewFileSequences, New ) {
         EXPECT_EQ(t.end, s.end()) << "end does not match, Given " << t.path;
         EXPECT_EQ(t.zfill, s.zfill()) << "zfill does not match, Given " << t.path;
         EXPECT_EQ(t.frameCount, s.length()) << "length does not match, Given " << t.path;
+        EXPECT_EQ(t.ext, s.ext()) << "extension does not match, Given " << t.path;
     }
 }
 

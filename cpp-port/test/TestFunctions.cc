@@ -184,6 +184,7 @@ void testFindSequencesOnDisk(bool singleFiles) {
     cases["seqB.5-14,16-18,20#.jpg"] = false;
     cases["seqC.-5-2,4-10,20-21,27-30@@.tif"] = false;
     cases["seqD.2-10@.gif"] = false;
+    cases["complex.5-7#.tar.gz"] = false;
 
     fileseq::FindSequenceOpts opts = fileseq::kNoOpt;
 
