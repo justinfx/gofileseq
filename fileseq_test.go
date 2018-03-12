@@ -184,6 +184,11 @@ func TestFrameSetSplitPattern(t *testing.T) {
 		{"/path/to/file%s_1-100x10@@.exr", "file%s_", 1, 91, "@@"},
 		{"/path/to/file%s.-10--1x2##.exr", "file%s.", -10, -2, "##"},
 		{"/path/to/file%s1,2,3,5-10,20-30#.exr", "file%s", 1, 30, "#"},
+
+		{"/path/to/file%s1-1x1#.tar.gz", "file%s", 1, 1, "#"},
+		{"/path/to/file%s_1-100x10@@.tar.gz", "file%s_", 1, 91, "@@"},
+		{"/path/to/file%s.-10--1x2##.tar.gz", "file%s.", -10, -2, "##"},
+		{"/path/to/file%s1,2,3,5-10,20-30#.tar.gz", "file%s", 1, 30, "#"},
 	}
 
 	// ref: splitPattern range directive chars
@@ -225,43 +230,80 @@ func TestNewFileSequence(t *testing.T) {
 		path, outPath     string
 		start, end, zfill int
 		frameCount        int
+		ext               string
 	}{
 		{"/file_path.100.exr",
-			"/file_path.100@@@.exr", 100, 100, 3, 1},
+			"/file_path.100@@@.exr", 100, 100, 3,
+			1, ".exr"},
 		{"/file_path.0100.exr",
-			"/file_path.0100#.exr", 100, 100, 4, 1},
+			"/file_path.0100#.exr", 100, 100, 4,
+			1, ".exr"},
 		{"/dir/f.1-100#.jpeg",
-			"/dir/f.1-100#.jpeg", 1, 100, 4, 100},
+			"/dir/f.1-100#.jpeg", 1, 100, 4,
+			100, ".jpeg"},
 		{"/dir/f.1-100@@@.f",
-			"/dir/f.1-100@@@.f", 1, 100, 3, 100},
+			"/dir/f.1-100@@@.f", 1, 100, 3,
+			100, ".f"},
 		{"/dir/f.1-10,50,60-90x2##.mp4",
-			"/dir/f.1-10,50,60-90x2##.mp4", 1, 90, 8, 27},
+			"/dir/f.1-10,50,60-90x2##.mp4", 1, 90, 8,
+			27, ".mp4"},
 		{"/dir/f.exr",
-			"/dir/f.exr", 0, 0, 0, 1},
+			"/dir/f.exr", 0, 0, 0,
+			1, ".exr"},
 		{"/dir/f.100",
-			"/dir/f.100@@@", 100, 100, 3, 1},
+			"/dir/f.100@@@", 100, 100, 3,
+			1, ""},
 		{"/dir/f.@@.ext",
-			"/dir/f.@@.ext", 0, 0, 2, 1},
+			"/dir/f.@@.ext", 0, 0, 2,
+			1, ".ext"},
 		{"/dir/f100.ext",
-			"/dir/f100@@@.ext", 100, 100, 3, 1},
+			"/dir/f100@@@.ext", 100, 100, 3,
+			1, ".ext"},
 		{"/dir/f_100.ext",
-			"/dir/f_100@@@.ext", 100, 100, 3, 1},
+			"/dir/f_100@@@.ext", 100, 100, 3,
+			1, ".ext"},
 		{"/dir/no_frames.ext",
-			"/dir/no_frames.ext", 0, 0, 0, 1},
+			"/dir/no_frames.ext", 0, 0, 0,
+			1, ".ext"},
 		{"/dir/no_file_extension",
-			"/dir/no_file_extension", 0, 0, 0, 1},
+			"/dir/no_file_extension", 0, 0, 0,
+			1, ""},
 		{"/dir/.hidden",
-			"/dir/.hidden", 0, 0, 0, 1},
+			"/dir/.hidden", 0, 0, 0,
+			1, ".hidden"},
 		{"/dir/.hidden.100",
-			"/dir/.hidden.100@@@", 100, 100, 3, 1},
+			"/dir/.hidden.100@@@", 100, 100, 3,
+			1, ""},
 		{"/dir/.hidden.100.ext",
-			"/dir/.hidden.100@@@.ext", 100, 100, 3, 1},
+			"/dir/.hidden.100@@@.ext", 100, 100, 3,
+			1, ".ext"},
 		{"/dir/.hidden5.1-10#.7zip",
-			"/dir/.hidden5.1-10#.7zip", 1, 10, 4, 10},
+			"/dir/.hidden5.1-10#.7zip", 1, 10, 4,
+			10, ".7zip"},
+		{"/dir/complex_extension.1-10,50,60-90x2#.tar.gz",
+			"/dir/complex_extension.1-10,50,60-90x2#.tar.gz", 1, 90, 4,
+			27, ".tar.gz"},
+		{"/dir/f.tar.gz",
+			"/dir/f.tar.gz", 0, 0, 0,
+			1, ".gz"},
+		{"/dir/f.@@.tar.gz",
+			"/dir/f.@@.tar.gz", 0, 0, 2,
+			1, ".tar.gz"},
+		{"/dir/f100.tar.gz",
+			"/dir/f100@@@.tar.gz", 100, 100, 3,
+			1, ".tar.gz"},
+		{"/dir/f_100.tar.gz",
+			"/dir/f_100@@@.tar.gz", 100, 100, 3,
+			1, ".tar.gz"},
+		{"/dir/no_frames.tar.gz",
+			"/dir/no_frames.tar.gz", 0, 0, 0,
+			1, ".gz"},
 		{".10000000000",
-			".10000000000", 0, 0, 0, 1},
+			".10000000000", 0, 0, 0,
+			1, ".10000000000"},
 		{".10000000000.123",
-			".10000000000@@@@@@@@@@@.123", 10000000000, 10000000000, 11, 1},
+			".10000000000@@@@@@@@@@@.123", 10000000000, 10000000000, 11,
+			1, ".123"},
 	}
 	for _, tt := range table {
 		seq, err := NewFileSequence(tt.path)
@@ -284,6 +326,9 @@ func TestNewFileSequence(t *testing.T) {
 		if seq.Len() != tt.frameCount {
 			t.Errorf("Expected %q frame count to be %d, got %d", tt.path, tt.frameCount, seq.Len())
 		}
+		if seq.Ext() != tt.ext {
+			t.Errorf("Expected %q ext to be %q, got %q", tt.path, tt.ext, seq.Ext())
+		}
 	}
 }
 
@@ -296,6 +341,7 @@ func TestFileSequenceSplit(t *testing.T) {
 		{"/file_path.-005.exr", []string{"-005"}},
 		{"/dir/f.-1-100#.jpeg", []string{"-1-100"}},
 		{"/dir/f.1-10,50,60-90x2##.exr", []string{"1-10", "50", "60-90x2"}},
+		{"/dir/f.1-10,50,60-90x2##.tar.gz", []string{"1-10", "50", "60-90x2"}},
 		{"/dir/f.exr", []string{""}},
 	}
 	for _, tt := range table {
@@ -549,6 +595,7 @@ func TestFindSequencesOnDisk(t *testing.T) {
 			"seqC.-5-2,4-10,20-21,27-30@@.tif",
 			"seqB.5-14,16-18,20#.jpg",
 			"seqA.1,3-6,8-10#.exr",
+			"complex.5-7#.tar.gz",
 		},
 		"testdata/mixed": {
 			"seq.-1-5@@.ext",
@@ -589,6 +636,7 @@ func TestListFiles(t *testing.T) {
 		"seqC.-5-2,4-10,20-21,27-30@@.tif": 0,
 		"seqB.5-14,16-18,20#.jpg":          0,
 		"seqA.1,3-6,8-10#.exr":             0,
+		"complex.5-7#.tar.gz":              0,
 		"aFile.ext":                        0,
 		"file_without_ext":                 0,
 	}

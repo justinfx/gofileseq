@@ -1,5 +1,9 @@
 Changes:
 
+2.6.0
+----------------
+* go/cpp: Preserve complex file extensions parsed after a frame, such as file.0001.tar.gz (".tar.gz")
+
 2.5.0
 ----------------
 * go: Use strings.Builder instead of bytes.Buffer for less allocations (requires go >= 1.10)

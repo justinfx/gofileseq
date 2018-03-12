@@ -16,7 +16,8 @@ bool getSplitPatternMatch(SeqPatternMatch &match, const std::string &path) {
     // Example:
     //     /film/shot/renders/hero_bty.1-100#.exr
     //     /film/shot/renders/hero_bty.@@.exr
-    static const std::string pattern = "^(.*?)([\\d-][:xy\\d,-]*)?([#@]+)(\\.[a-zA-Z0-9]+)?$";
+    static const std::string pattern =
+        "^(?P<name>.*?)(?P<range>[\\d-][:xy\\d,-]*)?(?P<pad>[#@]+)(?P<ext>(?:\\.[a-zA-Z0-9]+)*)$";
     static const pcrecpp::RE* rx = new pcrecpp::RE(pattern);
 
     return rx->FullMatch(path, &(match.base), &(match.range),
@@ -29,7 +30,8 @@ bool getSingleFrameMatch(SeqPatternMatch &match, const std::string &path) {
     // Regular expression for matching a single frame string.
     // Example:
     //     /film/shot/renders/hero_bty.100.exr
-    static const std::string pattern = "^(.*?)(-?\\d+)(\\.[a-zA-Z0-9]+)?$";
+    static const std::string pattern =
+        "^(?P<name>.*?)(?P<frame>-?\\d+)(?P<ext>(?:\\.[a-zA-Z0-9]+)*)$";
     static const pcrecpp::RE* rx = new pcrecpp::RE(pattern);
 
     // Not using this field
