@@ -31,7 +31,7 @@ bool getSingleFrameMatch(SeqPatternMatch &match, const std::string &path) {
     // Example:
     //     /film/shot/renders/hero_bty.100.exr
     static const std::string pattern =
-        "^(?P<name>.*?)(?P<frame>-?\\d+)(?P<ext>(?:\\.[a-zA-Z0-9]+)*)$";
+        "^(?P<name>.*?)(?P<frame>-?\\d+)(?P<ext>(?:\\.\\w*[a-zA-Z]\\w*)*(?:\\.[a-zA-Z0-9]+)?)$";
     static const pcrecpp::RE* rx = new pcrecpp::RE(pattern);
 
     // Not using this field

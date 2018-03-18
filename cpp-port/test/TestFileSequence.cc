@@ -32,7 +32,7 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f.1-100#.jpeg", "/dir/f.1-100#.jpeg", 1, 100, 4, 100, ".jpeg"};
+            Case t = {"/dir/f10_20.v123.1-100#.jpeg", "/dir/f10_20.v123.1-100#.jpeg", 1, 100, 4, 100, ".jpeg"};
             m_cases.push_back(t);
         }
         {
@@ -50,6 +50,10 @@ protected:
         }
         {
             Case t = {"/dir/f.exr", "/dir/f.exr", 0, 0, 0, 1, ".exr"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"/dir/f10_20.v123.456.exr", "/dir/f10_20.v123.456@@@.exr", 456, 456, 3, 1, ".exr"};
             m_cases.push_back(t);
         }
         {
@@ -106,8 +110,8 @@ protected:
         }
         {
             Case t = {
-                "/dir/f.1-10,50,60-90x2##.tar.gz",
-                "/dir/f.1-10,50,60-90x2##.tar.gz",
+                "/dir/f10_20.v123.1-10,50,60-90x2##.tar.gz",
+                "/dir/f10_20.v123.1-10,50,60-90x2##.tar.gz",
                 1, 90, 8, 27,
                 ".tar.gz"
             };
@@ -118,7 +122,7 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f.@@.tar.gz", "/dir/f.@@.tar.gz", 0, 0, 2, 1, ".tar.gz"};
+            Case t = {"/dir/f10_20.v123.@@.tar.gz", "/dir/f10_20.v123.@@.tar.gz", 0, 0, 2, 1, ".tar.gz"};
             m_cases.push_back(t);
         }
         {
