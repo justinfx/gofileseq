@@ -54,11 +54,18 @@ func init() {
 	//     /film/shot/renders/hero_bty.1-100#.exr
 	//     /film/shot/renders/hero_bty.@@.exr
 	splitPattern = regexp.MustCompile(
-		`^(?P<name>.*?)(?P<range>[\d-][:xy\d,-]*)?(?P<pad>[#@]+)(?P<ext>(?:\.[a-zA-Z0-9]+)*)$`)
+		`^(?P<name>.*?)` +
+			`(?P<range>[\d-][:xy\d,-]*)?` +
+			`(?P<pad>[#@]+)` +
+			// multiple extension parts:
+			`(?P<ext>\.(?:\w*[a-zA-Z]\w*)*(?:\.[a-zA-Z0-9]+)?)$`)
 
 	// /film/shot/renders/hero_bty.100.exr
 	singleFrame = regexp.MustCompile(
-		`^(?P<name>.*?)(?P<frame>-?\d+)(?P<ext>(?:\.[a-zA-Z0-9]+)*)$`)
+		`^(?P<name>.*?)` +
+			`(?P<frame>-?\d+)` +
+			// multiple extension parts:
+			`(?P<ext>(?:\.\w*[a-zA-Z]\w*)*(?:\.[a-zA-Z0-9]+)?)$`)
 }
 
 // IsFrameRange returns true if the given string is a valid frame
