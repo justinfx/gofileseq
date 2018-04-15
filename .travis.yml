@@ -35,11 +35,11 @@ jobs:
           condition: $TRAVIS_OS_NAME = linux
 
     - stage: doxygen 
-      script: cd cpp-port/docs && doxygen && cd $TRAVIS_BUILD_DIR
+      script: cd cpp/docs && doxygen && cd $TRAVIS_BUILD_DIR
       deploy:
         provider: pages
         project-name: libfileseq
-        local-dir: cpp-port/docs/build
+        local-dir: cpp/docs/build
         skip_cleanup: true
         keep-history: true
         github-token: $GH_REPO_TOKEN
