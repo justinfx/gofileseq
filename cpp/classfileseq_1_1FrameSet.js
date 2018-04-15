@@ -1,11 +1,11 @@
 var classfileseq_1_1FrameSet =
 [
-    [ "FrameSet", "classfileseq_1_1FrameSet.html#ae40398caef936601e956a02fdda56094", null ],
+    [ "FrameSet", "classfileseq_1_1FrameSet.html#af77c1459a9dfb5635cb9174329199406", null ],
     [ "FrameSet", "classfileseq_1_1FrameSet.html#a6fda0dc278acf42b50dec993c6894582", null ],
     [ "~FrameSet", "classfileseq_1_1FrameSet.html#aee6cfbe046d6f0d379a9aa3baf4def1c", null ],
     [ "FrameSet", "classfileseq_1_1FrameSet.html#aa6da79bceb0e25d54df5870214c033d6", null ],
     [ "end", "classfileseq_1_1FrameSet.html#a4cf64b52731c43e0e6a83c345ad351c5", null ],
-    [ "frame", "classfileseq_1_1FrameSet.html#aa68b3634907b0e74c969605798940859", null ],
+    [ "frame", "classfileseq_1_1FrameSet.html#a7bf9c394834cf465dd9b5f8815cd61a3", null ],
     [ "frameRange", "classfileseq_1_1FrameSet.html#ac4ddcd05faae9b17e96d562cd95c6939", null ],
     [ "frames", "classfileseq_1_1FrameSet.html#a16e6983cfa68dc5af4e6577deb05abd6", null ],
     [ "hasFrame", "classfileseq_1_1FrameSet.html#a1f51a27ba02f9790e26cac34afd5e48b", null ],
