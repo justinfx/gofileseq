@@ -4,25 +4,67 @@
 #include "../error.h"
 #include "../pad.h"
 
-#include <pcrecpp.h>
-
 #include <iomanip>
 #include <sstream>
 #include <string>
 #include <vector>
 
+// Conditional support for C++11 compilers that support std::regex
+#if HAVE_REGEX == 1
+#include <regex>
+#else
+#include <pcrecpp.h>
+#endif
+
 namespace fileseq {
 
 namespace internal {
 
-
 bool getRangePatternMatch(RangePatternMatch &match, const std::string &range) {
     // Frame range:  1-10
-    static const pcrecpp::RE* s_rxRange1 = new pcrecpp::RE("^(-?\\d+)-(-?\\d+)$");
+    static const char* s_pattern1 = "^(-?\\d+)-(-?\\d+)$";
     // Single frame:  10
-    static const pcrecpp::RE* s_rxRange2 = new pcrecpp::RE("^(-?\\d+)$");
+    static const char* s_pattern2 = "^(-?\\d+)$";
     // Complex range:  1-10x2
-    static const pcrecpp::RE* s_rxRange3 = new pcrecpp::RE("^(-?\\d+)-(-?\\d+)([:xy])(\\d+)$");
+    static const char* s_pattern3 = R"(^(-?\d+)-(-?\d+)([:xy])(\d+)$)";
+
+#if HAVE_REGEX == 1
+    static const auto flags = std::regex_constants::optimize|std::regex_constants::ECMAScript;
+    static const std::regex s_rxRange1(s_pattern1, flags);
+    static const std::regex s_rxRange2(s_pattern2, flags);
+    static const std::regex s_rxRange3(s_pattern3, flags);
+
+    std::smatch submatch;
+
+    match.stepMod.clear();
+    match.step = 1;
+
+    if ( std::regex_match(range, submatch, s_rxRange1) ) {
+        match.matches = 2;
+        match.start = std::stol(submatch[1].str(), nullptr);
+        match.end = std::stol(submatch[2].str(), nullptr);
+        return true;
+    }
+
+    if ( std::regex_match(range, submatch, s_rxRange2) ) {
+        match.matches = 1;
+        match.start = std::stol(submatch[1].str(), nullptr);
+        match.end = match.start;
+        return true;
+    }
+
+    if ( std::regex_match(range, submatch, s_rxRange3) ) {
+        match.matches = 4;
+        match.start = std::stol(submatch[1].str(), nullptr);
+        match.end = std::stol(submatch[2].str(), nullptr);
+        match.stepMod = submatch[3].str();
+        match.step = std::stoul(submatch[4].str(), nullptr);
+        return true;
+    }
+#else
+    static const pcrecpp::RE* s_rxRange1 = new pcrecpp::RE(s_pattern1);
+    static const pcrecpp::RE* s_rxRange2 = new pcrecpp::RE(s_pattern2);
+    static const pcrecpp::RE* s_rxRange3 = new pcrecpp::RE(s_pattern3);
 
     if ( s_rxRange1->FullMatch(range, &(match.start), &(match.end)) ) {
         match.matches = 2;
@@ -35,13 +77,14 @@ bool getRangePatternMatch(RangePatternMatch &match, const std::string &range) {
     }
 
     if ( s_rxRange3->FullMatch(
-        range,
-        &(match.start), &(match.end),
-        &(match.stepMod), &(match.step)) ) {
+            range,
+            &(match.start), &(match.end),
+            &(match.stepMod), &(match.step)) ) {
 
         match.matches = 4;
         return true;
     }
+#endif
 
     match.matches = 0;
     return false;
@@ -92,7 +135,7 @@ Status frameRangeMatches(RangeMatches &matches, std::string range) {
 }
 
 
-std::string zfill(const std::string &src, size_t z) {
+std::string zfill(const std::string &src, int z) {
     size_t size = src.size();
     if (size >= z) {
         return src;
@@ -113,7 +156,7 @@ std::string zfill(const std::string &src, size_t z) {
 }
 
 
-std::string zfill(Frame value, size_t z) {
+std::string zfill(Frame value, int z) {
     std::stringstream ss;
 
     ss << std::setfill('0')
@@ -131,12 +174,7 @@ bool isRangeModifier(const std::string &s) {
     }
 
     static const std::string mods("xy:");
-
-    if (s.find_first_of(mods) == std::string::npos) {
-        return false;
-    }
-
-    return true;
+    return s.find_first_of(mods) != std::string::npos;
 }
 
 } // internal

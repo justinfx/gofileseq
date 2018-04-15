@@ -1,156 +1,305 @@
 #include "frameset.h"
-#include "types.h"
-#include "private/fileseq_p.h"
+#include "error.h"
+#include "pad.h"
 
+#include "private/frameset_p.h"
+
+#include <algorithm>
 #include <iostream>
+#include <sstream>
 
 namespace fileseq {
 
+
+FrameSet::FrameSet() : m_frameData(new internal::FrameSetData) {
+
+}
+
+
 FrameSet::FrameSet(const std::string &frange, Status* ok)
-    : m_valid(false)
-    , m_id(0) {
+    : m_frameData(new internal::FrameSetData(frange))
+{
+    Status stat;
+    internal::RangeMatches matches;
 
-    internal::FrameSet_New_return fs = internal::FrameSet_New(
-                const_cast<char*>(frange.c_str()));
-
-    if (fs.r1 != NULL) {
-        std::string err = "Failed to create Frames(" + frange + "): " + std::string(fs.r1);
-        if (ok != NULL) {
-            ok->setError(err);
-        } else {
-            internal::printErrorIgnored(err);
+    // Process the frame range and get a list of matches
+    if (!(stat = internal::frameRangeMatches(matches, frange))) {
+        if (ok != nullptr) {
+            *ok = stat;
         }
-        free(fs.r1);
+        setInvalid();
         return;
     }
 
-    if (ok != NULL) {
-        ok->clearError();
+    // Process each list of matches and add it to the frame set
+    for (auto &matche : matches) {
+
+        // If handleMatch succeeds, it will populate the FrameSet
+        // with more parts of the range
+        if (handleMatch(&matche, &stat), !stat) {
+
+            // We could not process a match for some reason
+            if (ok != nullptr) {
+                *ok = stat;
+            }
+            setInvalid();
+            return;
+        }
     }
 
-    m_id = fs.r0;
-    m_valid = true;
+    // A valid frameset
+    if (ok != nullptr) ok->clearError();
+
+    // Save the original frame range string
+    m_frameData->frameRange = frange;
 }
 
-FrameSet::FrameSet(uint64_t id)
-    : m_valid(id != 0)
-    , m_id(id)
-{
-}
 
 FrameSet::~FrameSet() {
-    if (m_valid) {
-        m_valid = false;
-        internal::FrameSet_Decref(m_id);
+    setInvalid();
+}
+
+
+FrameSet::FrameSet(const FrameSet& other)
+    : m_frameData(new internal::FrameSetData) {
+
+    if (other.m_frameData != nullptr) {
+        (*m_frameData) = *(other.m_frameData);
     }
 }
 
-FrameSet::FrameSet(const FrameSet& rhs)
-    : m_valid(false)
-    , m_id(0)
-{
-    m_id = internal::FrameSet_Copy(rhs.m_id);
-    if (m_id != 0) {
-        m_valid = true;
+
+void FrameSet::setInvalid() {
+    if ( m_frameData != nullptr) {
+        delete m_frameData;
+        m_frameData = nullptr;
     }
 }
 
-FrameSet& FrameSet::operator=(const FrameSet& rhs) {
-    // Decref the previous value
-    if (m_id != 0) {
-        internal::FrameSet_Decref(m_id);
-        m_valid = false;
+
+void FrameSet::handleMatch(const internal::RangePatternMatch* match, Status* ok) {
+    const int num = match->matches;
+
+    ok->clearError();
+
+    Frame start, end;
+    size_t step = 1;
+
+    switch (num) {
+
+    // Single frame match
+    case 1:
+        start = match->start;
+        m_frameData->ranges.appendUnique(start, start, 1);
+        return;
+
+    // Simple frame range
+    case 2:
+        start = match->start;
+        end = match->end;
+
+        // Handle descending frame ranges, like 10-1
+        step = (start > end) ? -1 : 1;
+
+        m_frameData->ranges.appendUnique(start, end, step);
+        return;
+
+    // Complex frame range
+    case 4:
+        start = match->start;
+        end = match->end;
+        step = match->step;
+
+        if (step == 0) {
+            ok->setError("Got invalid step value 0");
+            return;
+        }
+
+        if (!internal::isRangeModifier(match->stepMod)) {
+            std::stringstream ss;
+            ss << match->stepMod << " is not one of the valid modifiers 'xy:'";
+            ok->setError(ss.str());
+        }
+
+        char mod = match->stepMod[0];
+
+        switch (mod) {
+
+        case 'x':
+            m_frameData->ranges.appendUnique(start, end, step);
+            break;
+
+        case 'y': {
+            // TODO: Add proper support for adding inverse of range.
+            // This approach will add excessive amounts of singe
+            // range elements. They could be compressed into chunks
+            Frame skip = start;
+            Range aRange(start, end, 1);
+            RangeIterator it = aRange.iterValues();
+            Frame val;
+            while (it.next()) {
+                val = (*it);
+                if (val == skip) {
+                    skip += step;
+                    continue;
+                }
+                m_frameData->ranges.appendUnique(val, val, 1);
+            }
+            break;
+        }
+
+        case ':':
+            while (step > 0) {
+                m_frameData->ranges.appendUnique(start, end, step);
+                step--;
+            }
+            break;
+
+        }
+
+        return;
     }
 
-    // Take on the reference from the other
-    m_id = rhs.m_id;
-    if (m_id != 0) {
-        m_valid = true;
-        internal::FrameSet_Incref(rhs.m_id);
+    // If we get here, we  have not handled the match
+    std::stringstream ss;
+    ss << "Unexpected match size: " << num;
+    ok->setError(ss.str());
+}
+
+bool FrameSet::isValid() const {
+    if ( m_frameData == nullptr) {
+        return false;
     }
 
-    return *this;
+    return m_frameData->ranges.length() != 0;
+
 }
 
 std::string FrameSet::string() const {
-    internal::StringProxy str = internal::FrameSet_String(m_id);
-    return str;
+    return isValid() ? m_frameData->frameRange : "";
 }
 
 size_t FrameSet::length() const {
-    return internal::FrameSet_Len(m_id);
+    return isValid() ? m_frameData->ranges.length() : 0;
 };
 
-int FrameSet::index(int frame) const {
-    return internal::FrameSet_Index(m_id, frame);
+size_t FrameSet::index(Frame frame) const {
+    return isValid() ? (size_t)m_frameData->ranges.index(frame) : 0;
 };
 
-int FrameSet::frame(int index, Status* ok) const {
-    internal::FrameSet_Frame_return fs = internal::FrameSet_Frame(m_id, index);
-    if (fs.r1 != NULL) {
-        if (ok != NULL) {
-            ok->setError(fs.r1);
-        } else {
-            internal::printErrorIgnored(fs.r1);
-        }
-        free(fs.r1); // we own the error
+Frame FrameSet::frame(size_t index, Status* ok) const {
+    if (!isValid()) {
         return 0;
     }
 
-    if (ok != NULL) {
-        ok->clearError();
-    }
-    return fs.r0;
+    return m_frameData->ranges.value(index, ok);
 };
 
-void FrameSet::frames(std::vector<int> &frames) const {
+void FrameSet::frames(Frames &frames) const {
     frames.clear();
+
+    if (!isValid()) {
+        return;
+    }
 
     size_t len = length();
     if (len <= 0) {
         return;
     }
 
-    frames.resize(len);
-    size_t n = internal::FrameSet_Frames(m_id, &frames[0]);
-    frames.resize(n);
+    frames.reserve(len);
+
+    RangesIterator it = m_frameData->ranges.iterValues();
+    while (it.next()) {
+        frames.push_back(*it);
+    }
 };
 
-bool FrameSet::hasFrame(int frame) const {
-    return internal::FrameSet_HasFrame(m_id, frame);
+RangesIterator FrameSet::iterFrames() const {
+    if (!isValid()) {
+        return RangesIterator();
+    }
+
+    return m_frameData->ranges.iterValues();
+}
+
+bool FrameSet::hasFrame(Frame frame) const {
+    return isValid() ? m_frameData->ranges.contains(frame) : false;
 };
 
-int FrameSet::start() const {
-    return internal::FrameSet_Start(m_id);
+Frame FrameSet::start() const {
+    return isValid() ? m_frameData->ranges.start() : 0;
 };
 
-int FrameSet::end() const {
-    return internal::FrameSet_End(m_id);
+Frame FrameSet::end() const {
+    return isValid() ? m_frameData->ranges.end() : 0;
 };
 
 std::string FrameSet::frameRange(int pad) const {
-    internal::StringProxy str;
-    if (pad >= 2) {
-        str = internal::FrameSet_FrameRangePadded(m_id, pad);
-    } else {
-        str = internal::FrameSet_FrameRange(m_id);
+    if (!isValid()) {
+        return "";
     }
-    return str;
+
+    if (pad < 2) {
+        return m_frameData->frameRange;
+    }
+
+    return padFrameRange(m_frameData->frameRange, (size_t)pad);
 };
 
 FrameSet FrameSet::inverted() const {
-    internal::GoUint64 invertedId = internal::FrameSet_Invert(m_id);
-    return FrameSet(invertedId);
+    FrameSet newFrameSet;
+
+    if (!isValid()) {
+        return newFrameSet;
+    }
+
+    // get a new range that is inverted
+    Ranges ranges;
+    m_frameData->ranges.inverted(ranges);
+
+    // Create a new internal data member and swap in our ranges
+    newFrameSet.m_frameData = new internal::FrameSetData();
+    newFrameSet.m_frameData->frameRange = ranges.string();
+    std::swap(newFrameSet.m_frameData->ranges, ranges);
+
+    return newFrameSet;
 };
 
 std::string FrameSet::invertedFrameRange(int pad) const {
-    internal::StringProxy ret = internal::FrameSet_InvertedFrameRange(m_id, pad);
-    return ret;
+    if (!isValid()) {
+        return "";
+    }
+
+    Ranges ranges;
+    m_frameData->ranges.inverted(ranges);
+
+    std::string frange = ranges.string();
+
+    if (pad > 1) {
+        frange = padFrameRange(frange, (size_t)pad);
+    }
+
+    return frange;
 };
 
 FrameSet FrameSet::normalized() const {
-    internal::GoUint64 normalizedId = internal::FrameSet_Normalize(m_id);
-    return FrameSet(normalizedId);
+    FrameSet newFrameSet;
+
+    if (!isValid()) {
+        return newFrameSet;
+    }
+
+    // get a new range that is normalized
+    Ranges ranges;
+    m_frameData->ranges.normalized(ranges);
+
+    // Create a new internal data member and swap in our ranges
+    newFrameSet.m_frameData = new internal::FrameSetData();
+    newFrameSet.m_frameData->frameRange = ranges.string();
+    std::swap(newFrameSet.m_frameData->ranges, ranges);
+
+    return newFrameSet;
 };
 
 } // fileseq

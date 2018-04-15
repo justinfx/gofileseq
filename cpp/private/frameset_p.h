@@ -5,6 +5,7 @@
 #include "../ranges/ranges.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace fileseq {
@@ -19,13 +20,9 @@ class FrameSetData {
 public:
     FrameSetData() : frameRange(), ranges() {}
 
-    explicit FrameSetData(const std::string &range)
-        : frameRange(range)
+    explicit FrameSetData(std::string range)
+        : frameRange(std::move(range))
         , ranges() {}
-
-    explicit FrameSetData(const Ranges &rangeArg, const std::string &frangeArg="")
-        : frameRange(frangeArg.empty() ? rangeArg.string() : frangeArg)
-        , ranges(rangeArg) {}
 
     std::string frameRange;
     Ranges ranges;
@@ -34,7 +31,8 @@ public:
 
 // Data structure holding information about
 // the parsed data from a range string
-struct RangePatternMatch {
+struct RangePatternMatch { ;
+
     int matches;
     Frame start;
     Frame end;
@@ -60,12 +58,12 @@ Status frameRangeMatches(RangeMatches &matches, std::string range);
 // Left pads a string to a given with, using "0".
 // If the string begins with a negative "-" character, then
 // padding is inserted between the "-" and the remaining characters.
-std::string zfill(const std::string &src, size_t z);
+std::string zfill(const std::string &src, int z);
 
 // Left pads an int to a given with, using "0".
 // If the string begins with a negative "-" character, then
 // padding is inserted between the "-" and the remaining characters.
-std::string zfill(Frame value, size_t z);
+std::string zfill(Frame value, int z);
 
 
 // Return whether a string component from a frame

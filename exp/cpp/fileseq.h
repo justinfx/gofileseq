@@ -1,12 +1,11 @@
-#ifndef FILESEQ_FILESEQ_H_
-#define FILESEQ_FILESEQ_H_
+#ifndef _GOFILESEQ_CPP_FILESEQ_H_
+#define _GOFILESEQ_CPP_FILESEQ_H_
 
-#include "error.h"
 #include "frameset.h"
 #include "sequence.h"
+#include "types.h"
 
 #include <vector>
-
 
 namespace fileseq {
 
@@ -20,13 +19,24 @@ their current order in the range.
 If zfill > 1, then pad out each number with "0" to the given
 total width.
 */
-std::string framesToFrameRange(const Frames &frames, bool sorted=false, int zfill=0);
+std::string framesToFrameRange(const std::vector<int> &frames, bool sorted=false, int zfill=0);
 
 /*!
 isFrameRange returns true if the given string is a valid frame
 range format. Any padding characters, such as '#' and '@' are ignored.
 */
 bool isFrameRange(const std::string &frange);
+
+/*!
+padFrameRange takes a frame range string and returns a new range
+with each number padded out with zeros to a given width
+*/
+std::string padFrameRange(const std::string &frange, int pad);
+
+/*!
+Returns the proper padding characters, given an amount of padding.
+*/
+std::string getPaddingChars(int pad);
 
 /*!
 FindSequenceOnDisk takes a string that is a compatible/parsible
@@ -49,45 +59,8 @@ If an error occurs while reading the filesystem, it can be
 captured by passing a fileseq::Status pointer.
 */
 FileSequence findSequenceOnDisk(const std::string &pattern,
-                                PadStyle style,
+                                PadStyle style=PadStyleDefault,
                                 Status* ok=NULL);
-
-/*!
-FindSequenceOpts enums define behavior of finding
-sequences on disk.
-*/
-enum FindSequenceOpts {
-    /// Default flag - No options
-    kNoOpt          = 0,
-    /// Return hidden files
-    kOptHiddenFiles = 1 << 0,
-    /// Return single files that have no frame range
-    kOptSingleFiles = 1 << 1,
-};
-
-inline FindSequenceOpts operator|(FindSequenceOpts a, FindSequenceOpts b) {
-    return static_cast<FindSequenceOpts>(static_cast<int>(a) | static_cast<int>(b));
-}
-
-inline FindSequenceOpts operator&(FindSequenceOpts a, FindSequenceOpts b) {
-    return static_cast<FindSequenceOpts>(static_cast<int>(a) & static_cast<int>(b));
-}
-
-/*!
-\deprecated Use findSequencesOnDisk overload that accepts FindSequenceOpts
-
-FindSequencesOnDisk searches a given directory path and sorts all
-valid sequence-compatible files into a list of FileSequence matches.
-By default, only non-hidden sequences of files will be returned.
-Extra options may be given to control whether things like hidden
-files, or single (non-sequence) files should be included in the
-search results.
-*/
-DEPRECATED(Status findSequencesOnDisk(FileSequences &seqs,
-                           const std::string &path,
-                           bool hiddenFiles,
-                           bool singleFiles,
-                           PadStyle style=PadStyleDefault));
 
 /*!
 FindSequencesOnDisk searches a given directory path and sorts all
@@ -99,9 +72,12 @@ search results.
 */
 Status findSequencesOnDisk(FileSequences &seqs,
                            const std::string &path,
-                           FindSequenceOpts opts=kNoOpt,
+                           bool hiddenFiles=false,
+                           bool singleFiles=false,
                            PadStyle style=PadStyleDefault);
+
+std::string allocStats();
 
 } // fileseq
 
-#endif // FILESEQ_FILESEQ_H_
+#endif // _GOFILESEQ_CPP_FILESEQ_H_

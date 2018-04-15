@@ -59,4 +59,4 @@ seql some/images
 C++ Support
 ------------
 
-A C++ pure port of gofileseq is also available in the [cpp-port](https://github.com/justinfx/gofileseq/tree/master/cpp-port) dir
+A C++ pure port of gofileseq is also available in the [cpp](https://github.com/justinfx/gofileseq/tree/master/cpp) dir

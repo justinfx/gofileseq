@@ -20,7 +20,7 @@ const char kPathSep =
 bool contains(const std::string &str, const std::string &substr);
 
 
-// replace all occurances of "from" with "to" within "str"
+// replace all occurrences of "from" with "to" within "str"
 void replace_all(std::string &str, const std::string &from, const std::string &to);
 
 

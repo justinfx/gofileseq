@@ -294,13 +294,13 @@ protected:
         m_seq = fileseq::FileSequence("/a/path/to/the/file_foo.1-10,50,70-100x5#.ext", &stat);
         ASSERT_TRUE(stat) << stat;
 
-        // {
-        //     Case t = {
-        //         "{{dir}}{{base}}{{frange}}{{pad}}{{ext}}",
-        //         m_seq.string(),
-        //     };
-        //     m_cases.push_back(t);
-        // }
+        {
+            Case t = {
+                "{{dir}}{{base}}{{frange}}{{pad}}{{ext}}",
+                m_seq.string(),
+            };
+            m_cases.push_back(t);
+        }
         {
             Case t = {
                 "{{startf}} {{endf}} {{len}} {{zfill}}",
@@ -308,13 +308,13 @@ protected:
             };
             m_cases.push_back(t);
         }
-        // {
-        //     Case t = {
-        //         "{{base}}{{if inverted}}{{inverted}}{{else}}{{frange}}{{end}}{{ext}}",
-        //         "file_foo.11-49,51-69,71-74,76-79,81-84,86-89,91-94,96-99.ext",
-        //     };
-        //     m_cases.push_back(t);
-        // }
+        {
+            Case t = {
+                "{{base}}{{inverted}}{{ext}}",
+                "file_foo.11-49,51-69,71-74,76-79,81-84,86-89,91-94,96-99.ext",
+            };
+            m_cases.push_back(t);
+        }
     }
 
     fileseq::FileSequence m_seq;
@@ -324,9 +324,7 @@ protected:
 
 TEST_F( TestNewFileSequenceFormat, Format ) {
     fileseq::Status stat;
-    for (size_t i=0; i < m_cases.size(); ++i) {
-        Case t = m_cases[i];
-
+    for (auto t : m_cases) {
         std::string actual = m_seq.format(t.format, &stat);
         ASSERT_TRUE(stat) << "Failed to format using: " << t.format;
         EXPECT_EQ(t.expected, actual) << "Given format: " << t.format;
@@ -361,18 +359,16 @@ TEST_F( TestSplitPatternChars, SplitPattern ) {
 
     const std::string chars = ":xy,";
 
-    for (size_t i=0; i < m_cases.size(); ++i) {
-        Case t = m_cases[i];
-
-        for (size_t j=0; j < chars.size(); ++j) {
+    for (auto t : m_cases) {
+        for (char j : chars) {
             std::string path( t.path );
-            fileseq::strings::replace_all(path, "%s", std::string(1, chars[j]));
+            fileseq::strings::replace_all(path, "%s", std::string(1, j));
 
             m_seq = fileseq::FileSequence(path, &stat);
             ASSERT_TRUE(stat) << stat;
 
             std::string base( t.base );
-            fileseq::strings::replace_all(base, "%s", std::string(1, chars[j]));
+            fileseq::strings::replace_all(base, "%s", std::string(1, j));
 
             EXPECT_EQ(path, m_seq.string());
             EXPECT_EQ(base, m_seq.basename());
@@ -383,44 +379,44 @@ TEST_F( TestSplitPatternChars, SplitPattern ) {
     }
 };
 
-
+//
 // TEST( Benchmark, FileSequence ) {
 //     const std::string path = "/path/to/file/sequence/name_a_b_c_d_description.1-100x2,200-300y3,500,-10-0.ext";
-
+//
 //     fileseq::Status ok;
 //     fileseq::FileSequence fs;
-
+//
 //     std::string dir, base, frange, invert;
 //     fileseq::Frame start, end;
 //     size_t length;
-
+//
 //     using namespace std;
 //     clock_t begin = clock();
-
+//
 //     const int N = 100000;
-
+//
 //     for (int i=0; i < N; ++i) {
-
+//
 //         fs = fileseq::FileSequence(path, &ok);
 //         ASSERT_TRUE(ok);
-
+//
 //         dir = fs.dirname();
 //         base = fs.basename();
 //         frange = fs.frameRange();
 //         start = fs.start();
 //         end = fs.end();
 //         length = fs.length();
-
+//
 //         invert = fs.invertedFrameRange();
 //     }
-
+//
 //     clock_t stop = clock();
 //     double elapsed_secs = double(stop - begin) / CLOCKS_PER_SEC;
-
+//
 //     // No warnings about unused vars
 //     (void)start;
 //     (void)end;
 //     (void)length;
-
+//
 //     std::cerr << "Total secs: " << elapsed_secs << "\n";
 // }

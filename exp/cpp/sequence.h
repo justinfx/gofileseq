@@ -1,29 +1,12 @@
-#ifndef FILESEQ_SEQUENCE_H_
-#define FILESEQ_SEQUENCE_H_
+#ifndef _GOFILESEQ_CPP_SEQUENCE_H_
+#define _GOFILESEQ_CPP_SEQUENCE_H_
 
 #include "frameset.h"
-#include "pad.h"
+#include "types.h"
 
 #include <ostream>
-#include <vector>
 
 namespace fileseq {
-
-class FileSequence;
-
-
-// Fwd Decl
-namespace internal {
-
-class FileSequenceData;
-
-} // internal
-
-
-// typedefs
-typedef std::vector<FileSequence> FileSequences;
-
-
 
 /*! \class FileSequence
 Represents a path to a sequence of files,
@@ -48,73 +31,31 @@ class FileSequence {
 
 public:
     /*!
-    Default constructor creates an invalid FileSequence
+    Create a new FrameSet from a given frame range string.
+    Uses PadStyleDefault for the padding char style.
+    If the range could not be parsed, Status will evaluate to false
+    and be filled with the error message
     */
-    FileSequence();
+    explicit FileSequence(const std::string &frange, Status* ok=NULL);
 
     /*!
-    Create a FileSequence from a string sequence path.
-    The path should be a valid sequence, expressing a frame range,
-    or a single file path.
-
-    If error is non-nil, then the given sequence string could not
-    be successfully parsed.
-
-    PadStyleDefault is used as the padding character formatter
-
-    Example paths:
-        /path/to/image_foo.1-10x2#.jpg
-        /path/to/single_image.0100.jpg
+    Create a new FrameSet from a given frame range string, and a specific
+    style of converting between padding chars and their numberic width.
+    If the range could not be parsed, Status will evaluate to false
+    and be filled with the error message
     */
-    explicit FileSequence(const std::string &path, Status* ok=NULL);
+    FileSequence(const std::string &frange, PadStyle padStyle, Status* ok=NULL);
 
-    /*!
-    Create a FileSequence from a string sequence path.
-    The path should be a valid sequence, expressing a frame range,
-    or a single file path.
+    ~FileSequence();
 
-    If error is non-nil, then the given sequence string could not
-    be successfully parsed.
-
-    The sequence uses the style of padding given, in
-    order to convert between padding characters and their numeric width.
-
-    Example path w/ PadStyleHash1:
-        /path/to/image_foo.1-10x2#.jpg => /path/to/image_foo.1.jpg ...
-        /path/to/image_foo.1-10x2@.jpg => /path/to/image_foo.1.jpg ...
-        /path/to/image_foo.1-10x2##.jpg => /path/to/image_foo.01.jpg ...
-
-    Example path w/ PadStyleHash4:
-        /path/to/image_foo.1-10x2#.jpg => /path/to/image_foo.0001.jpg ...
-        /path/to/image_foo.1-10x2@.jpg => /path/to/image_foo.1.jpg ...
-        /path/to/image_foo.1-10x2##.jpg => /path/to/image_foo.00000001.jpg ...
-    */
-    FileSequence(const std::string &path, PadStyle padStyle, Status* ok=NULL);
-
-    virtual ~FileSequence();
-
-    // Copy constructor
     FileSequence(const FileSequence& rhs);
 
-    // Assignment
-    FileSequence& operator=(FileSequence rhs) {
-        // Swap with copied arg
-        swap(*this, rhs);
-        return *this;
-    }
-
-    // Swap functionality
-    friend void swap(FileSequence &first, FileSequence &second) {
-        using std::swap;
-
-        swap(first.m_seqData, second.m_seqData);
-        swap(first.m_frameSet, second.m_frameSet);
-    }
+    FileSequence& operator=(const FileSequence& rhs);
 
     /*!
     Return whether the range was properly parsed
     */
-    bool isValid() const;
+    bool isValid() const { return m_valid; }
 
     /*!
     Return the string representation of the file sequence
@@ -136,12 +77,12 @@ public:
     /*!
     Return the first frame number in the range
     */
-    Frame start() const;
+    int start() const;
 
     /*!
     Return the last frame number in the range
     */
-    Frame end() const;
+    int end() const;
 
     /*!
     zfill returns the number of "0" fill characters used to
@@ -258,7 +199,7 @@ public:
     returns the original path. If the index is not valid, this will
     return an empty string.
     */
-    std::string index(size_t idx) const;
+    std::string index(int idx) const;
 
     /*!
     Frame returns a path to the given frame in the sequence.
@@ -267,13 +208,13 @@ public:
 
     Example:
 
-        seq.frame(1)
+        seq.Frame(1)
         >> /foo/bar.0001.exr
 
-        seq.frame("#")
+        seq.Frame("#")
         >> /foo/bar.#.exr
     */
-    std::string frame(Frame frame) const;
+    std::string frame(int frame) const;
 
     /*!
     Frame returns a path to the given frame in the sequence.
@@ -282,10 +223,10 @@ public:
 
     Example:
 
-        seq.frame(1)
+        seq.Frame(1)
         >> /foo/bar.0001.exr
 
-        seq.frame("#")
+        seq.Frame("#")
         >> /foo/bar.#.exr
     */
     std::string frame(const std::string &fillPattern) const;
@@ -300,11 +241,16 @@ public:
     /*!
     Set a new FrameSet for this sequence
     */
-    void setFrameSet(const FrameSet &frameSet);
+    void setFrameSet(FrameSet &frameSet);
 
 private:
-    bool init(const std::string &frange, PadStyle padStyle, Status* ok=NULL);
+    explicit FileSequence(uint64_t id);
 
+    void init(const std::string &frange, PadStyle padStyle, Status* ok=NULL);
+
+    bool m_valid;
+    uint64_t m_id;
+    uint64_t m_fsetId;
 
     friend FileSequence findSequenceOnDisk(const std::string &pattern, Status* ok);
     friend FileSequence findSequenceOnDisk(const std::string &pattern, PadStyle style, Status* ok);
@@ -314,12 +260,8 @@ private:
                                       bool hiddenFiles,
                                       bool singleFiles,
                                       PadStyle style);
-private:
-    internal::FileSequenceData* m_seqData;
-    FrameSet m_frameSet;
-
 };
 
 } // fileseq
 
-#endif // FILESEQ_SEQUENCE_H_
+#endif // _GOFILESEQ_CPP_SEQUENCE_H_

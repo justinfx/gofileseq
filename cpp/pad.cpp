@@ -44,15 +44,15 @@ std::string padFrameRange(const std::string &frange, size_t pad) {
 
         case 1:
             // Single frame match:  10
-            parts.push_back(internal::zfill(rxMatch.start, pad));
+            parts.push_back(internal::zfill(rxMatch.start, (int)pad));
             break;
 
         case 2:
             // Simple frame range match: 1-10
             rangeFormatter.str(std::string());
-            rangeFormatter << internal::zfill(rxMatch.start, pad)
+            rangeFormatter << internal::zfill(rxMatch.start, (int)pad)
                            << "-"
-                           << internal::zfill(rxMatch.end, pad);
+                           << internal::zfill(rxMatch.end, (int)pad);
 
             parts.push_back(rangeFormatter.str());
             break;
@@ -60,9 +60,9 @@ std::string padFrameRange(const std::string &frange, size_t pad) {
         case 4:
             // Frame range with stepping:  1-10x2
             rangeFormatter.str(std::string());
-            rangeFormatter << internal::zfill(rxMatch.start, pad)
+            rangeFormatter << internal::zfill(rxMatch.start, (int)pad)
                            << "-"
-                           << internal::zfill(rxMatch.end, pad)
+                           << internal::zfill(rxMatch.end, (int)pad)
                            << rxMatch.stepMod
                            << rxMatch.step;
 
