@@ -137,7 +137,7 @@ Status frameRangeMatches(RangeMatches &matches, std::string range) {
 
 std::string zfill(const std::string &src, int z) {
     size_t size = src.size();
-    if (size >= z) {
+    if (size >= size_t(z)) {
         return src;
     }
 
