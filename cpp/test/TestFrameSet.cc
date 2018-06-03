@@ -67,6 +67,16 @@ protected:
             Case t = {"10-1", FRAME_ARR_TO_VEC(arr)};
             m_cases.push_back(t);
         }
+        {
+            fileseq::Frame arr[] = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+            Case t = {"10-1x-1", FRAME_ARR_TO_VEC(arr)};
+            m_cases.push_back(t);
+        }
+        {
+            fileseq::Frame arr[] = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+            Case t = {"10-1x1", FRAME_ARR_TO_VEC(arr)};
+            m_cases.push_back(t);
+        }
     }
 
     std::vector<Case> m_cases;

@@ -26,7 +26,7 @@ bool getRangePatternMatch(RangePatternMatch &match, const std::string &range) {
     // Single frame:  10
     static const char* s_pattern2 = "^(-?\\d+)$";
     // Complex range:  1-10x2
-    static const char* s_pattern3 = R"(^(-?\d+)-(-?\d+)([:xy])(\d+)$)";
+    static const char* s_pattern3 = R"(^(-?\d+)-(-?\d+)([:xy])(-?\d+)$)";
 
 #if HAVE_REGEX == 1
     static const auto flags = std::regex_constants::optimize|std::regex_constants::ECMAScript;
