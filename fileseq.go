@@ -26,7 +26,7 @@ import (
 	"strings"
 )
 
-const Version = "2.6.0"
+const Version = "2.6.1"
 
 var (
 	rangePatterns []*regexp.Regexp
@@ -46,7 +46,7 @@ func init() {
 		// Single frame:  10
 		regexp.MustCompile(`^(-?\d+)$`),
 		// Complex range:  1-10x2
-		regexp.MustCompile(`^(-?\d+)-(-?\d+)([:xy])(\d+)$`),
+		regexp.MustCompile(`^(-?\d+)-(-?\d+)([:xy])(-?\d+)$`),
 	}
 
 	// Regular expression for matching a file sequence string.

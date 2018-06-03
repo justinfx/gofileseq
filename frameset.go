@@ -17,15 +17,13 @@ type FrameSet struct {
 // Create a new FrameSet from a given frame range string
 // Returns an error if the frame range could not be parsed.
 func NewFrameSet(frange string) (*FrameSet, error) {
-	var err error
-
-	frameSet := &FrameSet{frange, &ranges.InclusiveRanges{}}
-
 	// Process the frame range and get a slice of match slices
 	matches, err := frameRangeMatches(frange)
 	if err != nil {
 		return nil, err
 	}
+
+	frameSet := &FrameSet{frange, &ranges.InclusiveRanges{}}
 
 	// Process each slice match and add it to the frame set
 	for _, match := range matches {

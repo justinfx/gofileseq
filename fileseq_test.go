@@ -26,12 +26,19 @@ var stringRangeTable = []struct {
 	{" 1 - 10x2, 50, 60 - 62, 70 - 74x2 ", []int{1, 3, 5, 7, 9, 50, 60, 61, 62, 70, 72, 74}},
 	// Descending test
 	{"10-1", []int{10, 9, 8, 7, 6, 5, 4, 3, 2, 1}},
+	{"10-1x-1", []int{10, 9, 8, 7, 6, 5, 4, 3, 2, 1}},
+	{"10-1x1", []int{10, 9, 8, 7, 6, 5, 4, 3, 2, 1}},
 }
 
 func TestNewFrameSet(t *testing.T) {
 	for i, tt := range stringRangeTable {
-		if !IsFrameRange(tt.frange) {
+		isRange := IsFrameRange(tt.frange)
+		if !isRange && tt.expected != nil {
 			t.Fatalf("#%d: %q did not validate as a frame range", i, tt.frange)
+		}
+
+		if isRange && tt.expected == nil {
+			t.Fatalf("#%d: %q validated as a frame range when we expected it to fail", i, tt.frange)
 		}
 
 		s, err := NewFrameSet(tt.frange)
