@@ -156,8 +156,8 @@ void test_fileseqs() {
 void test_find_seqs() {
     fileseq::Status ok;
 
-    std::string path = "../../testdata/seqB.#.jpg";
-    std::string expect = "../../testdata/seqB.5-14,16-18,20#.jpg";
+    std::string path = "../test/testdata/seqB.#.jpg";
+    std::string expect = "../test/testdata/seqB.5-14,16-18,20#.jpg";
 
     fileseq::FileSequence fs = fileseq::findSequenceOnDisk(path, &ok);
     if (!ok) {
@@ -173,15 +173,15 @@ void test_find_seqs() {
               << std::endl;
     assert (!fs.isValid());
 
-    path = "../../testdata/seqB.####.jpg";
-    expect = "../../testdata/seqB.5-14,16-18,20####.jpg";
+    path = "../test/testdata/seqB.####.jpg";
+    expect = "../test/testdata/seqB.5-14,16-18,20####.jpg";
     std::cout << "findSequenceOnDisk for " << path << std::endl;
     fs = fileseq::findSequenceOnDisk(path, fileseq::PadStyleHash1, &ok);
     if (!ok) std::cout << "  Error: " << ok << std::endl;
     assert (ok);
     assert (fs.string() == expect);
 
-    path = "../../testdata";
+    path = "../test/testdata";
     std::cout << "findSequencesOnDisk for " << path << std::endl;
     fileseq::FileSequences seqs;
     seqs.push_back(fileseq::FileSequence("existing.1-100#.ext"));

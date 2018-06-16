@@ -11,11 +11,20 @@ This is an experimental library which provides a C++ wrapper over gofileseq, usi
 
 Go is only needed to build the library and is not a runtime dependency.
 
-You don't have to have qmake or waf if you want to compile it with your own Makefile :-)
+You don't have to have qmake or waf, if you want to compile it with your own Makefile :-)
 
 ### Runtime Dependencies
 
 None
+
+### Building with waf
+
+```shell
+$ cd <path/to/gofileseq>/cpp
+$ waf configure --prefix=/path/to/install/to
+$ waf install
+$ waf test
+```
 
 ### Building with qmake
 
@@ -31,14 +40,4 @@ $ make
 $ cd <path/to/gofileseq>/cpp/test
 $ qmake
 $ make
-```
-
-### Building with waf
-
-```shell
-$ cd <path/to/gofileseq>/cpp
-$ waf configure --prefix=/path/to/install/to
-$ waf build
-$ waf test
-$ waf install
 ```
