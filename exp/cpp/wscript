@@ -83,7 +83,7 @@ def build(bld):
     # Install Go libs
     bld.install_files(
         '${PREFIX}/lib',
-        shared_tsk.outputs + static_tsk.outputs,
+        ['build/%s.so' % golibname, 'build/%s.a' % golibname],
         )
 
     # C++ lib
