@@ -1,7 +1,7 @@
 /*
 seqls - list directory contents, rolled up into file sequences
 */
-package main
+package main // import "github.com/justinfx/gofileseq/cmd/seqls"
 
 import (
 	"fmt"
