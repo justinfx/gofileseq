@@ -1,4 +1,4 @@
-module github.com/justinfx/gofileseq
+module github.com/justinfx/gofileseq/v2
 
 require (
 	github.com/MichaelTJones/walk v0.0.0-20140707193007-3af09438b0ab
