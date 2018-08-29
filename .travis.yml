@@ -30,7 +30,6 @@ install: true
 jobs:
   include:
     - stage: deploy
-      script: skip
       if: tag =~ ^v\d+
       deploy:
         provider: script
