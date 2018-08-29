@@ -12,7 +12,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/MichaelTJones/walk"
-	"github.com/justinfx/gofileseq"
+	"github.com/justinfx/gofileseq/v2"
 )
 
 // number of goroutines to spawn for processing directories

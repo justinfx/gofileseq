@@ -1,8 +1,5 @@
 language: go
       
-go:
-  - "1.10"
-
 # This will run on Travis' 'new' container-based infrastructure
 sudo: false
 
@@ -18,8 +15,17 @@ addons:
       - doxygen-gui
       - graphviz
 
-script:
-  - go test -v $(go list ./... | grep -v /vendor/)
+matrix:
+  include:
+  - go: "1.10.x"
+    script:  go test -v $(go list ./... | grep -v /vendor/)
+  - go: "1.11.x"
+    script: go test -v -mod=vendor ./...
+
+env:
+  - GO111MODULE=on
+
+install: true
 
 jobs:
   include:

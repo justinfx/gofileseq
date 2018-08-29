@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"unsafe"
 
-	"github.com/justinfx/gofileseq"
+	"github.com/justinfx/gofileseq/v2"
 )
 
 //export FrameSetId

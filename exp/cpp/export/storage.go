@@ -4,7 +4,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/justinfx/gofileseq"
+	"github.com/justinfx/gofileseq/v2"
 )
 
 var (

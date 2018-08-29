@@ -11,7 +11,7 @@ import (
 	"strconv"
 
 	"github.com/jessevdk/go-flags"
-	"github.com/justinfx/gofileseq"
+	"github.com/justinfx/gofileseq/v2"
 )
 
 var Version = fileseq.Version
