@@ -66,6 +66,7 @@ def _create_test(bld):
             'test/gtest/src/gtest-all.cc']),
         includes = [ "test", "test/gtest/include", "test/gtest", "." ],
         use = use,
+        lib = ['pthread'],
         stlib = stlib,
         cxxflags = ["-Wno-undef", "-g", "-ggdb"],
         defines = ["FILESEQ_TEST_DIR=%s" % bld.path.parent.abspath()],
@@ -105,9 +106,10 @@ def check_cxx_regex(ctx):
             okmsg="Done",
             cxxflags=['-std=c++11'],
             fragment=REGEX_CPP_TEST,
+            mandatory=False,
         )
 
-    if have_regex.strip() == "1":
+    if have_regex and have_regex.strip() == "1":
         ctx.define("HAVE_REGEX", 1, comment="C++11 <regex> is supported")
     else:
         ctx.check_cxx(
