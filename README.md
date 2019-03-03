@@ -1,6 +1,6 @@
 Fileseq  
 =======
-[![Go project version](https://badge.fury.io/go/github.com%2Fjustinfx%2Fgofileseq.svg)](https://badge.fury.io/go/github.com%2Fjustinfx%2Fgofileseq) 
+[![Go project version](https://img.shields.io/github/release/justinfx/gofileseq.svg)](https://badge.fury.io/go/github.com%2Fjustinfx%2Fgofileseq) 
 [![GoDoc](https://godoc.org/github.com/justinfx/gofileseq?status.svg)](https://godoc.org/github.com/justinfx/gofileseq) 
 [![Travis Build Status](https://api.travis-ci.org/justinfx/gofileseq.svg)](https://www.travis-ci.org/justinfx/gofileseq) 
 [![Go Report](https://goreportcard.com/badge/github.com/justinfx/gofileseq)](https://goreportcard.com/report/github.com/justinfx/gofileseq)
