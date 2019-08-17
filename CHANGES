@@ -1,5 +1,11 @@
 Changes:
 
+2.7.0
+----------------
+* cmd/seqls - Properly build against gofileseq/v2
+* cmd/seqls - Add --hash1 flag to use pad hash width=1 instead of 4
+* cmd/seqls - Add --strict flag to apply strict length of search pattern pad character to matches
+
 2.6.0
 ----------------
 * cpp: Using C++11 and std::regex by default. Detect older compilers and use libpcre automatically as needed.
