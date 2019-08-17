@@ -680,14 +680,16 @@ func TestListFiles(t *testing.T) {
 
 func TestFindSequenceOnDisk(t *testing.T) {
 	type TestSet struct {
+		name   string
 		mapper PadStyle
 		tests  map[string]string
 	}
 
 	table := []TestSet{
 		{
-			PadStyleHash1,
-			map[string]string{
+			name:   "pad hash 1",
+			mapper: PadStyleHash1,
+			tests: map[string]string{
 				"testdata/seqC.@@.tif":        "testdata/seqC.-5-2,4-10,20-21,27-30##.tif",
 				"testdata/seqC.0010.tif":      "",
 				"testdata/seqC.10.tif":        "testdata/seqC.-5-2,4-10,20-21,27-30##.tif",
@@ -706,8 +708,9 @@ func TestFindSequenceOnDisk(t *testing.T) {
 		},
 
 		{
-			PadStyleHash4,
-			map[string]string{
+			name:   "pad hash 4",
+			mapper: PadStyleHash4,
+			tests: map[string]string{
 				"testdata/seqC.@@.tif":     "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
 				"testdata/seqC.0010.tif":   "",
 				"testdata/seqC.10.tif":     "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
@@ -726,24 +729,26 @@ func TestFindSequenceOnDisk(t *testing.T) {
 	}
 
 	for _, tg := range table {
-		for pattern, expected := range tg.tests {
-			seq, err := FindSequenceOnDiskPad(pattern, tg.mapper, StrictPadding)
-			if err != nil {
-				t.Fatal(err.Error())
-			}
-			if seq == nil && expected != "" {
-				t.Fatalf("For input %q, expected %q ; got a nil sequence", pattern, expected)
-			}
+		t.Run(tg.name, func(t *testing.T) {
+			for pattern, expected := range tg.tests {
+				seq, err := FindSequenceOnDiskPad(pattern, tg.mapper, StrictPadding)
+				if err != nil {
+					t.Fatal(err.Error())
+				}
+				if seq == nil && expected != "" {
+					t.Fatalf("For input %q, expected %q ; got a nil sequence", pattern, expected)
+				}
 
-			var actual string
-			if expected != "" {
-				actual = seq.String()
-			}
+				var actual string
+				if expected != "" {
+					actual = seq.String()
+				}
 
-			if actual != expected {
-				t.Fatalf("For input %q, expected %q ; got %q", pattern, expected, actual)
+				if actual != expected {
+					t.Fatalf("For input %q,\n  expected %q\n  got %q", pattern, expected, actual)
+				}
 			}
-		}
+		})
 	}
 }
 
