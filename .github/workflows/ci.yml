@@ -9,6 +9,7 @@ jobs:
       matrix:
         os: [
           'ubuntu-19.04',
+          'macOs-latest',
 #          'windows-latest'
         ]
         go: ['1.12.9']
