@@ -16,8 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
+#        with:
+#          fetch-depth: 1
 
       - name: Setup go
         uses: actions/setup-go@v1
