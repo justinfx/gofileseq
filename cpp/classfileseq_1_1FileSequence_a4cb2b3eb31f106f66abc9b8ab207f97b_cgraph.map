@@ -1,14 +1,11 @@
 <map id="fileseq::FileSequence::format" name="fileseq::FileSequence::format">
-<area shape="rect" id="node2" href="$classfileseq_1_1FileSequence.html#a242fab4913faf6007c537fbbd30c2157" title="fileseq::FileSequence\l::isValid" alt="" coords="203,129,349,170"/>
-<area shape="rect" id="node3" href="$classfileseq_1_1FileSequence.html#a05d9769a78aa65f79623b0cc85820f23" title="fileseq::FileSequence\l::string" alt="" coords="203,194,349,235"/>
-<area shape="rect" id="node6" href="$classfileseq_1_1FileSequence.html#a82aba52dcabb52aedfcbf773b321a03f" title="fileseq::FileSequence\l::frameRange" alt="" coords="413,253,560,294"/>
-<area shape="rect" id="node11" href="$classfileseq_1_1FileSequence.html#a09cd30eca2bff51bd7175147ddb2d8fc" title="fileseq::FileSequence\l::invertedFrameRange" alt="" coords="201,318,351,359"/>
-<area shape="rect" id="node4" href="$classfileseq_1_1FileSequence.html#a5a6394ae985323d8ca17194bcc98e757" title="fileseq::FileSequence\l::dirname" alt="" coords="413,5,560,46"/>
-<area shape="rect" id="node5" href="$classfileseq_1_1FileSequence.html#a8e6d999540bd428104ed2af8ac88d18c" title="fileseq::FileSequence\l::basename" alt="" coords="413,70,560,111"/>
-<area shape="rect" id="node9" href="$classfileseq_1_1FileSequence.html#a8b014a127605c2b8c476a52f6783dd4d" title="fileseq::FileSequence\l::padding" alt="" coords="413,135,560,177"/>
-<area shape="rect" id="node10" href="$classfileseq_1_1FileSequence.html#abc67d7819ed5c0661dd6da0224d51caf" title="fileseq::FileSequence::ext" alt="" coords="400,201,573,228"/>
-<area shape="rect" id="node7" href="$classfileseq_1_1FrameSet.html#ac4ddcd05faae9b17e96d562cd95c6939" title="fileseq::FrameSet::\lframeRange" alt="" coords="627,267,760,309"/>
-<area shape="rect" id="node8" href="$classfileseq_1_1FrameSet.html#af8b4c0a5b86c9400f229eddb8352e307" title="Return whether the FrameSet is properly parsed and valid as a range. " alt="" coords="813,307,947,349"/>
-<area shape="rect" id="node12" href="$classfileseq_1_1FileSequence.html#a679aa1ba73ec7886e71a7883b7c77f84" title="fileseq::FileSequence\l::zfill" alt="" coords="413,318,560,359"/>
-<area shape="rect" id="node13" href="$classfileseq_1_1FrameSet.html#ab83503f9f44181f2d742cdbb7d7af803" title="fileseq::FrameSet::\linvertedFrameRange" alt="" coords="622,347,765,389"/>
+<area shape="rect" id="node2" href="$classfileseq_1_1FileSequence.html#a242fab4913faf6007c537fbbd30c2157" title="fileseq::FileSequence\l::isValid" alt="" coords="202,129,349,171"/>
+<area shape="rect" id="node3" href="$classfileseq_1_1FileSequence.html#a05d9769a78aa65f79623b0cc85820f23" title="fileseq::FileSequence\l::string" alt="" coords="202,195,349,236"/>
+<area shape="rect" id="node6" href="$classfileseq_1_1FileSequence.html#a82aba52dcabb52aedfcbf773b321a03f" title="fileseq::FileSequence\l::frameRange" alt="" coords="412,253,559,295"/>
+<area shape="rect" id="node9" href="$classfileseq_1_1FileSequence.html#a09cd30eca2bff51bd7175147ddb2d8fc" title="fileseq::FileSequence\l::invertedFrameRange" alt="" coords="200,315,351,356"/>
+<area shape="rect" id="node4" href="$classfileseq_1_1FileSequence.html#a5a6394ae985323d8ca17194bcc98e757" title="fileseq::FileSequence\l::dirname" alt="" coords="412,5,559,47"/>
+<area shape="rect" id="node5" href="$classfileseq_1_1FileSequence.html#a8e6d999540bd428104ed2af8ac88d18c" title="fileseq::FileSequence\l::basename" alt="" coords="412,71,559,112"/>
+<area shape="rect" id="node7" href="$classfileseq_1_1FileSequence.html#a8b014a127605c2b8c476a52f6783dd4d" title="fileseq::FileSequence\l::padding" alt="" coords="412,136,559,177"/>
+<area shape="rect" id="node8" href="$classfileseq_1_1FileSequence.html#abc67d7819ed5c0661dd6da0224d51caf" title="fileseq::FileSequence::ext" alt="" coords="399,202,572,229"/>
+<area shape="rect" id="node10" href="$classfileseq_1_1FileSequence.html#a679aa1ba73ec7886e71a7883b7c77f84" title="fileseq::FileSequence\l::zfill" alt="" coords="412,319,559,360"/>
 </map>

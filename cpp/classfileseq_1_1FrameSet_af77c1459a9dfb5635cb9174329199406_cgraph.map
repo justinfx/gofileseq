@@ -1,0 +1,6 @@
+<map id="fileseq::FrameSet::FrameSet" name="fileseq::FrameSet::FrameSet">
+<area shape="rect" id="node2" href="$classfileseq_1_1FrameSet.html#a6fda0dc278acf42b50dec993c6894582" title="fileseq::FrameSet::\lFrameSet" alt="" coords="197,5,331,47"/>
+<area shape="rect" id="node3" href="$classfileseq_1_1FrameSet.html#ae22f560f441f9f7eff0a9b5f504a6ee2" title="The first frame of the range. " alt="" coords="197,71,331,112"/>
+<area shape="rect" id="node5" href="$classfileseq_1_1FrameSet.html#a4cf64b52731c43e0e6a83c345ad351c5" title="The last frame in the range. " alt="" coords="187,137,341,163"/>
+<area shape="rect" id="node4" href="$classfileseq_1_1FrameSet.html#af8b4c0a5b86c9400f229eddb8352e307" title="Return whether the FrameSet is properly parsed and valid as a range. " alt="" coords="389,100,523,141"/>
+</map>

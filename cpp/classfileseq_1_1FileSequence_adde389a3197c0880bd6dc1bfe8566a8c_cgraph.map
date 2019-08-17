@@ -1,6 +1,6 @@
 <map id="fileseq::FileSequence::frame" name="fileseq::FileSequence::frame">
-<area shape="rect" id="node2" href="$classfileseq_1_1FileSequence.html#a679aa1ba73ec7886e71a7883b7c77f84" title="fileseq::FileSequence\l::zfill" alt="" coords="213,5,360,46"/>
-<area shape="rect" id="node3" href="$classfileseq_1_1FileSequence.html#a5a6394ae985323d8ca17194bcc98e757" title="fileseq::FileSequence\l::dirname" alt="" coords="213,70,360,111"/>
-<area shape="rect" id="node4" href="$classfileseq_1_1FileSequence.html#a8e6d999540bd428104ed2af8ac88d18c" title="fileseq::FileSequence\l::basename" alt="" coords="213,135,360,177"/>
-<area shape="rect" id="node5" href="$classfileseq_1_1FileSequence.html#abc67d7819ed5c0661dd6da0224d51caf" title="fileseq::FileSequence::ext" alt="" coords="200,201,373,228"/>
+<area shape="rect" id="node2" href="$classfileseq_1_1FileSequence.html#a679aa1ba73ec7886e71a7883b7c77f84" title="fileseq::FileSequence\l::zfill" alt="" coords="213,5,360,47"/>
+<area shape="rect" id="node3" href="$classfileseq_1_1FileSequence.html#a5a6394ae985323d8ca17194bcc98e757" title="fileseq::FileSequence\l::dirname" alt="" coords="213,71,360,112"/>
+<area shape="rect" id="node4" href="$classfileseq_1_1FileSequence.html#a8e6d999540bd428104ed2af8ac88d18c" title="fileseq::FileSequence\l::basename" alt="" coords="213,136,360,177"/>
+<area shape="rect" id="node5" href="$classfileseq_1_1FileSequence.html#abc67d7819ed5c0661dd6da0224d51caf" title="fileseq::FileSequence::ext" alt="" coords="200,202,373,229"/>
 </map>
