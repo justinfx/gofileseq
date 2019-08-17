@@ -2,31 +2,16 @@ name: ci
 on: [push, pull_request]
 
 jobs:
-  test_go_linux:
-    name: Test go ${{ matrix.go }} on linux
-    runs-on: ubuntu-19.04
+  test_go:
+    name: Test go-${{ matrix.go }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        go: ['1.12.9']
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
-
-      - name: Setup go
-        uses: actions/setup-go@v1
-        with:
-            go-version: ${{ matrix.go }}
-
-      - name: Test
-        run: go test -v ./...
-
-  test_go_osx:
-    name: Test go ${{ matrix.go }} on osx
-    runs-on: macOs-latest
-    strategy:
-      matrix:
+        os: [
+          'ubuntu-19.04',
+#          'macOs-latest',
+#          'windows-latest'
+        ]
         go: ['1.12.9']
     steps:
       - name: Checkout
