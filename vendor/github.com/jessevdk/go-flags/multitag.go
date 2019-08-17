@@ -15,12 +15,12 @@ func newMultiTag(v string) multiTag {
 	}
 }
 
-func (x *multiTag) scan() map[string][]string {
+func (x *multiTag) scan() (map[string][]string, error) {
 	v := x.value
 
 	ret := make(map[string][]string)
 
-	// This is mostly copied from reflect.StructTAg.Get
+	// This is mostly copied from reflect.StructTag.Get
 	for v != "" {
 		i := 0
 
@@ -42,8 +42,20 @@ func (x *multiTag) scan() map[string][]string {
 			i++
 		}
 
-		if i+1 >= len(v) || v[i] != ':' || v[i+1] != '"' {
-			break
+		if i >= len(v) {
+			return nil, newErrorf(ErrTag, "expected `:' after key name, but got end of tag (in `%v`)", x.value)
+		}
+
+		if v[i] != ':' {
+			return nil, newErrorf(ErrTag, "expected `:' after key name, but got `%v' (in `%v`)", v[i], x.value)
+		}
+
+		if i+1 >= len(v) {
+			return nil, newErrorf(ErrTag, "expected `\"' to start tag value at end of tag (in `%v`)", x.value)
+		}
+
+		if v[i+1] != '"' {
+			return nil, newErrorf(ErrTag, "expected `\"' to start tag value, but got `%v' (in `%v`)", v[i+1], x.value)
 		}
 
 		name := v[:i]
@@ -53,6 +65,10 @@ func (x *multiTag) scan() map[string][]string {
 		i = 1
 
 		for i < len(v) && v[i] != '"' {
+			if v[i] == '\n' {
+				return nil, newErrorf(ErrTag, "unexpected newline in tag value `%v' (in `%v`)", name, x.value)
+			}
+
 			if v[i] == '\\' {
 				i++
 			}
@@ -60,21 +76,39 @@ func (x *multiTag) scan() map[string][]string {
 		}
 
 		if i >= len(v) {
-			break
+			return nil, newErrorf(ErrTag, "expected end of tag value `\"' at end of tag (in `%v`)", x.value)
 		}
 
-		val, _ := strconv.Unquote(v[:i+1])
+		val, err := strconv.Unquote(v[:i+1])
+
+		if err != nil {
+			return nil, newErrorf(ErrTag, "Malformed value of tag `%v:%v` => %v (in `%v`)", name, v[:i+1], err, x.value)
+		}
+
 		v = v[i+1:]
 
 		ret[name] = append(ret[name], val)
 	}
 
-	return ret
+	return ret, nil
+}
+
+func (x *multiTag) Parse() error {
+	vals, err := x.scan()
+	x.cache = vals
+
+	return err
 }
 
 func (x *multiTag) cached() map[string][]string {
 	if x.cache == nil {
-		x.cache = x.scan()
+		cache, _ := x.scan()
+
+		if cache == nil {
+			cache = make(map[string][]string)
+		}
+
+		x.cache = cache
 	}
 
 	return x.cache
