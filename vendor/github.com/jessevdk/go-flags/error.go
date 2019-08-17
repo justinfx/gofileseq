@@ -23,7 +23,7 @@ const (
 	// ErrMarshal indicates a marshalling error while converting values.
 	ErrMarshal
 
-	// ErrHelp indicates that the builtin help was shown (the error
+	// ErrHelp indicates that the built-in help was shown (the error
 	// contains the help message).
 	ErrHelp
 
@@ -37,12 +37,29 @@ const (
 	// ErrShortNameTooLong indicates that a short flag name was specified,
 	// longer than one character.
 	ErrShortNameTooLong
-	
-	// A short or long flag has been defined more than once
+
+	// ErrDuplicatedFlag indicates that a short or long flag has been
+	// defined more than once
 	ErrDuplicatedFlag
+
+	// ErrTag indicates an error while parsing flag tags.
+	ErrTag
+
+	// ErrCommandRequired indicates that a command was required but not
+	// specified
+	ErrCommandRequired
+
+	// ErrUnknownCommand indicates that an unknown command was specified.
+	ErrUnknownCommand
+
+	// ErrInvalidChoice indicates an invalid option value which only allows
+	// a certain number of choices.
+	ErrInvalidChoice
+
+	// ErrInvalidTag indicates an invalid tag or invalid use of an existing tag
+	ErrInvalidTag
 )
 
-// String returns a string representation of the error type.
 func (e ErrorType) String() string {
 	switch e {
 	case ErrUnknown:
@@ -61,11 +78,23 @@ func (e ErrorType) String() string {
 		return "no argument for bool"
 	case ErrRequired:
 		return "required"
+	case ErrShortNameTooLong:
+		return "short name too long"
 	case ErrDuplicatedFlag:
 		return "duplicated flag"
+	case ErrTag:
+		return "tag"
+	case ErrCommandRequired:
+		return "command required"
+	case ErrUnknownCommand:
+		return "unknown command"
+	case ErrInvalidChoice:
+		return "invalid choice"
+	case ErrInvalidTag:
+		return "invalid tag"
 	}
 
-	return "unknown"
+	return "unrecognized error type"
 }
 
 // Error represents a parser error. The error returned from Parse is of this
