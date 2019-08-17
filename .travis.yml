@@ -20,13 +20,9 @@ install: true
 
 jobs:
   include:
-    - go: "1.10.x"
-      env: USEMOD=0
-      script: go test -v $(go list ./... | grep -v /vendor/)
-      
-    - go: "1.11.x"
+    - go: "1.12.x"
       env: USEMOD=1 GO111MODULE=on
-      script: go test -v -mod=vendor ./...
+      script: go test -v ./...
           
     - stage: cpp-test
       language: cpp
