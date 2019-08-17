@@ -630,12 +630,13 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 
 	// Prep a string buffer that we can reuse to constantly
 	// build strings
-	path = filepath.FromSlash(filepath.Clean(path))
-	buf := bytes.NewBufferString(path)
+	path = filepath.Clean(path)
 	sep := string(filepath.Separator)
 	if strings.Contains(path, "\\") {
+		path = filepath.FromSlash(path)
 		sep = "\\"
 	}
+	buf := bytes.NewBufferString(path)
 	if !strings.HasSuffix(path, sep) {
 		buf.WriteString(sep)
 	}
