@@ -1,5 +1,9 @@
 language: go
 
+branches:
+  except:
+    - /exp_.*/
+
 git:
   depth: 1
   
