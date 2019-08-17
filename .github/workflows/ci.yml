@@ -1,0 +1,21 @@
+name: continuous-integration
+on: [push, pull_request]
+
+jobs:
+  test_go:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        go: ['1.12']
+    name: Test Go ${{ matrix.go }}
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - name: Setup Go
+        uses: actions/setup-go@v1
+        with:
+            go-version: ${{ matrix.go }}
+        env:
+          GO111MODULE: 'on'
+      - run: go test -v ./...
