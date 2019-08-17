@@ -12,7 +12,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/MichaelTJones/walk"
-	"github.com/justinfx/gofileseq/v2"
+	fileseq "github.com/justinfx/gofileseq/v2"
 )
 
 // number of goroutines to spawn for processing directories
@@ -39,7 +39,9 @@ func NewWorkManager() *workManager {
 	if !Options.SeqsOnly {
 		fileopts = append(fileopts, fileseq.SingleFiles)
 	}
-
+	if Options.PadHash1 {
+		fileopts = append(fileopts, fileseq.FileOptPadStyleHash1)
+	}
 	s := &workManager{
 		inDirs:   make(chan string),
 		inSeqs:   make(chan *fileseq.FileSequence),

@@ -1,4 +1,4 @@
-package main // import "github.com/justinfx/gofileseq/cmd/seqinfo"
+package main // import "github.com/justinfx/gofileseq/v2/cmd/seqinfo"
 
 import (
 	"bufio"

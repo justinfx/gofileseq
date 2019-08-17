@@ -1,7 +1,7 @@
 /*
 seqls - list directory contents, rolled up into file sequences
 */
-package main // import "github.com/justinfx/gofileseq/cmd/seqls"
+package main // import "github.com/justinfx/gofileseq/v2/cmd/seqls"
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"runtime"
 
 	"github.com/jessevdk/go-flags"
-	"github.com/justinfx/gofileseq/v2"
+	fileseq "github.com/justinfx/gofileseq/v2"
 )
 
 var Options struct {
@@ -21,6 +21,7 @@ var Options struct {
 	LongList  bool `short:"l" long:"long" description:"Long listing; include extra stat information"`
 	AbsPath   bool `short:"f" long:"full" description:"Show absolute paths"`
 	HumanSize bool `short:"H" long:"human" description:"When using long listing, show human-readable file size units"`
+	PadHash1  bool `long:"hash1" description:"Treat padding character # as width=1 instead of 4"`
 	Quiet     bool `short:"q" long:"quiet" description:"Don't print errors encountered when reading the file system"`
 }
 
