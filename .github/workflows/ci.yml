@@ -3,19 +3,24 @@ on: [push, pull_request]
 
 jobs:
   test_go:
-    runs-on: ubuntu-18.04
+    name: Test go-${{ matrix.go }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: ['ubuntu-18.04', 'windows-latest']
         go: ['1.12']
-    name: Test Go ${{ matrix.go }}
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout
+        uses: actions/checkout@v1
         with:
           fetch-depth: 1
-      - name: Setup Go
+
+      - name: Setup go
         uses: actions/setup-go@v1
         with:
             go-version: ${{ matrix.go }}
         env:
           GO111MODULE: 'on'
-      - run: go test -v ./...
+
+      - name: Test
+        run: go test -v ./...
