@@ -427,8 +427,13 @@ func (s *FileSequence) Index(idx int) string {
 
 // Set a new dirname for the sequence
 func (s *FileSequence) SetDirname(dir string) {
-	if !strings.HasSuffix(dir, string(filepath.Separator)) {
-		dir = dir + string(filepath.Separator)
+	sep := string(filepath.Separator)
+	if strings.Contains(dir, "\\") {
+		dir = filepath.FromSlash(dir)
+		sep = "\\"
+	}
+	if !strings.HasSuffix(dir, sep) {
+		dir += sep
 	}
 	s.dir = dir
 }
@@ -625,10 +630,14 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 
 	// Prep a string buffer that we can reuse to constantly
 	// build strings
-	path = filepath.Clean(path)
+	path = filepath.FromSlash(filepath.Clean(path))
 	buf := bytes.NewBufferString(path)
-	if !strings.HasSuffix(path, string(filepath.Separator)) {
-		buf.WriteRune(filepath.Separator)
+	sep := string(filepath.Separator)
+	if strings.Contains(path, "\\") {
+		sep = "\\"
+	}
+	if !strings.HasSuffix(path, sep) {
+		buf.WriteString(sep)
 	}
 
 	size := buf.Len()
