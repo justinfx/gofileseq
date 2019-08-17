@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"sort"
 	"testing"
 )
@@ -767,6 +768,10 @@ func TestFindSequenceOnDisk(t *testing.T) {
 }
 
 func TestHandleSymlinksOnDisk(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("skipping symlink test on windows")
+	}
+
 	seqs, err := FindSequencesOnDisk("testdata/versions")
 	if err != nil {
 		t.Fatal(err.Error())
