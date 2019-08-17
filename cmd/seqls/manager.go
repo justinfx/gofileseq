@@ -42,6 +42,9 @@ func NewWorkManager() *workManager {
 	if Options.PadHash1 {
 		fileopts = append(fileopts, fileseq.FileOptPadStyleHash1)
 	}
+	if Options.StrictPad {
+		fileopts = append(fileopts, fileseq.StrictPadding)
+	}
 	s := &workManager{
 		inDirs:   make(chan string),
 		inSeqs:   make(chan *fileseq.FileSequence),
@@ -149,7 +152,7 @@ func (w *workManager) processSources() {
 				continue
 			}
 
-			seq, err := fileseq.FindSequenceOnDisk(path)
+			seq, err := fileseq.FindSequenceOnDisk(path, fileopts...)
 			if err != nil {
 				if !os.IsNotExist(err) {
 					fmt.Fprintf(errOut, "%s %q: %s\n", ErrorPattern, path, err)

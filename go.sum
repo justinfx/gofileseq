@@ -1,4 +1,4 @@
 github.com/MichaelTJones/walk v0.0.0-20140707193007-3af09438b0ab h1:meh3Jl5FL2rBfz3aiYcEpAoeGel3X2UqZF8d0J9YBuU=
 github.com/MichaelTJones/walk v0.0.0-20140707193007-3af09438b0ab/go.mod h1:VVwKsx9Dc8rNG55BWqogoJzGubjKnRoXdUvpGbWqeCc=
-github.com/jessevdk/go-flags v0.0.0-20131218111322-7168dbf82f26 h1:mMIIT/elL3KrygjTGjMBvRC+rBQn5z7sPTE2N4WICxg=
-github.com/jessevdk/go-flags v0.0.0-20131218111322-7168dbf82f26/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
+github.com/jessevdk/go-flags v1.4.0 h1:4IU2WS7AumrZ/40jfhf4QVDMsQwqA7VEHozFRrGARJA=
+github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
