@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [
-          'ubuntu-19.04',
+          'ubuntu-latest',
           'macOs-latest',
           'windows-latest'
         ]
