@@ -419,10 +419,24 @@ func TestFileSequenceSetDir(t *testing.T) {
 	var table = []struct {
 		src, newDir, newBase, newExt, newFrange, newPad, expected string
 	}{
-		{"/path/to/file.100.exr", "/other", "fileB.", "jpg", "200", "#",
-			"/other/fileB.200#.jpg"},
-		{"/path/to/file.1-100#.exr", "/other/subdir", "fileB", "f", "-10-5,20-30x2", "@@@",
-			"/other/subdir/fileB-10-5,20-30x2@@@.f"},
+		{
+			src:       "/path/to/file.100.exr",
+			newDir:    "/other",
+			newBase:   "fileB.",
+			newExt:    "jpg",
+			newFrange: "200",
+			newPad:    "#",
+			expected:  "/other/fileB.200#.jpg",
+		},
+		{
+			src:       "/path/to/file.1-100#.exr",
+			newDir:    "/other/subdir",
+			newBase:   "fileB",
+			newExt:    "f",
+			newFrange: "-10-5,20-30x2",
+			newPad:    "@@@",
+			expected:  "/other/subdir/fileB-10-5,20-30x2@@@.f",
+		},
 	}
 
 	for _, tt := range table {
@@ -435,7 +449,7 @@ func TestFileSequenceSetDir(t *testing.T) {
 		seq.SetExt(tt.newExt)
 		seq.SetPadding(tt.newPad)
 		seq.SetFrameRange(tt.newFrange)
-		actual := seq.String()
+		actual := filepath.ToSlash(seq.String())
 		if actual != tt.expected {
 			t.Errorf("Expected %q ; got %q", tt.expected, actual)
 		}
@@ -741,7 +755,7 @@ func TestFindSequenceOnDisk(t *testing.T) {
 
 				var actual string
 				if expected != "" {
-					actual = seq.String()
+					actual = filepath.ToSlash(seq.String())
 				}
 
 				if actual != expected {
