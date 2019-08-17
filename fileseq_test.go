@@ -638,7 +638,7 @@ func TestFindSequencesOnDisk(t *testing.T) {
 		}
 
 		if !reflect.DeepEqual(actual, expected) {
-			t.Errorf("For dir %q, expected %v, got %v", dir, expected, actual)
+			t.Errorf("For dir %q\n  expected %v\n  got %v", dir, expected, actual)
 		}
 	}
 }
