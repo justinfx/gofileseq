@@ -612,8 +612,8 @@ func TestFindSequencesOnDisk(t *testing.T) {
 		},
 		"testdata/mixed": {
 			"seq.-1-5@@.ext",
-			"seq.-1-5,1001#.ext",
-			"seq.-1-5@@@@@.ext",
+			"seq.-1-5#.ext",
+			"seq.-1-5,1001@@@@@.ext",
 		},
 	}
 
@@ -697,10 +697,10 @@ func TestFindSequenceOnDisk(t *testing.T) {
 				"testdata/seqA.@@@@.exr":      "testdata/seqA.1,3-6,8-10####.exr",
 				"testdata/seqA.@.jpg":         "",
 
-				"testdata/mixed/seq.####.ext":  "testdata/mixed/seq.-1-5,1001####.ext",
+				"testdata/mixed/seq.####.ext":  "testdata/mixed/seq.-1-5####.ext",
 				"testdata/mixed/seq.#.ext":     "",
 				"testdata/mixed/seq.@@.ext":    "testdata/mixed/seq.-1-5##.ext",
-				"testdata/mixed/seq.@@@@@.ext": "testdata/mixed/seq.-1-5#####.ext",
+				"testdata/mixed/seq.@@@@@.ext": "testdata/mixed/seq.-1-5,1001#####.ext",
 				"testdata/mixed/seq.@.ext":     "",
 			},
 		},
@@ -717,9 +717,9 @@ func TestFindSequenceOnDisk(t *testing.T) {
 				"testdata/seqA.@.exr":      "",
 				"testdata/seqA.@.jpg":      "",
 
-				"testdata/mixed/seq.#.ext":     "testdata/mixed/seq.-1-5,1001#.ext",
+				"testdata/mixed/seq.#.ext":     "testdata/mixed/seq.-1-5#.ext",
 				"testdata/mixed/seq.@@.ext":    "testdata/mixed/seq.-1-5@@.ext",
-				"testdata/mixed/seq.@@@@@.ext": "testdata/mixed/seq.-1-5@@@@@.ext",
+				"testdata/mixed/seq.@@@@@.ext": "testdata/mixed/seq.-1-5,1001@@@@@.ext",
 				"testdata/mixed/seq.@.ext":     "",
 			},
 		},
