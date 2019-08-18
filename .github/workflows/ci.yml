@@ -41,7 +41,7 @@ jobs:
           WAF_VERSION: waf-1.9.14
         run: test -x waf-light || {
           PROJ=$(pwd) &&
-          cd "$GITHUB_WORKSPACE" &&
+          cd "$GITHUB_WORKSPACE" && ls && 
           wget "https://gitlab.com/ita1024/waf/-/archive/${WAF_VERSION}/waf-${WAF_VERSION}.tar.gz" &&
           tar -zxf "waf-${WAF_VERSION}.tar.gz" &&
           cd "waf-${WAF_VERSION}" &&
@@ -49,4 +49,7 @@ jobs:
           cd ${PROJ}; }
 
       - name: Build and Test
+        env:
+          WAF_VERSION: waf-1.9.14
+          PATH: ${$GITHUB_WORKSPACE}/waf-${WAF_VERSION}:${PATH}
         run: cd cpp && waf-light configure test
