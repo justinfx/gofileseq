@@ -28,7 +28,7 @@ jobs:
         run: go test -v ./...
 
   cpp:
-    name: C++
+    name: C++ tests and docs
     runs-on: "ubuntu-latest"
     steps:
       - name: Checkout
@@ -53,6 +53,6 @@ jobs:
         run: cd ${GITHUB_WORKSPACE}/cpp && ${HOME}/waf/waf configure test
 
       - name: Build doxygen
-        run: apt install -y doxygen doxygen-doc doxygen-latex doxygen-gui graphviz &&
+        run: sudo apt-get install -y doxygen doxygen-doc doxygen-latex doxygen-gui graphviz &&
           cd ${GITHUB_WORKSPACE}/cpp/docs &&
           doxygen
