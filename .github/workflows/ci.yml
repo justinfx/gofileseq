@@ -16,8 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-#        with:
-#          fetch-depth: 1
+        with:
+          fetch-depth: 1
 
       - name: Setup go
         uses: actions/setup-go@v1
@@ -26,3 +26,27 @@ jobs:
 
       - name: Test
         run: go test -v ./...
+
+  test_cpp:
+    name: Test cpp
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - name: Setup waf
+        env:
+          WAF_VERSION: waf-1.9.14
+        run: test -x waf-light || {
+          PROJ=$(pwd) &&
+          cd "$GITHUB_WORKSPACE" &&
+          wget "https://gitlab.com/ita1024/waf/-/archive/${WAF_VERSION}/waf-${WAF_VERSION}.tar.gz" &&
+          tar -zxf "waf-${WAF_VERSION}.tar.gz" &&
+          cd "waf-${WAF_VERSION}" &&
+          ./waf-light configure build &&
+          cd ${PROJ}; }
+
+      - name: Build and Test
+        run: cd cpp && waf-light configure test
