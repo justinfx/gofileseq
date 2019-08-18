@@ -53,6 +53,7 @@ jobs:
         run: cd ${GITHUB_WORKSPACE}/cpp && ${HOME}/waf/waf configure test
 
       - name: Build doxygen
-        run: sudo apt-get install -y doxygen doxygen-doc doxygen-latex doxygen-gui graphviz &&
+        run: sudo apt-get update &&
+          sudo apt install -y doxygen doxygen-doc doxygen-latex doxygen-gui graphviz &&
           cd ${GITHUB_WORKSPACE}/cpp/docs &&
           doxygen
