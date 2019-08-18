@@ -27,8 +27,8 @@ jobs:
       - name: Test
         run: go test -v ./...
 
-  test_cpp:
-    name: Test cpp
+  cpp:
+    name: C++
     runs-on: "ubuntu-latest"
     steps:
       - name: Checkout
@@ -38,7 +38,7 @@ jobs:
 
       - name: Setup waf
         env:
-          WAF_VERSION: waf-1.9.14
+          WAF_VERSION: waf-2.0.18
         run: test -x waf-light || {
           cd $HOME &&
           wget "https://gitlab.com/ita1024/waf/-/archive/${WAF_VERSION}/waf-${WAF_VERSION}.tar.gz" &&
@@ -50,4 +50,9 @@ jobs:
           cd $GITHUB_WORKSPACE; }
 
       - name: Build and Test
-        run: cd cpp && ${HOME}/waf/waf configure test
+        run: cd ${GITHUB_WORKSPACE}/cpp && ${HOME}/waf/waf configure test
+
+      - name: Build doxygen
+        run: apt install -y doxygen doxygen-doc doxygen-latex doxygen-gui graphviz &&
+          cd ${GITHUB_WORKSPACE}/cpp/docs &&
+          doxygen
