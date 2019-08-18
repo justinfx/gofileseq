@@ -85,8 +85,10 @@ REGEX_CPP_TEST = '''
 #include <regex>
 using namespace std;
 int main() {
+    const string str("_OK_");
+    const regex rx("_(OK)_");
     smatch match;
-    if (regex_match(string("_OK_"), match, regex("_(OK)_"))) {
+    if (regex_match(str, match, rx)) {
         cout << (match[1].str() == "OK" ? "1" : "0");
     }
     return 0;
@@ -104,7 +106,6 @@ def check_cxx_regex(ctx):
             define_ret=True,
             msg="Checking for <regex> support",
             okmsg="Done",
-            cxxflags=['-std=c++11'],
             fragment=REGEX_CPP_TEST,
             mandatory=False,
         )
