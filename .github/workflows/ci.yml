@@ -50,4 +50,4 @@ jobs:
           cd $GITHUB_WORKSPACE; }
 
       - name: Build and Test
-        run: cd cpp && ${HOME}/waf/waf-light configure test
+        run: cd cpp && ${HOME}/waf/waf configure test
