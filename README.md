@@ -10,7 +10,7 @@ A Go language library for parsing file sequence strings commonly
 used in VFX and animation applications.
 
 Ported from the original fileseq Python library:
-https://github.com/sqlboy/fileseq
+https://github.com/justinfx/fileseq
 
 For C++, see [C++ Support](#c-support)
 
