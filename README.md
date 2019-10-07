@@ -1,4 +1,4 @@
-Fileseq  
+![Fileseq](https://raw.githubusercontent.com/justinfx/fileseq/master/docs/_static/fileseq.png "Fileseq")  
 =======
 [![Go project version](https://img.shields.io/github/release/justinfx/gofileseq.svg)](https://badge.fury.io/go/github.com%2Fjustinfx%2Fgofileseq) 
 [![GoDoc](https://godoc.org/github.com/justinfx/gofileseq?status.svg)](https://godoc.org/github.com/justinfx/gofileseq) 
