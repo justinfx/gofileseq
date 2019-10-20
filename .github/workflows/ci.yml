@@ -12,7 +12,7 @@ jobs:
           'macOs-latest',
           'windows-latest'
         ]
-        go: ['1.12.9']
+        go: ['1.13.0']
     steps:
       - name: Checkout
         uses: actions/checkout@v1
