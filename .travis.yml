@@ -49,17 +49,10 @@ jobs:
 
     - stage: cpp-test-cmake
       language: cpp
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - gcc-4.9
-            - g++-4.9
-            - cmake
+      dist: bionic
       script:
         - cd ${TRAVIS_BUILD_DIR}/cpp
-        - make build_cmake && cd build_cmake
+        - mkdir build_cmake && cd build_cmake
         - cmake ..
         - make
         - ./test/fileseq_test
