@@ -1,5 +1,14 @@
+env:
+  - CGO_ENABLED=0
+  - GO111MODULE=on
+
+before:
+  hooks:
+    - go mod download
+
 builds:
-  - main: ./cmd/seqls/
+  - id: seqls
+    main: ./cmd/seqls/
     binary: seqls
     ldflags: -s -w -X main.Version={{.Version}}
     goos:
@@ -9,10 +18,9 @@ builds:
     ignore:
       - goos: darwin
         goarch: 386
-    env:
-      - CGO_ENABLED=0
-      - GO111MODULE=on
-  - main: ./cmd/seqinfo/
+
+  - id: seqinfo
+    main: ./cmd/seqinfo/
     binary: seqinfo
     ldflags: -s -w -X main.Version={{.Version}}
     goos:
@@ -22,23 +30,22 @@ builds:
     ignore:
       - goos: darwin
         goarch: 386
-    env:
-      - CGO_ENABLED=0
-      - GO111MODULE=on
 
-archive:
-  wrap_in_directory: true
-  replacements:
-    386: 32-bit
-    amd64: 64-bit
-    darwin: osx
-  format_overrides:
-    - goos: windows
-      format: zip
-  files:
-    - LICENSE
-    - CHANGES
-    - README.md
+
+archives:
+  - id: default
+    wrap_in_directory: true
+    replacements:
+      386: 32-bit
+      amd64: 64-bit
+      darwin: osx
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE
+      - CHANGES
+      - README.md
 
 release:
   github:
