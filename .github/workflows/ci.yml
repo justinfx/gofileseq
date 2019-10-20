@@ -1,0 +1,64 @@
+name: ci
+on: [push, pull_request]
+
+jobs:
+  test_go:
+    name: Test go-${{ matrix.go }} on ${{ matrix.os }}
+    strategy:
+      matrix:
+        go: [1.13.x]
+        os: [ubuntu-latest, macOs-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - name: Setup go
+        uses: actions/setup-go@v1
+        with:
+            go-version: ${{ matrix.go }}
+
+      - name: Test
+        run: go test -v ./...
+
+  cpp:
+    name: C++ tests and docs
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - name: Setup waf
+        env:
+          WAF_VERSION: waf-2.0.18
+        run: test -x waf-light || {
+          cd $HOME &&
+          wget "https://gitlab.com/ita1024/waf/-/archive/${WAF_VERSION}/waf-${WAF_VERSION}.tar.gz" &&
+          tar -zxf "waf-${WAF_VERSION}.tar.gz" &&
+          cd "waf-${WAF_VERSION}" &&
+          ./waf-light configure build &&
+          cd ${HOME} &&
+          mv "waf-${WAF_VERSION}" waf &&
+          cd $GITHUB_WORKSPACE; }
+
+      - name: Build and Test (waf)
+        run: cd ${GITHUB_WORKSPACE}/cpp &&
+          ${HOME}/waf/waf configure test
+
+      - name: Build and Test (cmake)
+        run: cd ${GITHUB_WORKSPACE}/cpp &&
+          mkdir build_cmake && cd build_cmake &&
+          cmake .. &&
+          make &&
+          ./test/fileseq_test
+
+      - name: Build doxygen
+        run: sudo apt-get update &&
+          sudo apt install -y doxygen doxygen-doc doxygen-latex doxygen-gui graphviz &&
+          cd ${GITHUB_WORKSPACE}/cpp/docs &&
+          doxygen
+
