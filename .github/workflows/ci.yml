@@ -49,8 +49,16 @@ jobs:
           mv "waf-${WAF_VERSION}" waf &&
           cd $GITHUB_WORKSPACE; }
 
-      - name: Build and Test
-        run: cd ${GITHUB_WORKSPACE}/cpp && ${HOME}/waf/waf configure test
+      - name: Build and Test (waf)
+        run: cd ${GITHUB_WORKSPACE}/cpp &&
+          ${HOME}/waf/waf configure test
+
+      - name: Build and Test (cmake)
+        run: cd ${GITHUB_WORKSPACE}/cpp &&
+          mkdir build_cmake && cd build_cmake &&
+          cmake .. &&
+          make &&
+          ./test/fileseq_test
 
       - name: Build doxygen
         run: sudo apt-get update &&
