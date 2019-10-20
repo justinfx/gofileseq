@@ -4,15 +4,11 @@ on: [push, pull_request]
 jobs:
   test_go:
     name: Test go-${{ matrix.go }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [
-          'ubuntu-latest',
-          'macOs-latest',
-          'windows-latest'
-        ]
-        go: ['1.13.0']
+        go: [1.13.x]
+        os: [ubuntu-latest, macOs-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v1
