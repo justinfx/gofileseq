@@ -7,3 +7,4 @@ libgo*
 Makefile
 build*
 .lock-waf*
+cmake-build-debug/
