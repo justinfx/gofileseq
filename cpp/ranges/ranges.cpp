@@ -11,7 +11,7 @@
 namespace fileseq {
 
 
-Range::Range(long start, long end, int step)
+Range::Range(long start, long end, long step)
     : m_start(start)
     , m_end(end)
     , m_step(step)
@@ -103,7 +103,7 @@ bool Range::contains(long value) const {
 }
 
 
-long Range::closestInRange(long value, long start, long end, int step) const {
+long Range::closestInRange(long value, long start, long end, long step) const {
     // Possibly clamp the value if it is outside the range
     if (end >= start) {
         if (value < start) {
@@ -137,7 +137,7 @@ long Range::value(size_t idx, Status* ok) const {
     // Calculate the value as an offset from the start
     long l_start = start();
     long l_end = end();
-    int l_step = step();
+    long l_step = step();
 
     long val = l_start + (l_step * idx);
 
@@ -303,7 +303,7 @@ bool predDecRangeDone(long val, long end) {
     return val >= end;
 }
 
-void Ranges::appendUnique(long start, long end, int step) {
+void Ranges::appendUnique(long start, long end, long step) {
     if (step == 0) {
         // Invalid step. Do nothing.
         return;
@@ -451,7 +451,7 @@ void Ranges::normalized(Ranges &outRanges, bool invert) const {
     long start = 0;
     long end = 0;
     long current = 0;
-    int step = 0;
+    long step = 0;
     bool keepValue = false;
     size_t pending = 0;
 

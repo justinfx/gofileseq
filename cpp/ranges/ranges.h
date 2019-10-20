@@ -34,7 +34,7 @@ public:
     // Advance to the next value.
     bool next();
 
-    // Returns whether the interator points to a valid range
+    // Returns whether the iterator points to a valid range
     bool isValid() const { return m_range != NULL; }
 
 private:
@@ -58,7 +58,7 @@ public:
     // If step value == 0, it will automatically default
     // to a propert increment depending on whether start is
     // less than or greather than end.
-    Range(long start, long end, int step=0);
+    Range(long start, long end, long step=0);
 
     virtual ~Range() {}
 
@@ -77,7 +77,7 @@ public:
     long end() const;
 
     // returns the stepping value used in the range
-    int step() const { return m_step; }
+    long step() const { return m_step; }
 
     // returns the smallest value in the range
     long min() const { return (start() < end() ? start() : end()); }
@@ -122,12 +122,12 @@ protected:
     // closestInRange finds the closest valid value within the range,
     // to a given value. Values outside the range are clipped to either
     // the range min or max.
-    long closestInRange(long value, long start, long end, int step=0) const;
+    long closestInRange(long value, long start, long end, long step=0) const;
 
 private:
     long m_start;
     long m_end;
-    int m_step;
+    long m_step;
 
     mutable long m_cachedEnd;
     mutable bool m_isEndCached;
@@ -221,14 +221,14 @@ public:
     // to the total range list.
     // Values in new range may duplicate values in
     // existing ranges.
-    void append(long start, long end, int step=0) {
+    void append(long start, long end, long step=0) {
         m_blocks.push_back(new Range(start, end, step));
     }
 
     // creates and adds another range of values
     // to the total range list. Only unique values from the
     // given range are appended to the total range.
-    void appendUnique(long start, long end, int step=0);
+    void appendUnique(long start, long end, long step=0);
 
     // returns true if a given value is a valid
     // value within the total range.

@@ -37,7 +37,7 @@ struct RangePatternMatch { ;
     Frame start;
     Frame end;
     std::string stepMod;
-    size_t step;
+    long step;
 };
 
 // Regular expression patterns for matching frame set strings.

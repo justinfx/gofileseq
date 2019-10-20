@@ -83,7 +83,7 @@ void FrameSet::handleMatch(const internal::RangePatternMatch* match, Status* ok)
     ok->clearError();
 
     Frame start, end;
-    size_t step = 1;
+    long step = 1;
 
     switch (num) {
 

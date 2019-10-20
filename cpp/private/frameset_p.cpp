@@ -28,6 +28,9 @@ bool getRangePatternMatch(RangePatternMatch &match, const std::string &range) {
     // Complex range:  1-10x2
     static const char* s_pattern3 = R"(^(-?\d+)-(-?\d+)([:xy])(-?\d+)$)";
 
+    match.stepMod.clear();
+    match.step = 1;
+
 #if HAVE_REGEX == 1
     static const auto flags = std::regex_constants::optimize|std::regex_constants::ECMAScript;
     static const std::regex s_rxRange1(s_pattern1, flags);
@@ -35,9 +38,6 @@ bool getRangePatternMatch(RangePatternMatch &match, const std::string &range) {
     static const std::regex s_rxRange3(s_pattern3, flags);
 
     std::smatch submatch;
-
-    match.stepMod.clear();
-    match.step = 1;
 
     if ( std::regex_match(range, submatch, s_rxRange1) ) {
         match.matches = 2;
@@ -58,7 +58,7 @@ bool getRangePatternMatch(RangePatternMatch &match, const std::string &range) {
         match.start = std::stol(submatch[1].str(), nullptr);
         match.end = std::stol(submatch[2].str(), nullptr);
         match.stepMod = submatch[3].str();
-        match.step = std::stoul(submatch[4].str(), nullptr);
+        match.step = std::stol(submatch[4].str(), nullptr);
         return true;
     }
 #else
