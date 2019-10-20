@@ -2,9 +2,26 @@ Changes:
 
 2.7.0
 ----------------
+* Removed vendored Go dependencies
+* Fix handling of Windows path separator in FileSequence.SetDirname and findSequencesOnDisk
 * cmd/seqls - Properly build against gofileseq/v2
 * cmd/seqls - Add --hash1 flag to use pad hash width=1 instead of 4
 * cmd/seqls - Add --strict flag to apply strict length of search pattern pad character to matches
+* cpp: Add a cmake build setup
+
+2.6.3
+----------------
+* Convert from Glide to Go module
+
+2.6.2
+----------------
+* Add Go module support as v2
+* exp/cpp: cleanups of experimental go/cpp binding
+
+2.6.1
+----------------
+* Support a negative stepping value when start > end in frame range string pattern
+* cpp: Prevent compiler warnings from int vs size_t
 
 2.6.0
 ----------------
