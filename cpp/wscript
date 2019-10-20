@@ -12,6 +12,7 @@ def options(opt):
     opt.add_option('--force-pcre', action='store_true', default=False, dest='force_pcre',
                    help="Build against libpcre regardless of availability of C++11 <regex>")
 
+
 def configure(ctx):
     ctx.load('compiler_cxx')
     ctx.env.append_unique('CXXFLAGS', ['-fPIC', '-std=c++11'])
@@ -21,8 +22,8 @@ def configure(ctx):
 def build(bld):
     objs = bld.objects(
         target='fileseq_obj',
-        source = bld.path.ant_glob(['*.cpp', 'ranges/*.cpp', 'private/*.cpp']),
-        includes = ['.', 'ranges', 'private'],
+        source=bld.path.ant_glob(['*.cpp', 'ranges/*.cpp', 'private/*.cpp']),
+        includes=['.', 'ranges', 'private'],
     )
 
     opts = {}
@@ -30,8 +31,19 @@ def build(bld):
         opts['use'] = "PCRE"
         opts['stlib'] = "pcrecpp"
 
-    bld.shlib(name="fileseq_shared", target=APPNAME, use=[objs.target], features='cxx cxxshlib')
-    bld.stlib(name="fileseq_static", target=APPNAME, use=[objs.target], features='cxx cxxstlib')
+    bld.shlib(
+        name="fileseq_shared",
+        source=[],
+        target=APPNAME,
+        use=[objs.target],
+        features='cxx cxxshlib')
+
+    bld.stlib(
+        name="fileseq_static",
+        source=[],
+        target=APPNAME,
+        use=[objs.target],
+        features='cxx cxxstlib')
 
     # Install headers
     bld.install_files('${PREFIX}/include/fileseq', bld.path.ant_glob("*.h"))
@@ -43,6 +55,7 @@ def build(bld):
 
 
 _is_test = False
+
 
 def test(bld):
     Options.commands = ['build'] + Options.commands
@@ -60,17 +73,17 @@ def _create_test(bld):
         stlib += ['pcrecpp', 'pcre']
 
     tsk = bld.program(
-        target = 'TestFileseq',
-        source = bld.path.ant_glob([
-            'test/main.cc', 
-            'test/Test*.cc', 
+        target='TestFileseq',
+        source=bld.path.ant_glob([
+            'test/main.cc',
+            'test/Test*.cc',
             'test/gtest/src/gtest-all.cc']),
-        includes = [ "test", "test/gtest/include", "test/gtest", "." ],
-        use = use,
-        lib = ['pthread'],
-        stlib = stlib,
-        cxxflags = ["-Wno-undef", "-g", "-ggdb"],
-        defines = ["FILESEQ_TEST_DIR=%s" % bld.path.parent.abspath()],
+        includes=["test", "test/gtest/include", "test/gtest", "."],
+        use=use,
+        lib=['pthread'],
+        stlib=stlib,
+        cxxflags=["-Wno-undef", "-g", "-ggdb"],
+        defines=["FILESEQ_TEST_DIR=%s" % bld.path.parent.abspath()],
     )
 
     bld(
@@ -78,7 +91,7 @@ def _create_test(bld):
         source=tsk.target,
         use="test_fileseq",
         always=True,
-        )
+    )
 
 
 REGEX_CPP_TEST = '''
@@ -119,4 +132,3 @@ def check_cxx_regex(ctx):
             stlib='pcrecpp',
             use='PCRE',
             msg='Checking for static library pcrecpp')
-
