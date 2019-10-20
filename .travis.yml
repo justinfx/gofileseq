@@ -14,17 +14,17 @@ cache:
 
 env:
   global:
-    - WAF_VERSION=waf-1.9.14
+    - WAF_VERSION=waf-2.0.18
         
 install: true
 
 jobs:
   include:
-    - go: "1.12.x"
-      env: USEMOD=1 GO111MODULE=on
+    - go: "1.13.x"
+      env: USEMOD=1
       script: go test -v ./...
           
-    - stage: cpp-test
+    - stage: cpp-test-waf
       language: cpp
       addons:
         apt:
@@ -46,7 +46,24 @@ jobs:
       script:
         - cd ${TRAVIS_BUILD_DIR}/cpp
         - waf-light configure test
-        
+
+    - stage: cpp-test-cmake
+      language: cpp
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-4.9
+            - g++-4.9
+            - cmake
+      script:
+        - cd ${TRAVIS_BUILD_DIR}/cpp
+        - make build_cmake && cd build_cmake
+        - cmake ..
+        - make
+        - ./test/fileseq_test
+
     - stage: deploy
       script: skip
       if: tag =~ ^v\d+
