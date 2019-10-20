@@ -19,18 +19,19 @@ def configure(ctx):
 
 
 def build(bld):
-    opts = dict(
-        target = APPNAME,
+    objs = bld.objects(
+        target='fileseq_obj',
         source = bld.path.ant_glob(['*.cpp', 'ranges/*.cpp', 'private/*.cpp']),
         includes = ['.', 'ranges', 'private'],
     )
 
+    opts = {}
     if bld.get_define("HAVE_REGEX") != "1":
         opts['use'] = "PCRE"
         opts['stlib'] = "pcrecpp"
 
-    bld.shlib(name="fileseq_shared", **opts)
-    bld.stlib(name="fileseq_static", **opts)
+    bld.shlib(name="fileseq_shared", target=APPNAME, use=[objs.target], features='cxx cxxshlib')
+    bld.stlib(name="fileseq_static", target=APPNAME, use=[objs.target], features='cxx cxxstlib')
 
     # Install headers
     bld.install_files('${PREFIX}/include/fileseq', bld.path.ant_glob("*.h"))
