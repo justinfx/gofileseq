@@ -85,5 +85,8 @@ func main() {
 	}
 
 	manager := NewWorkManager()
-	manager.Process(roots)
+	err = manager.Process(roots)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
 }

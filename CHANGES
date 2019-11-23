@@ -1,5 +1,9 @@
 Changes:
 
+2.7.1
+----------------
+* cmd/seqls - Switch to a faster parallel filesystem walking library
+
 2.7.0
 ----------------
 * Removed vendored Go dependencies

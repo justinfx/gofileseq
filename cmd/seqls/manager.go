@@ -9,10 +9,11 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"text/tabwriter"
 
-	"github.com/MichaelTJones/walk"
 	fileseq "github.com/justinfx/gofileseq/v2"
+	"github.com/justinfx/gofileseq/v2/cmd/seqls/internal/fastwalk"
 )
 
 // number of goroutines to spawn for processing directories
@@ -66,6 +67,8 @@ func (w *workManager) Process(rootPaths []string) error {
 
 	w.hasRun = true
 
+	var errCount uint64
+
 	// Start the workers to find sequences
 	var wg sync.WaitGroup
 	for i := 0; i < numWorkers; i++ {
@@ -73,20 +76,23 @@ func (w *workManager) Process(rootPaths []string) error {
 		go func() {
 			// Processes work from the input chans
 			// and places them into the output chans
-			w.processSources()
+			numErrs := w.processSources()
+			atomic.AddUint64(&errCount, numErrs)
 			wg.Done()
 		}()
 	}
 
 	// Load the root paths into the source channel
 	go func() {
+		var numErrs uint64
 		if Options.Recurse {
 			// Perform a recursive walk on all paths
-			w.loadRecursive(rootPaths)
+			numErrs = w.loadRecursive(rootPaths)
 		} else {
 			// Load each root path directly into chan
-			w.load(rootPaths)
+			numErrs = w.load(rootPaths)
 		}
+		atomic.AddUint64(&errCount, numErrs)
 		w.closeInputs()
 	}()
 
@@ -100,16 +106,20 @@ func (w *workManager) Process(rootPaths []string) error {
 	// Pull out all processed sequences and print
 	w.processResults()
 
+	if errCount > 0 {
+		return fmt.Errorf("Error: finished with %d path error(s)", errCount)
+	}
 	return nil
 }
 
 // processSources pulls from input channels, and processes
 // them into the output channel until there is no more work
-func (w *workManager) processSources() {
+func (w *workManager) processSources() uint64 {
 	var (
-		ok   bool
-		path string
-		seq  *fileseq.FileSequence
+		ok       bool
+		path     string
+		errCount uint64
+		seq      *fileseq.FileSequence
 	)
 
 	fileopts := w.fileOpts
@@ -133,6 +143,7 @@ func (w *workManager) processSources() {
 			}
 			seqs, err := fileseq.FindSequencesOnDisk(path, fileopts...)
 			if err != nil {
+				errCount++
 				fmt.Fprintf(errOut, "%s %q: %s\n", ErrorPath, path, err)
 				continue
 			}
@@ -165,6 +176,7 @@ func (w *workManager) processSources() {
 			}
 		}
 	}
+	return errCount
 }
 
 // Pull from the output channel until there are no more results,
@@ -230,8 +242,8 @@ func (w *workManager) closeOutput() {
 
 // loadStandard takes paths and loads them into the
 // dir input channel for processing
-func (w *workManager) load(paths []string) {
-	dirs, seqs := preparePaths(paths)
+func (w *workManager) load(paths []string) uint64 {
+	dirs, seqs, errCount := preparePaths(paths)
 
 	for _, s := range seqs {
 		w.inSeqs <- s
@@ -240,64 +252,104 @@ func (w *workManager) load(paths []string) {
 	for _, r := range dirs {
 		w.inDirs <- r
 	}
+
+	return errCount
 }
 
 // Parallel walk the root paths and populate the path
 // channel for the worker routines to consume.
-func (w *workManager) loadRecursive(paths []string) {
+func (w *workManager) loadRecursive(paths []string) uint64 {
+	cache := map[string]struct{}{}
+	var mu sync.RWMutex
 
-	walkFn := func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return nil
-		}
-
+	walkFn := func(path string, typ os.FileMode) error {
 		var isDir bool
+		var ret error
 
-		if info.IsDir() {
+		if typ.IsDir() {
 			isDir = true
-		} else if info, err = os.Stat(path); err == nil && info.IsDir() {
-			isDir = true
-		}
 
-		if isDir {
-
-			if !Options.AllFiles {
-				// Skip tranversing into hidden dirs
-				if len(info.Name()) > 1 && strings.HasPrefix(info.Name(), ".") {
-					return walk.SkipDir
+		} else if typ&os.ModeSymlink != 0 {
+			if info, err := os.Stat(path); err == nil && info.IsDir() {
+				tgt, err := filepath.EvalSymlinks(path)
+				if err != nil {
+					return err
 				}
-			}
 
-			// Add the path to the input channel for sequence scanning
-			w.inDirs <- path
+				isDir = true
+				ret = fastwalk.TraverseLink
+
+				// prevent symlink cycles.
+				// don't traverse the same symlink path if a subdirectory
+				// has a reference back to a link we have already seen
+
+				// check with read lock
+				mu.RLock()
+				_, exists := cache[tgt]
+				mu.RUnlock()
+				if exists {
+					ret = fastwalk.SkipFiles
+				} else {
+					// attempt to cache with write lock
+					mu.Lock()
+					if _, exists = cache[tgt]; exists {
+						ret = fastwalk.SkipFiles
+					} else {
+						cache[tgt] = struct{}{}
+						cache[path] = struct{}{}
+					}
+					mu.Unlock()
+				}
+
+				// We will still allow the immediate file listing
+				// of this symlink no matter what. But we may be
+				// instructing the walk not to recurse any further.
+			}
 		}
 
-		return nil
+		if !isDir {
+			return ret
+		}
+
+		if !Options.AllFiles {
+			// Skip traversing into hidden dirs
+			name := filepath.Base(path)
+			if len(name) > 1 && strings.HasPrefix(name, ".") {
+				return filepath.SkipDir
+			}
+		}
+
+		// Add the path to the input channel for sequence scanning
+		w.inDirs <- path
+		return ret
 	}
 
-	dirs, seqs := preparePaths(paths)
+	dirs, seqs, errCount := preparePaths(paths)
 
 	for _, s := range seqs {
 		w.inSeqs <- s
 	}
 
 	for _, r := range dirs {
-		r := r
-		if err := walk.Walk(r, walkFn); err != nil {
-			if err != walk.SkipDir {
+		if err := fastwalk.Walk(r, walkFn); err != nil {
+			if err != fastwalk.SkipFiles && err != fastwalk.TraverseLink {
+				atomic.AddUint64(&errCount, 1)
 				fmt.Fprintf(errOut, "%s %q: %s\n", ErrorPath, r, err)
 			}
 		}
 	}
+
+	return errCount
 }
 
 // Take a list of paths and reduce them to cleaned
 // and unique paths. Return two slices, separated by
 // directory paths, and sequence patterns
-func preparePaths(paths []string) ([]string, fileseq.FileSequences) {
+func preparePaths(paths []string) ([]string, fileseq.FileSequences, uint64) {
 	var (
-		fi  os.FileInfo
-		err error
+		fi       os.FileInfo
+		errCount uint64
+		err      error
 	)
 
 	dirs := make([]string, 0)
@@ -324,6 +376,7 @@ func preparePaths(paths []string) ([]string, fileseq.FileSequences) {
 				continue
 			}
 
+			errCount++
 			fmt.Fprintf(errOut, "%s %q: %s\n", ErrorPath, p, err)
 			continue
 		}
@@ -335,5 +388,5 @@ func preparePaths(paths []string) ([]string, fileseq.FileSequences) {
 		dirs = append(dirs, p)
 	}
 
-	return dirs, seqs
+	return dirs, seqs, errCount
 }
