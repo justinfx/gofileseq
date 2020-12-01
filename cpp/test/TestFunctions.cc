@@ -146,6 +146,11 @@ protected:
         {Case t = {PadStyleHash1, "@@", 2}; m_cases.push_back(t);}
         {Case t = {PadStyleHash1, "@@@", 3}; m_cases.push_back(t);}
         {Case t = {PadStyleHash1, "@@@@", 4}; m_cases.push_back(t);}
+        {Case t = {PadStyleHash1, "%01d", 1}; m_cases.push_back(t);}
+        {Case t = {PadStyleHash1, "%04d", 4}; m_cases.push_back(t);}
+        {Case t = {PadStyleHash1, "$F", 1}; m_cases.push_back(t);}
+        {Case t = {PadStyleHash1, "$F2", 2}; m_cases.push_back(t);}
+        {Case t = {PadStyleHash1, "$F04", 4}; m_cases.push_back(t);}
 
         {Case t = {PadStyleHash4, "", 0}; m_cases.push_back(t);}
         {Case t = {PadStyleHash4, "#", 4}; m_cases.push_back(t);}
@@ -156,6 +161,11 @@ protected:
         {Case t = {PadStyleHash4, "@@", 2}; m_cases.push_back(t);}
         {Case t = {PadStyleHash4, "@@@", 3}; m_cases.push_back(t);}
         {Case t = {PadStyleHash4, "@@@@", 4}; m_cases.push_back(t);}
+        {Case t = {PadStyleHash4, "%01d", 1}; m_cases.push_back(t);}
+        {Case t = {PadStyleHash4, "%04d", 4}; m_cases.push_back(t);}
+        {Case t = {PadStyleHash4, "$F", 1}; m_cases.push_back(t);}
+        {Case t = {PadStyleHash4, "$F2", 2}; m_cases.push_back(t);}
+        {Case t = {PadStyleHash4, "$F04", 4}; m_cases.push_back(t);}
     }
 
     std::vector<Case> m_cases;
@@ -214,6 +224,9 @@ void testFindSequencesOnDisk(bool singleFiles) {
         }
         // Found
         mapIt->second = true;
+
+        // Sanity check
+        EXPECT_NE("", seqs[i].index(0));
     }
 
     for (mapIt = cases.begin(); mapIt != cases.end(); ++mapIt) {
@@ -240,7 +253,6 @@ TEST( TestFindSequencesOnDisk, HandleSymlinksOnDisk ) {
     std::string expected = "testdata/versions/seq.1-10#.ext";
     ASSERT_EQ(expected, seqs[0].string());
 }
-
 
 class TestFindSequenceOnDisk : public testing::Test {
 
@@ -284,6 +296,14 @@ protected:
             Case t = {PadStyleHash1, "testdata/seqA.@.jpg", ""};
             m_cases.push_back(t);
         }
+        {
+            Case t = {PadStyleHash1, "testdata/seqA.%04d.exr", "testdata/seqA.1,3-6,8-10####.exr"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {PadStyleHash1, "testdata/seqA.$F4.exr", "testdata/seqA.1,3-6,8-10####.exr"};
+            m_cases.push_back(t);
+        }
 
         // PadStyleHash4
         {
@@ -312,6 +332,14 @@ protected:
         }
         {
             Case t = {PadStyleHash4, "testdata/seqA.@.jpg", ""};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {PadStyleHash4, "testdata/seqA.%04d.exr", "testdata/seqA.1,3-6,8-10#.exr"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {PadStyleHash4, "testdata/seqA.$F4.exr", "testdata/seqA.1,3-6,8-10#.exr"};
             m_cases.push_back(t);
         }
     }

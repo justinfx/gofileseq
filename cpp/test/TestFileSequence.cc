@@ -40,6 +40,14 @@ protected:
             m_cases.push_back(t);
         }
         {
+            Case t = {"/dir/f.1-100%03d.f", "/dir/f.1-100%03d.f", 1, 100, 3, 100, ".f"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"/dir/f.1-100$F03.f", "/dir/f.1-100$F03.f", 1, 100, 3, 100, ".f"};
+            m_cases.push_back(t);
+        }
+        {
             Case t = {
                 "/dir/f.1-10,50,60-90x2##.mp4",
                 "/dir/f.1-10,50,60-90x2##.mp4",
@@ -187,6 +195,14 @@ protected:
             m_cases.push_back(t);
         }
         {
+            Case t = {"file.1-100%04d.exr", 100, 4, 5, "file.0005.exr"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"file.1-100$F04.exr", 100, 4, 5, "file.0005.exr"};
+            m_cases.push_back(t);
+        }
+        {
             Case t = {"file.-10-30@@@.exr", 40, 25, 15, "file.015.exr"};
             m_cases.push_back(t);
         }
@@ -251,6 +267,22 @@ protected:
                 "/path/to/file.1-100#.exr",
                 "/other/subdir", "fileB", "f", "-10-5,20-30x2", "@@@",
                 "/other/subdir/fileB-10-5,20-30x2@@@.f"
+            };
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {
+                "/path/to/file.1-100%04d.exr",
+                "/other/subdir", "fileB", "f", "-10-5,20-30x2", "$F3",
+                "/other/subdir/fileB-10-5,20-30x2$F3.f"
+            };
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {
+                "/path/to/file.1-100$F3.exr",
+                "/other/subdir", "fileB", "f", "-10-5,20-30x2", "%04d",
+                "/other/subdir/fileB-10-5,20-30x2%04d.f"
             };
             m_cases.push_back(t);
         }
@@ -347,6 +379,10 @@ protected:
     void SetUp() {
         {Case t = {"/path/to/file%s1-1x1#.exr", "file%s", 1, 1, "#"}; m_cases.push_back(t);}
         {Case t = {"/path/to/file%s_1-100x10@@.exr", "file%s_", 1, 91, "@@"}; m_cases.push_back(t);}
+        {Case t = {"/path/to/file%s_1-100x10%02d.exr", "file%s_", 1, 91, "%02d"}; m_cases.push_back(t);}
+        {Case t = {"/path/to/file%s_1-100x10$F.exr", "file%s_", 1, 91, "$F"}; m_cases.push_back(t);}
+        {Case t = {"/path/to/file%s_1-100x10$F2.exr", "file%s_", 1, 91, "$F2"}; m_cases.push_back(t);}
+        {Case t = {"/path/to/file%s_1-100x10$F02.exr", "file%s_", 1, 91, "$F02"}; m_cases.push_back(t);}
         {Case t = {"/path/to/file%s.-10--1x2##.exr", "file%s.", -10, -2, "##"}; m_cases.push_back(t);}
         {Case t = {"/path/to/file%s1,2,3,5-10,20-30#.exr", "file%s", 1, 30, "#"}; m_cases.push_back(t);}
     }

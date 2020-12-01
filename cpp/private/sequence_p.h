@@ -30,6 +30,16 @@ bool getSplitPatternMatch(SeqPatternMatch &match, const std::string &path);
 // Returns true if the match was successful.
 bool getSingleFrameMatch(SeqPatternMatch &match, const std::string &path);
 
+// PadSyntax indicate alternate padding format syntax
+enum PadSyntax {
+    PadSyntaxPrintf = 1,  // %04d
+    PadSyntaxHoudini = 2, // $F, $F4, $F04
+};
+
+// Try to match padding syntax, and return the parsed padding size.
+// Returns 0 if there is no match.
+size_t getPadSize(const std::string &pad, PadSyntax syntax);
+
 // Private data container for FileSequence
 class FileSequenceData {
 
