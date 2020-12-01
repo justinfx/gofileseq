@@ -72,4 +72,5 @@ changelog:
       - goreleaser
       - gitignore
       - '[tT]ravis'
+      - '^ci:'
       
