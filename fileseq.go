@@ -13,6 +13,8 @@ Support for:
     Staggered: 1-100:3 (1-100x3, 1-100x2, 1-100)
     Negative frame numbers: -10-100
     Padding: #=4 padded, @=single pad
+	Printf Syntax Padding: %04d=4 padded, %01d=1 padded
+	Houdini Syntax Padding: $F4=4 padding, $F=1 padded
 
 */
 package fileseq
@@ -29,9 +31,11 @@ import (
 const Version = "2.7.1"
 
 var (
-	rangePatterns []*regexp.Regexp
-	splitPattern  *regexp.Regexp
-	singleFrame   *regexp.Regexp
+	rangePatterns  []*regexp.Regexp
+	splitPattern   *regexp.Regexp
+	singleFrame    *regexp.Regexp
+	printfPattern  *regexp.Regexp
+	houdiniPattern *regexp.Regexp
 )
 
 func init() {
@@ -53,10 +57,16 @@ func init() {
 	// Example:
 	//     /film/shot/renders/hero_bty.1-100#.exr
 	//     /film/shot/renders/hero_bty.@@.exr
+	//     /film/shot/renders/hero_bty.1-100%04d.exr
+	//     /film/shot/renders/hero_bty.1-100$F04.exr
 	splitPattern = regexp.MustCompile(
 		`^(?P<name>.*?)` +
 			`(?P<range>[\d-][:xy\d,-]*)?` +
-			`(?P<pad>[#@]+)` +
+			`(?P<pad>` +
+			`[#@]+` + // standard pad chars
+			`|%\d*d` + // or printf padding
+			`|\$F\d*` + // or houdini padding
+			`)` + // end <pad>
 			// multiple extension parts:
 			`(?P<ext>\.(?:\w*[a-zA-Z]\w*)*(?:\.[a-zA-Z0-9]+)?)$`)
 
@@ -66,6 +76,14 @@ func init() {
 			`(?P<frame>-?\d+)` +
 			// multiple extension parts:
 			`(?P<ext>(?:\.\w*[a-zA-Z]\w*)*(?:\.[a-zA-Z0-9]+)?)$`)
+
+	// Regular expression pattern for matching padding against a
+	// printf syntax padding string E.g. %04d
+	printfPattern = regexp.MustCompile(`^%(\d*)d$`)
+
+	// Regular expression pattern for matching padding against
+	// houdini syntax. E.g. $F04
+	houdiniPattern = regexp.MustCompile(`^\$F(\d*)$`)
 }
 
 // IsFrameRange returns true if the given string is a valid frame
@@ -244,7 +262,7 @@ func parseInt(s string) (int, error) {
 	if err != nil {
 		return 0, parseIntErr
 	}
-	return int(val), nil
+	return val, nil
 }
 
 // Return whether a string component from a frame
