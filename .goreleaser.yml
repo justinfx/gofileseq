@@ -73,4 +73,5 @@ changelog:
       - gitignore
       - '[tT]ravis'
       - '^ci:'
+      - '^merge:'
       
