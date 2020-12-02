@@ -18,7 +18,6 @@ var classfileseq_1_1FileSequence =
     [ "invertedFrameRange", "classfileseq_1_1FileSequence.html#aa64b80899eebaa347e8ca2d6ac0deeb4", null ],
     [ "isValid", "classfileseq_1_1FileSequence.html#aab5d82469fc7296ac7c212bbf806f4a4", null ],
     [ "length", "classfileseq_1_1FileSequence.html#ad4a7713f39a346ea51925c9d8ae93ebe", null ],
-    [ "operator bool", "classfileseq_1_1FileSequence.html#a74fdc401a27dfb5e3b27395591e7227b", null ],
     [ "operator std::string", "classfileseq_1_1FileSequence.html#a745261ed4fa18114cb06cf74c88eeaed", null ],
     [ "operator=", "classfileseq_1_1FileSequence.html#ad395d17305df0cea28c285f0c52d3a45", null ],
     [ "padding", "classfileseq_1_1FileSequence.html#a9c1e99d9a9076bb0a19059d4db513502", null ],
