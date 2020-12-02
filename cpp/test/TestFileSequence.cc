@@ -24,6 +24,10 @@ public:
 protected:
     void SetUp() {
         {
+            Case t = {"", "", 0, 0, 0, 0, ""};
+            m_cases.push_back(t);
+        }
+        {
             Case t = {"/file_path.100.exr", "/file_path.100@@@.exr", 100, 100, 3, 1, ".exr"};
             m_cases.push_back(t);
         }
@@ -157,7 +161,10 @@ TEST_F( TestNewFileSequences, New ) {
     for (size_t i=0; i < m_cases.size(); ++i) {
         Case t = m_cases[i];
 
-        fileseq::FileSequence s(t.path, &stat);
+        fileseq::FileSequence s;
+        if (!t.path.empty()) {
+            s = fileseq::FileSequence(t.path, &stat);
+        }
         if (!stat) {
             ADD_FAILURE() << "#" << i << stat;
             continue;

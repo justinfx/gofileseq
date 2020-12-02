@@ -304,6 +304,10 @@ protected:
             Case t = {PadStyleHash1, "testdata/seqA.$F4.exr", "testdata/seqA.1,3-6,8-10####.exr"};
             m_cases.push_back(t);
         }
+        {
+            Case t = {PadStyleHash1, "testdata/_MISSING_.0010.tif", ""};
+            m_cases.push_back(t);
+        }
 
         // PadStyleHash4
         {
@@ -364,6 +368,11 @@ TEST_F( TestFindSequenceOnDisk, FindSeq ) {
 
         if (!t.expected.empty()) {
             EXPECT_EQ(t.expected, seq.string());
+        }
+
+        // Sanity check
+        if (seq.index(0) == "" && !t.expected.empty()) {
+            ADD_FAILURE() << "Expected non-empty string for index(0) of input: " << t.input;
         }
     }
 }

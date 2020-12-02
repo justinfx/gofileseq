@@ -3,6 +3,7 @@ Changes:
 2.8.0
 ----------------
 * go/cpp - Add support for printf (%04d) and houdini ($F04) pad syntax formats
+* cpp - Prevent segfault when calling getters on default constructed FileSequence; return default values
 * cmd/seqls - Update to a faster parallel filesystem walk library
 * go - Update to Go 1.15.x
 

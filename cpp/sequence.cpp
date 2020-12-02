@@ -170,6 +170,7 @@ std::string FileSequence::string() const {
 }
 
 std::string FileSequence::dirname() const {
+    if (!isValid()) return "";
     return m_seqData->dir;
 }
 
@@ -184,6 +185,7 @@ void FileSequence::setDirname(const std::string& dirname) const {
 }
 
 std::string FileSequence::basename() const {
+    if (!isValid()) return "";
     return m_seqData->base;
 }
 
@@ -192,6 +194,7 @@ void FileSequence::setBasename(const std::string& basename) const {
 }
 
 std::string FileSequence::ext() const {
+    if (!isValid()) return "";
     return m_seqData->ext;
 }
 
@@ -206,6 +209,7 @@ void FileSequence::setExt(const std::string& ext) const {
 }
 
 std::string FileSequence::padding() const {
+    if (!isValid()) return "";
     return m_seqData->pad;
 }
 
@@ -220,6 +224,7 @@ void FileSequence::setPadding(const std::string &padChars) const {
 }
 
 PadStyle FileSequence::paddingStyle() const {
+    if (!isValid()) return PadStyleDefault;
     return m_seqData->padStyle;;
 }
 
@@ -242,6 +247,7 @@ Frame FileSequence::end() const {
 }
 
 int FileSequence::zfill() const {
+    if (!isValid()) return 0;
     return m_seqData->zfill;
 }
 
