@@ -1,5 +1,6 @@
 #include "pad.h"
 #include "private/frameset_p.h"
+#include "private/sequence_p.h"
 
 #include <algorithm>
 #include <sstream>
@@ -125,8 +126,21 @@ std::string PaddingMapper::getAllChars() const {
 }
 
 size_t PaddingMapper::getPaddingCharsSize(const std::string &chars) const {
+    if (chars.empty()) {
+        return 0;
+    }
+
     size_t size = 0;
 
+    // check for alternate padding syntax
+    if ((size = internal::getPadSize(chars, internal::PadSyntaxPrintf)) > 0) {
+        return size;
+    }
+    if ((size = internal::getPadSize(chars, internal::PadSyntaxHoudini)) > 0) {
+        return size;
+    }
+
+    // standard pad chars
     CharSizeMap::const_iterator found;
     std::string::const_iterator strIt;
 

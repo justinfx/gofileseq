@@ -26,7 +26,9 @@ Support for:
 * Staggered: 1-100:3 (1-100x3, 1-100x2, 1-100)
 * Negative frame numbers: -10-100
 * Padding: #=4 padded, @=single pad
-
+* Printf Syntax Padding: %04d=4 padded, %01d=1 padded
+* Houdini Syntax Padding: $F4=4 padding, $F=1 padded
+	
 Sequence Formats
 ----------------
 
@@ -35,6 +37,8 @@ Sequences of files are expected to follow a pattern similar to:
 * /path/to/some/file_foo.0100.exr
 * /path/to/some/file_foo.1-100#.jpg
 * /path/to/some/file_foo.1-100@@@.tif
+* /path/to/some/file_foo.1-100%03d.tif
+* /path/to/some/file_foo.1-100$F3.tif
 
 Install
 -------

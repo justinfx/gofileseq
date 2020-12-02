@@ -2,6 +2,7 @@ package fileseq
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -109,6 +110,24 @@ func (m *paddingMap) AllChars() []string {
 }
 
 func (m *paddingMap) PaddingCharsSize(chars string) int {
+	if len(chars) == 0 {
+		return 0
+	}
+
+	// check for alternate padding syntax
+	var match []string
+	for _, rx := range []*regexp.Regexp{printfPattern, houdiniPattern} {
+		if match = rx.FindStringSubmatch(chars); len(match) == 0 {
+			continue
+		}
+		intVal, err := strconv.Atoi(match[1])
+		if err != nil || intVal < 1 {
+			return 1
+		}
+		return intVal
+	}
+
+	// standard pad chars
 	var size int
 	for _, char := range chars {
 		size += m.charToSize[string(char)]

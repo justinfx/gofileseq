@@ -197,6 +197,10 @@ func TestFrameSetSplitPattern(t *testing.T) {
 		{"/path/to/file%s_1-100x10@@.tar.gz", "file%s_", 1, 91, "@@"},
 		{"/path/to/file%s.-10--1x2##.tar.gz", "file%s.", -10, -2, "##"},
 		{"/path/to/file%s1,2,3,5-10,20-30#.tar.gz", "file%s", 1, 30, "#"},
+
+		{"/path/to/file%s_1-100x10%%02d.exr", "file%s_", 1, 91, "%02d"},
+		{"/path/to/file%s_1-100x10$F2.exr", "file%s_", 1, 91, "$F2"},
+		{"/path/to/file%s_1-100x10$F02.exr", "file%s_", 1, 91, "$F02"},
 	}
 
 	// ref: splitPattern range directive chars
@@ -318,6 +322,12 @@ func TestNewFileSequence(t *testing.T) {
 		{".10000000000.123",
 			".10000000000@@@@@@@@@@@.123", 10000000000, 10000000000, 11,
 			1, ".123"},
+		{"/dir/f.1-100%04d.jpeg",
+			"/dir/f.1-100%04d.jpeg", 1, 100, 4,
+			100, ".jpeg"},
+		{"/dir/f.1-100$F04.jpeg",
+			"/dir/f.1-100$F04.jpeg", 1, 100, 4,
+			100, ".jpeg"},
 	}
 	for _, tt := range table {
 		seq, err := NewFileSequence(tt.path)
@@ -354,6 +364,8 @@ func TestFileSequenceSplit(t *testing.T) {
 		{"/file_path.100.exr", []string{"100"}},
 		{"/file_path.-005.exr", []string{"-005"}},
 		{"/dir/f.-1-100#.jpeg", []string{"-1-100"}},
+		{"/dir/f.-1-100%04d.jpeg", []string{"-1-100"}},
+		{"/dir/f.-1-100$F04.jpeg", []string{"-1-100"}},
 		{"/dir/f.1-10,50,60-90x2##.exr", []string{"1-10", "50", "60-90x2"}},
 		{"/dir/f.1-10,50,60-90x2##.tar.gz", []string{"1-10", "50", "60-90x2"}},
 		{"/dir/f.exr", []string{""}},
@@ -437,6 +449,24 @@ func TestFileSequenceSetDir(t *testing.T) {
 			newFrange: "-10-5,20-30x2",
 			newPad:    "@@@",
 			expected:  "/other/subdir/fileB-10-5,20-30x2@@@.f",
+		},
+		{
+			src:       "/path/to/file.1-100#.exr",
+			newDir:    "/other/subdir",
+			newBase:   "fileB",
+			newExt:    "f",
+			newFrange: "-10-5,20-30x2",
+			newPad:    "%03d",
+			expected:  "/other/subdir/fileB-10-5,20-30x2%03d.f",
+		},
+		{
+			src:       "/path/to/file.1-100#.exr",
+			newDir:    "/other/subdir",
+			newBase:   "fileB",
+			newExt:    "f",
+			newFrange: "-10-5,20-30x2",
+			newPad:    "$F03",
+			expected:  "/other/subdir/fileB-10-5,20-30x2$F03.f",
 		},
 	}
 
@@ -569,14 +599,37 @@ func TestPaddingCharsSize(t *testing.T) {
 	}{
 		{
 			padders[PadStyleHash1], []TestVals{
-				{"", 0}, {"#", 1}, {"##", 2}, {"###", 3}, {"####", 4},
-				{"@", 1}, {"@@", 2}, {"@@@", 3}, {"@@@@", 4},
+				{"", 0},
+				{"#", 1},
+				{"##", 2},
+				{"###", 3},
+				{"####", 4},
+				{"@", 1},
+				{"@@", 2},
+				{"@@@", 3},
+				{"@@@@", 4},
+				{"%02d", 2},
+				{"%04d", 4},
+				{"$F", 1},
+				{"$F2", 2},
+				{"$F04", 4},
 			},
 		},
 		{
 			padders[PadStyleHash4], []TestVals{
-				{"", 0}, {"#", 4}, {"##", 8}, {"###", 12}, {"####", 16},
-				{"@", 1}, {"@@", 2}, {"@@@", 3}, {"@@@@", 4},
+				{"", 0},
+				{"#", 4},
+				{"##", 8},
+				{"###", 12},
+				{"####", 16},
+				{"@", 1},
+				{"@@", 2},
+				{"@@@", 3},
+				{"@@@@", 4},
+				{"%02d", 2},
+				{"%04d", 4},
+				{"$F2", 2},
+				{"$F04", 4},
 			},
 		},
 	}
@@ -714,6 +767,9 @@ func TestFindSequenceOnDisk(t *testing.T) {
 				"testdata/seqA.@@@@.exr":      "testdata/seqA.1,3-6,8-10####.exr",
 				"testdata/seqA.@.jpg":         "",
 
+				"testdata/seqC.%02d.tif": "testdata/seqC.-5-2,4-10,20-21,27-30##.tif",
+				"testdata/seqC.$F02.tif": "testdata/seqC.-5-2,4-10,20-21,27-30##.tif",
+
 				"testdata/mixed/seq.####.ext":  "testdata/mixed/seq.-1-5####.ext",
 				"testdata/mixed/seq.#.ext":     "",
 				"testdata/mixed/seq.@@.ext":    "testdata/mixed/seq.-1-5##.ext",
@@ -734,6 +790,9 @@ func TestFindSequenceOnDisk(t *testing.T) {
 				"testdata/seqA.#.exr":      "testdata/seqA.1,3-6,8-10#.exr",
 				"testdata/seqA.@.exr":      "",
 				"testdata/seqA.@.jpg":      "",
+
+				"testdata/seqC.%02d.tif": "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
+				"testdata/seqC.$F02.tif": "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
 
 				"testdata/mixed/seq.#.ext":     "testdata/mixed/seq.-1-5#.ext",
 				"testdata/mixed/seq.@@.ext":    "testdata/mixed/seq.-1-5@@.ext",

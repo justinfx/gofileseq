@@ -1,6 +1,7 @@
 
 #include "sequence_p.h"
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -21,7 +22,13 @@ bool getSplitPatternMatch(SeqPatternMatch &match, const std::string &path) {
     // Example:
     //     /film/shot/renders/hero_bty.1-100#.exr
     //     /film/shot/renders/hero_bty.@@.exr
-    static const char* s_pattern = R"(^(.*?)([\d-][:xy\d,-]*)?([#@]+)((?:\.[a-zA-Z0-9]+)*)$)";
+    //     /film/shot/renders/hero_bty.%02d.exr
+    //     /film/shot/renders/hero_bty.$F02.exr
+    static const char* s_pattern =
+            R"(^(.*?))" // dir and basename
+            R"(([\d-][:xy\d,-]*)?)" // optional frame range
+            R"(([#@]+|%\d*d|\$F\d*))" // padding: chars, printf, houdini
+            R"(((?:\.[a-zA-Z0-9]+)*)$)"; // extension
 
     match.base.clear();
     match.range.clear();
@@ -82,6 +89,73 @@ bool getSingleFrameMatch(SeqPatternMatch &match, const std::string &path) {
     return rx->FullMatch(path, &(match.base), &(match.range), &(match.ext));
 
 #endif
+}
+
+
+size_t getPadSize(const std::string &pad, PadSyntax syntax) {
+    // printf:  %04d
+    static const char *s_printf_pattern = R"(^%(\d*)d$)";
+    // houdini:  $F, $F4, $F04
+    static const char *s_houdini_pattern = R"(^\$F(\d*)$)";
+
+    if (pad.empty()) {
+        return 0;
+    }
+
+    size_t val = 0;
+
+#if HAVE_REGEX == 1
+    static const auto flags = std::regex_constants::optimize|std::regex_constants::ECMAScript;
+    static const std::regex s_printf_rx(s_printf_pattern, flags);
+    static const std::regex s_houdini_rx(s_houdini_pattern, flags);
+
+    const std::regex* rx;
+    switch (syntax) {
+        case PadSyntaxPrintf:
+            rx = &s_printf_rx;
+            break;
+        case PadSyntaxHoudini:
+            rx = &s_houdini_rx;
+            break;
+        default:
+            std::cerr << "warning: unhandled fileseq pad format "
+                         "syntax getPadSize(syntax=" << syntax << ")\n";
+            return val;
+    }
+
+    std::smatch submatch;
+    if (!std::regex_match(pad, submatch, *rx)) {
+        return val;
+    }
+    val = !submatch[1].str().empty() ? std::stol(submatch[1].str()) : 1;
+
+#else
+    static const pcrecpp::RE* s_printf_rx = new pcrecpp::RE(s_printf_pattern);
+    static const pcrecpp::RE* s_houdini_rx = new pcrecpp::RE(s_houdini_pattern);
+
+    const pcrecpp::RE* rx;
+    switch (syntax) {
+        case PadSyntaxPrintf:
+            rx = s_printf_rx;
+            break;
+        case PadSyntaxHoudini:
+            rx = s_houdini_rx;
+            break;
+        default:
+            std::cerr << "warning: unhandled fileseq pad format "
+                         "syntax getPadSize(syntax=" << syntax << ")\n";
+            return val;
+    }
+
+    std::string str;
+    if (!(rx->FullMatch(pad, &str))) {
+        return val;
+    }
+    val = !str.empty() ? std::stol(str) : 1;
+
+#endif
+
+    return std::max(val, size_t(1));
 }
 
 

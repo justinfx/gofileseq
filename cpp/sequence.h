@@ -112,9 +112,16 @@ public:
     }
 
     /*!
-    Return whether the range was properly parsed
+    Return whether the sequence was properly parsed and
+    is valid for use
     */
     bool isValid() const;
+
+    /*!
+    Return whether the sequence was properly parsed and
+    is valid for use
+    */
+    operator bool() const { return isValid(); };
 
     /*!
     Return the string representation of the file sequence
