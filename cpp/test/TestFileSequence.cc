@@ -162,6 +162,8 @@ TEST_F( TestNewFileSequences, New ) {
         Case t = m_cases[i];
 
         fileseq::FileSequence s;
+        ASSERT_FALSE(s.isValid());
+        ASSERT_FALSE(s);
         if (!t.path.empty()) {
             s = fileseq::FileSequence(t.path, &stat);
         }

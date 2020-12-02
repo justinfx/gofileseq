@@ -374,6 +374,10 @@ TEST_F( TestFindSequenceOnDisk, FindSeq ) {
         if (seq.index(0) == "" && !t.expected.empty()) {
             ADD_FAILURE() << "Expected non-empty string for index(0) of input: " << t.input;
         }
+        if (t.expected.empty()) {
+            EXPECT_FALSE(seq.isValid());
+            EXPECT_FALSE(seq);
+        }
     }
 }
 
