@@ -1,4 +1,4 @@
-var files =
+var files_dup =
 [
     [ "error.h", "error_8h_source.html", null ],
     [ "fileseq.h", "fileseq_8h_source.html", null ],

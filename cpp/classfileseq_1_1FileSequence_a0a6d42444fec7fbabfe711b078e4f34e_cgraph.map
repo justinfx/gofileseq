@@ -1,0 +1,5 @@
+<map id="fileseq::FileSequence::end" name="fileseq::FileSequence::end">
+<area shape="rect" id="node1" title=" " alt="" coords="5,13,196,39"/>
+<area shape="rect" id="node2" href="$classfileseq_1_1FrameSet.html#af7b16ef8fda2ce5a3ce95f1788b6056e" title="The last frame in the range." alt="" coords="244,13,411,39"/>
+<area shape="rect" id="node3" href="$classfileseq_1_1FrameSet.html#ad21ec89be706fa51cbcfaa54ea9d06f1" title="Return whether the FrameSet is properly parsed and valid as a range." alt="" coords="459,5,601,47"/>
+</map>

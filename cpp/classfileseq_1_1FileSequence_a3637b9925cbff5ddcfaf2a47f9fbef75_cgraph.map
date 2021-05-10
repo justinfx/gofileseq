@@ -1,8 +1,0 @@
-<map id="fileseq::FileSequence::FileSequence" name="fileseq::FileSequence::FileSequence">
-<area shape="rect" id="node2" href="$classfileseq_1_1FileSequence.html#a5f9e2963d9aaa9acbbb03ce9272253cd" title="fileseq::FileSequence::ext" alt="" coords="200,13,373,39"/>
-<area shape="rect" id="node4" href="$classfileseq_1_1FileSequence.html#a44dd3a3c6c6b46461d4387c7aeec46f1" title="fileseq::FileSequence\l::frameSet" alt="" coords="213,64,360,105"/>
-<area shape="rect" id="node5" href="$classfileseq_1_1FrameSet.html#ad21ec89be706fa51cbcfaa54ea9d06f1" title="Return whether the FrameSet is properly parsed and valid as a range. " alt="" coords="220,129,353,171"/>
-<area shape="rect" id="node6" href="$classfileseq_1_1FileSequence.html#af333c85e43cd8bbbfe597696848587f6" title="fileseq::FileSequence\l::setPadding" alt="" coords="213,195,360,236"/>
-<area shape="rect" id="node7" href="$classfileseq_1_1FileSequence.html#a02407b53f67878c56f0c83b6cd57b17f" title="fileseq::FileSequence\l::FileSequence" alt="" coords="213,260,360,301"/>
-<area shape="rect" id="node3" href="$classfileseq_1_1FileSequence.html#aab5d82469fc7296ac7c212bbf806f4a4" title="fileseq::FileSequence\l::isValid" alt="" coords="421,5,568,47"/>
-</map>

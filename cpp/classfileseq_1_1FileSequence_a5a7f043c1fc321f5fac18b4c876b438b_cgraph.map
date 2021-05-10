@@ -1,0 +1,5 @@
+<map id="fileseq::FileSequence::start" name="fileseq::FileSequence::start">
+<area shape="rect" id="node1" title=" " alt="" coords="5,5,164,47"/>
+<area shape="rect" id="node2" href="$classfileseq_1_1FrameSet.html#acadebbbe52d9cd2280f81cf92b7664f1" title="The first frame of the range." alt="" coords="212,5,355,47"/>
+<area shape="rect" id="node3" href="$classfileseq_1_1FrameSet.html#ad21ec89be706fa51cbcfaa54ea9d06f1" title="Return whether the FrameSet is properly parsed and valid as a range." alt="" coords="403,5,545,47"/>
+</map>

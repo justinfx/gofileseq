@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['changes',['CHANGES',['../CHANGES.html',1,'']]]
+  ['changes_2',['CHANGES',['../CHANGES.html',1,'']]]
 ];
