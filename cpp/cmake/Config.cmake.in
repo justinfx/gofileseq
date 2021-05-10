@@ -1,0 +1,6 @@
+get_filename_component(@CMAKE_PROJECT_NAME@_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+
+# Include the targets if the shared library target is not defined.
+if(NOT TARGET @CMAKE_PROJECT_NAME@::@CMAKE_PROJECT_NAME@_shared)
+    include("${@CMAKE_PROJECT_NAME@_CMAKE_DIR}/cmake/@CMAKE_PROJECT_NAME@Targets.cmake")
+endif()
