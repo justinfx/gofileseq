@@ -63,3 +63,39 @@ if("${PCRECPP_FOUND}")
     target_link_libraries(fileseq_shared ${PCRECPP_LIBRARIES})
     target_link_libraries(fileseq_static ${PCRECPP_LIBRARIES})
 endif()
+
+# For providing standard install location vars.
+include(GNUInstallDirs)
+
+# Install public headers.
+file(GLOB PUBLIC_HEADERS *.h)
+install(
+    FILES ${PUBLIC_HEADERS}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/fileseq
+)
+
+# Install libraries.
+install(
+    TARGETS fileseq_shared fileseq_static
+    DESTINATION
+    EXPORT ${CMAKE_PROJECT_NAME}-targets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+# Produce a target import script for ease of importing into other CMake projects.
+install(
+    EXPORT ${CMAKE_PROJECT_NAME}-targets
+    FILE ${CMAKE_PROJECT_NAME}Targets.cmake
+    NAMESPACE ${CMAKE_PROJECT_NAME}::
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake
+)
+
+# Configure & install <Project>Config.cmake (which includes fileseqTargets.cmake)
+set(OUTPUT_CONFIG ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake)
+configure_file(cmake/Config.cmake.in ${OUTPUT_CONFIG} @ONLY)
+install(
+    FILES ${OUTPUT_CONFIG}
+    DESTINATION ${CMAKE_INSTALL_PREFIX}
+)
