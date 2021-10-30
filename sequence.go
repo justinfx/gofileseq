@@ -562,7 +562,117 @@ func ListFiles(path string) (FileSequences, error) {
 	return findSequencesOnDisk(path, SingleFiles)
 }
 
+type fileItem struct {
+	DirName  string
+	FileName string
+}
+
 func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error) {
+	root, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+
+	infos, err := root.Readdir(-1)
+	root.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	// Prep a string buffer that we can reuse to constantly
+	// build strings
+	path = filepath.Clean(path)
+	sep := string(filepath.Separator)
+	if strings.Contains(path, "\\") {
+		path = filepath.FromSlash(path)
+		sep = "\\"
+	}
+	if !strings.HasSuffix(path, sep) {
+		path += sep
+	}
+	buf := bytes.NewBufferString(path)
+	size := buf.Len()
+
+	// Read dir and sort files into groups based on their name
+	// and file extension
+	var fileItems []*fileItem
+	for _, info := range infos {
+		if info.IsDir() {
+			continue
+		}
+
+		// Also skip symlinks that point to directories
+		if (info.Mode() & os.ModeSymlink) != 0 {
+			buf.WriteString(info.Name())
+			syminfo, err := os.Stat(buf.String())
+			buf.Truncate(size)
+			if err != nil {
+				return nil, fmt.Errorf("Error reading symlink %q: %s", buf.String(), err)
+			}
+			if syminfo.IsDir() {
+				continue
+			}
+		}
+
+		fileItems = append(fileItems, &fileItem{path, info.Name()})
+	}
+
+	return findSequencesInList(fileItems, opts...)
+}
+
+// FindSequencesInList takes a list of individual file paths and compresses them into
+// sequences based on their dirname, basename, and extension.
+//
+// By default, only non-hidden sequences of files will be returned.
+// Extra FileOption values may be given to control whether things like
+// hidden files, or single (non-sequence) files should be included in
+// the results.
+func FindSequencesInList(paths []string, opts ...FileOption) (FileSequences, error) {
+	items := make([]*fileItem, len(paths))
+	for i, path := range paths {
+		path = filepath.Clean(path)
+
+		// normalize path separator on Windows
+		sep := string(filepath.Separator)
+		if strings.Contains(path, "\\") {
+			path = filepath.FromSlash(path)
+			sep = "\\"
+		}
+
+		var item fileItem
+		item.DirName, item.FileName = filepath.Split(path)
+
+		if !strings.HasSuffix(item.DirName, sep) {
+			item.DirName += sep
+		}
+
+		items[i] = &item
+	}
+
+	return findSequencesInList(items, opts...)
+}
+
+func findSequencesInList(paths []*fileItem, opts ...FileOption) (FileSequences, error) {
+	// Get options
+	var (
+		singleFiles bool
+		hiddenFiles bool
+		padStyle    = PadStyleDefault
+	)
+
+	for _, opt := range opts {
+		switch opt {
+		case SingleFiles:
+			singleFiles = true
+		case HiddenFiles:
+			hiddenFiles = true
+		case FileOptPadStyleHash1:
+			padStyle = PadStyleHash1
+		case FileOptPadStyleHash4:
+			padStyle = PadStyleHash4
+		}
+	}
+
 	type FrameInfo struct {
 		Frame    string
 		FrameNum int
@@ -575,7 +685,7 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 		MinWidth int
 	}
 
-	type SeqKey [2]string
+	type SeqKey [3]string // dir, base, ext
 
 	frameMinSize := func(frame string) int {
 		frameSize := len(frame)
@@ -587,39 +697,8 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 		return frameSize
 	}
 
-	root, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-
-	infos, err := root.Readdir(-1)
-	root.Close()
-	if err != nil {
-		return nil, err
-	}
-
 	// map key for sequences: basename, padWidth, ext
 	seqs := make(map[SeqKey]SeqInfo)
-
-	// Get options
-	var (
-		singleFiles bool
-		hiddenFiles bool
-		padStyle    = PadStyleDefault
-	)
-
-	for _, opt := range opts {
-		switch opt {
-		case HiddenFiles:
-			hiddenFiles = true
-		case SingleFiles:
-			singleFiles = true
-		case FileOptPadStyleHash1:
-			padStyle = PadStyleHash1
-		case FileOptPadStyleHash4:
-			padStyle = PadStyleHash4
-		}
-	}
 
 	padder := padders[padStyle]
 
@@ -628,61 +707,21 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 		files = make(FileSequences, 0)
 	}
 
-	// Prep a string buffer that we can reuse to constantly
-	// build strings
-	path = filepath.Clean(path)
-	sep := string(filepath.Separator)
-	if strings.Contains(path, "\\") {
-		path = filepath.FromSlash(path)
-		sep = "\\"
-	}
-	buf := bytes.NewBufferString(path)
-	if !strings.HasSuffix(path, sep) {
-		buf.WriteString(sep)
-	}
-
-	size := buf.Len()
-
-	// Read dir and sort files into groups based on their name
-	// and file extension
 	var (
-		match      []string
-		frameStr   string
-		frameNum   int
-		frameWidth int
-		seqCount   int
+		buf      strings.Builder
+		seqCount int
 	)
 
-	for _, info := range infos {
-		if info.IsDir() {
+	for _, item := range paths {
+		if !hiddenFiles && strings.HasPrefix(item.FileName, ".") {
 			continue
 		}
 
-		// Also skip symlinks that point to directories
-		if (info.Mode() & os.ModeSymlink) != 0 {
-			buf.WriteString(info.Name())
-			syminfo, err := os.Stat(buf.String())
-			if err != nil {
-				return nil, fmt.Errorf("Error reading symlink %q: %s", buf.Bytes(), err)
-			}
-
-			buf.Truncate(size)
-
-			if syminfo.IsDir() {
-				continue
-			}
-		}
-
-		name := info.Name()
-
-		if !hiddenFiles && strings.HasPrefix(name, ".") {
-			continue
-		}
-
-		match = singleFrame.FindStringSubmatch(name)
+		match := singleFrame.FindStringSubmatch(item.FileName)
 		if len(match) == 0 {
 			if singleFiles {
-				buf.WriteString(name)
+				buf.WriteString(item.DirName)
+				buf.WriteString(item.FileName)
 
 				fs, err := NewFileSequencePad(buf.String(), padStyle)
 				if err != nil {
@@ -692,18 +731,16 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 				fs.SetPadding("")
 				files = append(files, fs)
 
-				buf.Truncate(size)
+				buf.Reset()
 			}
 			continue
 		}
 
-		frameStr = match[2]
-		frameNum, _ = strconv.Atoi(frameStr)
-		frameWidth = len(frameStr)
+		baseName, frameStr, ext := match[1], match[2], match[3]
+		frameNum, _ := strconv.Atoi(frameStr)
+		frameWidth := len(frameStr)
 
-		// basename, ext
-		key := SeqKey{match[1], match[3]}
-
+		key := SeqKey{item.DirName, baseName, ext}
 		seq, ok := seqs[key]
 
 		seq.Frames = append(seq.Frames, FrameInfo{
@@ -724,17 +761,13 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 		seqs[key] = seq
 	}
 
-	var (
-		i                      int
-		frameInfo              FrameInfo
-		name, frange, pad, ext string
-		appendErr              error
-	)
+	var dirName, baseName, frange, pad, ext string
 
 	fseqs := make(FileSequences, 0, seqCount)
 
 	appendSeq := func() error {
-		buf.WriteString(name)
+		buf.WriteString(dirName)
+		buf.WriteString(baseName)
 		buf.WriteString(frange)
 		buf.WriteString(pad)
 		buf.WriteString(ext)
@@ -748,9 +781,7 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 		}
 		fseqs = append(fseqs, fs)
 
-		buf.Truncate(size)
-		i++
-
+		buf.Reset()
 		return nil
 	}
 
@@ -761,29 +792,29 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 			continue
 		}
 
-		name, ext = key[0], key[1]
+		dirName, baseName, ext = key[0], key[1], key[2]
 		pad = seq.Padding
 
 		// Handle single frame sequences
 		if len(seq.Frames) == 1 {
 			frange = seq.Frames[0].Frame
-			if name != "" {
+			if baseName != "" {
 				// Make sure a non-sequence file doesn't accidentally
-				// get reparsed as a range.
+				// get re-parsed as a range.
 				pos := 1
 				// Check if the parsed number was preceded by a "-",
 				// if so, check before that char to see if its a number
-				if strings.HasSuffix(name, "-") && len(name) >= 2 {
+				if strings.HasSuffix(baseName, "-") && len(baseName) >= 2 {
 					pos = 2
 				}
-				dig := string(name[len(name)-pos])
+				dig := string(baseName[len(baseName)-pos])
 				// If it is a number, clear the padding char
 				if _, err := strconv.ParseUint(dig, 10, 8); err == nil {
 					pad = ""
 				}
 			}
 
-			if appendErr = appendSeq(); appendErr != nil {
+			if appendErr := appendSeq(); appendErr != nil {
 				return nil, appendErr
 			}
 		}
@@ -803,12 +834,12 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 		// Walk the sorted frames, trying to group sequences with
 		// compatible padding. Start a new sequence each time a new
 		// padding has to be used.
-		for _, frameInfo = range seq.Frames {
+		for _, frameInfo := range seq.Frames {
 
 			if len(frameInfo.Frame) != currentWidth && frameInfo.MinWidth > currentWidth {
 				// Commit current frame range and start over
 				frange = FramesToFrameRange(frames, true, 0)
-				if appendErr = appendSeq(); appendErr != nil {
+				if appendErr := appendSeq(); appendErr != nil {
 					return nil, appendErr
 				}
 
@@ -823,7 +854,7 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 		// Append a remaining sequence
 		if len(frames) > 0 {
 			frange = FramesToFrameRange(frames, true, 0)
-			if appendErr = appendSeq(); appendErr != nil {
+			if appendErr := appendSeq(); appendErr != nil {
 				return nil, appendErr
 			}
 			frames = nil
@@ -841,7 +872,7 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 // FileSequence pattern, and finds a sequence on disk which matches
 // the Basename and Extension.
 //
-// By default the patterns frame value and padding characters are ignored and
+// By default, the patterns frame value and padding characters are ignored and
 // replaced by a wildcard '*' glob. If you want to match on a specific frame
 // padding length, pass the option StrictPadding
 //
