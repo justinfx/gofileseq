@@ -746,6 +746,118 @@ func TestListFiles(t *testing.T) {
 	}
 }
 
+func TestFindSequencesInList(t *testing.T) {
+	/*
+			"testdata": {
+			"seqD.2-10@.gif",
+			"seqC.-5-2,4-10,20-21,27-30@@.tif",
+			"seqB.5-14,16-18,20#.jpg",
+			"seqA.1,3-6,8-10#.exr",
+			"complex.5-7#.tar.gz",
+		},
+		"testdata/mixed": {
+			"seq.-1-5@@.ext",
+			"seq.-1-5#.ext",
+			"seq.-1-5,1001@@@@@.ext",
+		},
+	*/
+	table := []struct {
+		Name   string
+		Paths  []string
+		Opts   []FileOption
+		Expect []string
+	}{
+		{
+			Name:   "empty",
+			Paths:  []string{},
+			Expect: []string{},
+		},
+		{
+			Name:   "single seq",
+			Paths:  []string{"/path/to/file.0001.ext", "/path/to/file.0002.ext", "/path/to/file.0003.ext"},
+			Expect: []string{"/path/to/file.1-3#.ext"},
+		},
+		{
+			Name: "multi seq",
+			Paths: []string{
+				"/path/to/foo.0001.ext", "/path/to/foo.0002.ext", "/path/to/foo.0003.ext",
+				"/path/to/a/bar.020.ext", "/path/to/a/bar.030.ext", "/path/to/a/bar.040.ext",
+			},
+			Expect: []string{
+				"/path/to/foo.1-3#.ext",
+				"/path/to/a/bar.20-40x10@@@.ext",
+			},
+		},
+		{
+			Name: "no single files",
+			Paths: []string{
+				"/path/to/single/file.ext",
+				"/path/to/foo.0001.ext", "/path/to/foo.0002.ext", "/path/to/foo.0003.ext",
+				"/path/to/bar.020.ext", "/path/to/bar.030.ext", "/path/to/bar.040.ext",
+				"/path/to/single/.another.ext",
+			},
+			Expect: []string{
+				"/path/to/foo.1-3#.ext",
+				"/path/to/bar.20-40x10@@@.ext",
+			},
+		},
+		{
+			Name: "with single files",
+			Paths: []string{
+				"/path/to/single/file.ext",
+				"/path/to/foo.0001.ext", "/path/to/foo.0002.ext", "/path/to/foo.0003.ext",
+				"/path/to/a/bar.020.ext", "/path/to/a/bar.030.ext", "/path/to/a/bar.040.ext",
+				"/path/to/single/.another.ext",
+			},
+			Opts: []FileOption{SingleFiles, HiddenFiles},
+			Expect: []string{
+				"/path/to/single/file.ext",
+				"/path/to/foo.1-3#.ext",
+				"/path/to/a/bar.20-40x10@@@.ext",
+				"/path/to/single/.another.ext",
+			},
+		},
+		{
+			Name: "pad hash 1",
+			Paths: []string{
+				"/path/to/foo.0001.ext", "/path/to/foo.0002.ext", "/path/to/foo.0003.ext",
+				"/path/to/bar.1.ext", "/path/to/bar.2.ext", "/path/to/bar.3.ext",
+			},
+			Opts: []FileOption{FileOptPadStyleHash1},
+			Expect: []string{
+				"/path/to/foo.1-3####.ext",
+				"/path/to/bar.1-3#.ext",
+			},
+		},
+	}
+
+	for _, tt := range table {
+		t.Run(tt.Name, func(t *testing.T) {
+			seqs, err := FindSequencesInList(tt.Paths, tt.Opts...)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			actual := make([]string, 0, len(seqs))
+			for _, seq := range seqs {
+				actual = append(actual, seq.String())
+			}
+
+			cleanPaths(tt.Expect)
+			sort.Strings(tt.Expect)
+			sort.Strings(actual)
+
+			if len(actual) != len(tt.Expect) {
+				t.Errorf("\nExpected %d seqs ; got %d", len(tt.Expect), len(actual))
+			}
+
+			if !reflect.DeepEqual(actual, tt.Expect) {
+				t.Errorf("\nExpect %v\n   Got %v", tt.Expect, actual)
+			}
+		})
+	}
+}
+
 func TestFindSequenceOnDisk(t *testing.T) {
 	type TestSet struct {
 		name   string
@@ -845,5 +957,11 @@ func TestHandleSymlinksOnDisk(t *testing.T) {
 
 	if actual != expected {
 		t.Fatalf("Expected to find seq %q ; got %q", expected, actual)
+	}
+}
+
+func cleanPaths(paths []string) {
+	for i, path := range paths {
+		paths[i] = filepath.Clean(path)
 	}
 }

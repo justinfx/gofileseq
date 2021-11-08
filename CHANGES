@@ -1,5 +1,9 @@
 Changes:
 
+2.9.0
+----------------
+* Split the FindSequencesOnDisk logic to expose new FindSequencesInList function
+
 2.8.0
 ----------------
 * go/cpp - Add support for printf (%04d) and houdini ($F04) pad syntax formats
