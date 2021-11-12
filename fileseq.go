@@ -28,17 +28,9 @@ import (
 	"strings"
 )
 
-const Version = "2.9.0"
+const Version = "2.9.1"
 
 var (
-	rangePatterns  []*regexp.Regexp
-	splitPattern   *regexp.Regexp
-	singleFrame    *regexp.Regexp
-	printfPattern  *regexp.Regexp
-	houdiniPattern *regexp.Regexp
-)
-
-func init() {
 	// Regular expression patterns for matching frame set strings.
 	// Examples:
 	//     1-100
@@ -53,6 +45,13 @@ func init() {
 		regexp.MustCompile(`^(-?\d+)-(-?\d+)([:xy])(-?\d+)$`),
 	}
 
+	extPatternStr = `` +
+		`(?P<ext>` +
+		// multiple extension parts:
+		`(?:\.\w*[a-zA-Z]\w)*` + // optional leading alnum ext prefix (.foo.1bar)
+		`(?:\.[a-zA-Z0-9]+)?` + // ext suffix
+		`)`
+
 	// Regular expression for matching a file sequence string.
 	// Example:
 	//     /film/shot/renders/hero_bty.1-100#.exr
@@ -60,22 +59,41 @@ func init() {
 	//     /film/shot/renders/hero_bty.1-100%04d.exr
 	//     /film/shot/renders/hero_bty.1-100$F04.exr
 	splitPattern = regexp.MustCompile(
-		`^(?P<name>.*?)` +
+		`^` +
+			`(?P<name>.*?)` +
 			`(?P<range>[\d-][:xy\d,-]*)?` +
+			// padding options
 			`(?P<pad>` +
 			`[#@]+` + // standard pad chars
 			`|%\d*d` + // or printf padding
 			`|\$F\d*` + // or houdini padding
 			`)` + // end <pad>
-			// multiple extension parts:
-			`(?P<ext>\.(?:\w*[a-zA-Z]\w*)*(?:\.[a-zA-Z0-9]+)?)$`)
+			extPatternStr +
+			`$`,
+	)
 
-	// /film/shot/renders/hero_bty.100.exr
-	singleFrame = regexp.MustCompile(
-		`^(?P<name>.*?)` +
+	// Regular expression pattern for matching single file path names containing a frame.
+	// Example:
+	//     /film/shot/renders/hero_bty.100.exr
+	singleFramePattern = regexp.MustCompile(
+		`^` +
+			`(?P<name>.*?)` +
 			`(?P<frame>-?\d+)` +
-			// multiple extension parts:
-			`(?P<ext>(?:\.\w*[a-zA-Z]\w*)*(?:\.[a-zA-Z0-9]+)?)$`)
+			extPatternStr +
+			`$`,
+	)
+
+	// Regular expression pattern for matching single file path names where the
+	// frame may be optional.
+	// Example:
+	//     /film/shot/renders/hero_bty.exr
+	optionalFramePattern = regexp.MustCompile(
+		`^` +
+			`(?P<name>.*?)` +
+			`(?P<frame>-?\d+)?` +
+			extPatternStr +
+			`$`,
+	)
 
 	// Regular expression pattern for matching padding against a
 	// printf syntax padding string E.g. %04d
@@ -84,7 +102,7 @@ func init() {
 	// Regular expression pattern for matching padding against
 	// houdini syntax. E.g. $F04
 	houdiniPattern = regexp.MustCompile(`^\$F(\d*)$`)
-}
+)
 
 // IsFrameRange returns true if the given string is a valid frame
 // range format.  Any padding characters, such as '#' and '@' are ignored.
