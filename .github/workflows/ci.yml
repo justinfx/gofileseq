@@ -2,7 +2,7 @@ name: Build and Deploy
 
 on:
   push:
-    tags: 
+    tags:
       - "*"
     branches-ignore:
       - 'exp_*'
@@ -19,8 +19,8 @@ jobs:
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       matrix:
-        go: [1.15.x]
-        os: [ubuntu-latest, macOs-latest, windows-latest]
+        go: [ 1.17.x ]
+        os: [ ubuntu-latest, macOs-latest, windows-latest ]
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -30,7 +30,7 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v1
         with:
-            go-version: ${{ matrix.go }}
+          go-version: ${{ matrix.go }}
 
       - name: Test
         run: go test -v ./...
@@ -48,7 +48,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.15
+          go-version: 1.17
       - name: Release 🚀
         uses: goreleaser/goreleaser-action@v2
         with:
