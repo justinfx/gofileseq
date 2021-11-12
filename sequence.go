@@ -817,6 +817,7 @@ func findSequencesInList(paths []*fileItem, opts ...FileOption) (FileSequences, 
 			if appendErr := appendSeq(); appendErr != nil {
 				return nil, appendErr
 			}
+			continue
 		}
 
 		// Multi-frame sequences
