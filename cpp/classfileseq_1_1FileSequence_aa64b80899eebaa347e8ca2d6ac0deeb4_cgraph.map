@@ -1,7 +1,7 @@
 <map id="fileseq::FileSequence::invertedFrameRange" name="fileseq::FileSequence::invertedFrameRange">
 <area shape="rect" id="node1" title=" " alt="" coords="5,39,172,80"/>
-<area shape="rect" id="node2" href="$classfileseq_1_1FrameSet.html#ae25d6ad884ac8551c23993ba60d7cb07" title=" " alt="" coords="220,5,379,47"/>
-<area shape="rect" id="node4" href="$classfileseq_1_1FileSequence.html#a3caef0f425d08e88b6f98a16248b61e5" title=" " alt="" coords="220,71,379,112"/>
-<area shape="rect" id="node3" href="$classfileseq_1_1FrameSet.html#ad21ec89be706fa51cbcfaa54ea9d06f1" title="Return whether the FrameSet is properly parsed and valid as a range." alt="" coords="435,5,577,47"/>
+<area shape="rect" id="node2" href="$classfileseq_1_1FrameSet.html#ae25d6ad884ac8551c23993ba60d7cb07" title=" " alt="" coords="427,5,585,47"/>
+<area shape="rect" id="node4" href="$classfileseq_1_1FileSequence.html#a3caef0f425d08e88b6f98a16248b61e5" title=" " alt="" coords="220,68,379,109"/>
+<area shape="rect" id="node3" href="$classfileseq_1_1FrameSet.html#ad21ec89be706fa51cbcfaa54ea9d06f1" title="Return whether the FrameSet is properly parsed and valid as a range." alt="" coords="633,39,776,80"/>
 <area shape="rect" id="node5" href="$classfileseq_1_1FileSequence.html#aab5d82469fc7296ac7c212bbf806f4a4" title=" " alt="" coords="427,71,585,112"/>
 </map>

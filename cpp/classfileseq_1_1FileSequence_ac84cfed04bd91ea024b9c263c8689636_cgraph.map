@@ -1,16 +1,16 @@
 <map id="fileseq::FileSequence::index" name="fileseq::FileSequence::index">
-<area shape="rect" id="node1" title=" " alt="" coords="5,110,164,151"/>
-<area shape="rect" id="node2" href="$classfileseq_1_1FrameSet.html#abe148f0686f029e54040d89e29985252" title=" " alt="" coords="441,43,584,84"/>
-<area shape="rect" id="node4" href="$classfileseq_1_1FrameSet.html#ad21ec89be706fa51cbcfaa54ea9d06f1" title="Return whether the FrameSet is properly parsed and valid as a range." alt="" coords="861,72,1004,114"/>
-<area shape="rect" id="node5" href="$classfileseq_1_1FileSequence.html#aa0ac049cc72d0d9f41e0a520ff696d41" title=" " alt="" coords="212,304,371,346"/>
-<area shape="rect" id="node11" href="$classfileseq_1_1FileSequence.html#a31670fc375b42ac11a8e5b9b1fb37550" title=" " alt="" coords="212,207,371,248"/>
-<area shape="rect" id="node3" href="$classfileseq_1_1FrameSet.html#a2e8449b94cd965b6642783dcb02f6e31" title=" " alt="" coords="663,43,805,84"/>
-<area shape="rect" id="node6" href="$classfileseq_1_1FileSequence.html#a9f1f61df010ce00c74a5467b4d662139" title=" " alt="" coords="433,239,592,280"/>
-<area shape="rect" id="node8" href="$classfileseq_1_1FileSequence.html#af7e598b352ff7a6cd22b419fd7c17f0f" title=" " alt="" coords="433,304,592,346"/>
-<area shape="rect" id="node9" href="$classfileseq_1_1FileSequence.html#a5f9e2963d9aaa9acbbb03ce9272253cd" title=" " alt="" coords="419,370,607,397"/>
-<area shape="rect" id="node10" href="$classfileseq_1_1FileSequence.html#a3caef0f425d08e88b6f98a16248b61e5" title=" " alt="" coords="433,422,592,463"/>
-<area shape="rect" id="node7" href="$classfileseq_1_1FileSequence.html#aab5d82469fc7296ac7c212bbf806f4a4" title=" " alt="" coords="655,304,813,346"/>
-<area shape="rect" id="node12" href="$classfileseq_1_1FileSequence.html#a54bcf839d417f53f5517990b13e65de1" title=" " alt="" coords="433,108,592,150"/>
-<area shape="rect" id="node14" href="$classfileseq_1_1FileSequence.html#a9c1e99d9a9076bb0a19059d4db513502" title=" " alt="" coords="433,174,592,215"/>
-<area shape="rect" id="node13" href="$classfileseq_1_1FrameSet.html#aa0fe9ca91313bae1f53259ed335173ed" title=" " alt="" coords="663,160,805,202"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,114,164,155"/>
+<area shape="rect" id="node2" href="$classfileseq_1_1FrameSet.html#abe148f0686f029e54040d89e29985252" title=" " alt="" coords="441,49,584,90"/>
+<area shape="rect" id="node4" href="$classfileseq_1_1FrameSet.html#ad21ec89be706fa51cbcfaa54ea9d06f1" title="Return whether the FrameSet is properly parsed and valid as a range." alt="" coords="861,107,1004,149"/>
+<area shape="rect" id="node5" href="$classfileseq_1_1FileSequence.html#aa0ac049cc72d0d9f41e0a520ff696d41" title=" " alt="" coords="212,179,371,221"/>
+<area shape="rect" id="node11" href="$classfileseq_1_1FileSequence.html#a31670fc375b42ac11a8e5b9b1fb37550" title=" " alt="" coords="212,274,371,315"/>
+<area shape="rect" id="node3" href="$classfileseq_1_1FrameSet.html#a2e8449b94cd965b6642783dcb02f6e31" title=" " alt="" coords="663,49,805,90"/>
+<area shape="rect" id="node6" href="$classfileseq_1_1FileSequence.html#a9f1f61df010ce00c74a5467b4d662139" title=" " alt="" coords="433,179,592,221"/>
+<area shape="rect" id="node8" href="$classfileseq_1_1FileSequence.html#af7e598b352ff7a6cd22b419fd7c17f0f" title=" " alt="" coords="433,245,592,286"/>
+<area shape="rect" id="node9" href="$classfileseq_1_1FileSequence.html#a5f9e2963d9aaa9acbbb03ce9272253cd" title=" " alt="" coords="419,311,607,337"/>
+<area shape="rect" id="node10" href="$classfileseq_1_1FileSequence.html#a3caef0f425d08e88b6f98a16248b61e5" title=" " alt="" coords="433,114,592,155"/>
+<area shape="rect" id="node7" href="$classfileseq_1_1FileSequence.html#aab5d82469fc7296ac7c212bbf806f4a4" title=" " alt="" coords="655,211,813,253"/>
+<area shape="rect" id="node12" href="$classfileseq_1_1FileSequence.html#a54bcf839d417f53f5517990b13e65de1" title=" " alt="" coords="433,427,592,469"/>
+<area shape="rect" id="node14" href="$classfileseq_1_1FileSequence.html#a9c1e99d9a9076bb0a19059d4db513502" title=" " alt="" coords="433,362,592,403"/>
+<area shape="rect" id="node13" href="$classfileseq_1_1FrameSet.html#aa0fe9ca91313bae1f53259ed335173ed" title=" " alt="" coords="663,367,805,409"/>
 </map>

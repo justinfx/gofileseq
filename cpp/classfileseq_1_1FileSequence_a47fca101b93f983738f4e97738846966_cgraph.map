@@ -2,8 +2,9 @@
 <area shape="rect" id="node1" title=" " alt="" coords="5,100,164,141"/>
 <area shape="rect" id="node2" href="$classfileseq_1_1FileSequence.html#aa0ac049cc72d0d9f41e0a520ff696d41" title=" " alt="" coords="212,100,371,141"/>
 <area shape="rect" id="node3" href="$classfileseq_1_1FileSequence.html#a9f1f61df010ce00c74a5467b4d662139" title=" " alt="" coords="433,5,592,47"/>
-<area shape="rect" id="node5" href="$classfileseq_1_1FileSequence.html#af7e598b352ff7a6cd22b419fd7c17f0f" title=" " alt="" coords="433,71,592,112"/>
-<area shape="rect" id="node6" href="$classfileseq_1_1FileSequence.html#a5f9e2963d9aaa9acbbb03ce9272253cd" title=" " alt="" coords="419,137,607,163"/>
-<area shape="rect" id="node7" href="$classfileseq_1_1FileSequence.html#a3caef0f425d08e88b6f98a16248b61e5" title=" " alt="" coords="433,188,592,229"/>
+<area shape="rect" id="node6" href="$classfileseq_1_1FileSequence.html#af7e598b352ff7a6cd22b419fd7c17f0f" title=" " alt="" coords="433,71,592,112"/>
+<area shape="rect" id="node7" href="$classfileseq_1_1FileSequence.html#a5f9e2963d9aaa9acbbb03ce9272253cd" title=" " alt="" coords="419,137,607,163"/>
+<area shape="rect" id="node8" href="$classfileseq_1_1FileSequence.html#a3caef0f425d08e88b6f98a16248b61e5" title=" " alt="" coords="433,188,592,229"/>
 <area shape="rect" id="node4" href="$classfileseq_1_1FileSequence.html#aab5d82469fc7296ac7c212bbf806f4a4" title=" " alt="" coords="655,100,813,141"/>
+<area shape="rect" id="node5" href="$classfileseq_1_1FrameSet.html#ad21ec89be706fa51cbcfaa54ea9d06f1" title="Return whether the FrameSet is properly parsed and valid as a range." alt="" coords="861,100,1004,141"/>
 </map>
