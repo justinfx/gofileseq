@@ -44,7 +44,7 @@ Install
 -------
 
 ```bash
-go get github.com/justinfx/gofileseq
+go get github.com/justinfx/gofileseq/v2
 ```
 
 Also included is a [`seqls`](https://github.com/justinfx/gofileseq/tree/master/cmd/seqls) tool, which uses `gofileseq` to produce an executable, used for listing sequences on the filesystem:
