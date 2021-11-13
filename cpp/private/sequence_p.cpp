@@ -116,7 +116,7 @@ bool getSingleFrameMatch(SeqPatternMatch &match, const std::string &path, bool r
     static const pcrecpp::RE* s_rxSingleFrame = new pcrecpp::RE(s_singleFramePattern.c_str());
     static const pcrecpp::RE* s_rxOptionalFrame = new pcrecpp::RE(s_optionalFramePattern.c_str());
 
-    const std::regex &rx = require_frame ? s_rxSingleFrame : s_rxOptionalFrame;
+    const pcrecpp::RE* &rx = require_frame ? s_rxSingleFrame : s_rxOptionalFrame;
     return rx->FullMatch(path, &(match.base), &(match.range), &(match.ext));
 
 #endif
