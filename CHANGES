@@ -1,5 +1,10 @@
 Changes:
 
+2.10.0
+----------------
+* go - Prevent single file path from being appended more than one FindSequences*
+* go/cpp - Refactor FindSequences* to use optional frame range pattern when detecting single frame paths
+
 2.9.0
 ----------------
 * Split the FindSequencesOnDisk logic to expose new FindSequencesInList function

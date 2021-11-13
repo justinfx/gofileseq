@@ -188,13 +188,13 @@ TEST_F( TestPaddingCharsSize, CharsSize ) {
 }
 
 void testFindSequencesOnDisk(bool singleFiles) {
-    std::map<std::string, bool> cases;
-
-    cases["seqA.1,3-6,8-10#.exr"] = false;
-    cases["seqB.5-14,16-18,20#.jpg"] = false;
-    cases["seqC.-5-2,4-10,20-21,27-30@@.tif"] = false;
-    cases["seqD.2-10@.gif"] = false;
-    cases["complex.5-7#.tar.gz"] = false;
+    std::map<std::string, bool> cases = {
+        {"seqA.1,3-6,8-10#.exr", false},
+        {"seqB.5-14,16-18,20#.jpg", false},
+        {"seqC.-5-2,4-10,20-21,27-30@@.tif", false},
+        {"seqD.2-10@.gif", false},
+        {"complex.5-7#.tar.gz", false},
+    };
 
     fileseq::FindSequenceOpts opts = fileseq::kNoOpt;
 
@@ -212,13 +212,11 @@ void testFindSequencesOnDisk(bool singleFiles) {
     ASSERT_TRUE(stat) << "Failed to find seqs in location 'testdata': " << stat;
     ASSERT_NE(size_t(0), seqs.size()) << "Empty sequence search results";
 
-    std::map<std::string, bool>::iterator mapIt;
+    for (const auto &seq : seqs) {
+        std::string name = basename(seq.string());
 
-    for (size_t i=0; i < seqs.size(); ++i) {
-        std::string fullpath = seqs[i].string();
-        std::string name = basename(fullpath);
-
-        if ((mapIt = cases.find(name)) == cases.end()) {
+        auto mapIt = cases.find(name);
+        if (mapIt == cases.end()) {
             ADD_FAILURE() << "Found unexpected seq not in cases: " << name;
             continue;
         }
@@ -226,11 +224,11 @@ void testFindSequencesOnDisk(bool singleFiles) {
         mapIt->second = true;
 
         // Sanity check
-        EXPECT_NE("", seqs[i].index(0));
+        EXPECT_NE("", seq.index(0));
     }
 
-    for (mapIt = cases.begin(); mapIt != cases.end(); ++mapIt) {
-        EXPECT_TRUE(mapIt->second) << "Expected seq was not found: " << mapIt->first;
+    for (const auto &mapIt : cases) {
+        EXPECT_TRUE(mapIt.second) << "Expected seq was not found: " << mapIt.first;
     }
 }
 
@@ -252,6 +250,67 @@ TEST( TestFindSequencesOnDisk, HandleSymlinksOnDisk ) {
 
     std::string expected = "testdata/versions/seq.1-10#.ext";
     ASSERT_EQ(expected, seqs[0].string());
+}
+
+TEST( TestFindSequencesOnDisk, AmbiguousSingleFiles ) {
+    std::map<std::string, bool> cases = {
+            {"123@@@",         false},
+            {"123@@@.ext",     false},
+            {"file.ext12345",  false},
+            {"file.ext12345z", false},
+    };
+
+    fileseq::FileSequences seqs;
+    auto stat = fileseq::findSequencesOnDisk(seqs, "testdata/single_files", fileseq::kOptSingleFiles);
+    ASSERT_TRUE(stat) << "Failed to find seqs in location 'testdata/single_files': " << stat;
+    ASSERT_EQ(cases.size(), seqs.size()) << "Did not find expected number of seqs";
+
+    for (const auto &seq: seqs) {
+        std::string name = basename(seq.string());
+        auto mapIt = cases.find(name);
+        if (mapIt == cases.end()) {
+            ADD_FAILURE() << "Found unexpected seq not in cases: " << name;
+            continue;
+        }
+        // Found
+        mapIt->second = true;
+
+        // Sanity check
+        EXPECT_NE("", seq.index(0));
+    }
+
+    for (const auto &mapIt: cases) {
+        EXPECT_TRUE(mapIt.second) << "Expected seq was not found: " << mapIt.first;
+    }
+}
+
+TEST( TestFindSequencesOnDisk, AmbiguousSingleFilesDisabled ) {
+    std::map<std::string, bool> cases = {
+        {"123@@@.ext", false},
+    };
+
+    fileseq::FileSequences seqs;
+    auto stat = fileseq::findSequencesOnDisk(seqs, "testdata/single_files", fileseq::kNoOpt);
+    ASSERT_TRUE(stat) << "Failed to find seqs in location 'testdata/single_files': " << stat;
+    ASSERT_EQ(cases.size(), seqs.size()) << "Did not find expected number of seqs";
+
+    for (const auto &seq : seqs) {
+        std::string name = basename(seq.string());
+        auto mapIt = cases.find(name);
+        if (mapIt == cases.end()) {
+            ADD_FAILURE() << "Found unexpected seq not in cases: " << name;
+            continue;
+        }
+        // Found
+        mapIt->second = true;
+
+        // Sanity check
+        EXPECT_NE("", seq.index(0));
+    }
+
+    for (const auto &mapIt : cases) {
+        EXPECT_TRUE(mapIt.second) << "Expected seq was not found: " << mapIt.first;
+    }
 }
 
 class TestFindSequenceOnDisk : public testing::Test {

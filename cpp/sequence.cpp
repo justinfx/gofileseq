@@ -139,9 +139,13 @@ bool FileSequence::isValid() const {
         return false;
     }
 
+    if (m_seqData->str.empty()) {
+        return false;
+    }
+
     // We at least need a basename or ext to consider
     // ourselves valid
-    return !(m_seqData->str.empty() || (m_seqData->base.empty() && m_seqData->ext.empty()));
+    return !(m_seqData->base.empty() && m_seqData->ext.empty()) || m_frameSet.isValid();
 
 }
 

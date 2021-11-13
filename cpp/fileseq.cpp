@@ -369,8 +369,13 @@ Status findSequencesOnDisk(FileSequences &seqs,
         }
 
         // Are we matching a single frame (no range)?
-        if (!getSingleFrameMatch(match, name)) {
+        bool ok = getSingleFrameMatch(match, name, /*require_frame */ false);
 
+        if (ok && (match.range.empty() || (match.base.empty() && match.ext.empty()))) {
+            ok = false;
+        }
+
+        if (!ok) {
             // Only keep it if we wanted single files
             if (singleFiles) {
                 buf << name;
@@ -379,9 +384,15 @@ Status findSequencesOnDisk(FileSequences &seqs,
                 if (!status) {
                     return status;
                 }
-
-                fs.setFrameSet(FrameSet());
-                fs.setPadding("");
+                // Preserve the parsed base/frame/ext
+                fs.setBasename(match.base);
+                fs.setExt(match.ext);
+                if (match.range.empty()) {
+                    fs.setFrameSet(FrameSet());
+                    fs.setPadding("");
+                } else {
+                    fs.setFrameRange(match.range);
+                }
                 files.push_back(fs);
 
                 buf.str(root); // reset

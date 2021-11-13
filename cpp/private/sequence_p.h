@@ -28,7 +28,7 @@ bool getSplitPatternMatch(SeqPatternMatch &match, const std::string &path);
 // Try to match a valid single file pattern, containing no frame range, and
 // fill the match instance with the parsed results.
 // Returns true if the match was successful.
-bool getSingleFrameMatch(SeqPatternMatch &match, const std::string &path);
+bool getSingleFrameMatch(SeqPatternMatch &match, const std::string &path, bool require_frame=true);
 
 // PadSyntax indicate alternate padding format syntax
 enum PadSyntax {
