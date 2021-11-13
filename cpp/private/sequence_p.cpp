@@ -60,19 +60,47 @@ bool getSplitPatternMatch(SeqPatternMatch &match, const std::string &path) {
 }
 
 
-bool getSingleFrameMatch(SeqPatternMatch &match, const std::string &path) {
-    // Regular expression for matching a single frame string.
-    // Example:
-    //     /film/shot/renders/hero_bty.100.exr
-    static const char* s_pattern = R"(^(.*?)(-?\d+)((?:\.\w*[a-zA-Z]\w*)*(?:\.[a-zA-Z0-9]+)?)$)";
+bool getSingleFrameMatch(SeqPatternMatch &match, const std::string &path, bool require_frame) {
+    using std::string;
+    static const string s_extension =
+        // multiple extension parts:
+        "("
+            R"((?:\.\w*[a-zA-Z]\w)*)"  // optional leading alnum ext prefix (.foo.1bar)
+            R"((?:\.[a-zA-Z0-9]+)?)"   // ext suffix
+        ")";
+
+	// Regular expression pattern for matching single file path names containing a frame.
+	// Example:
+	//     /film/shot/renders/hero_bty.100.exr
+    static const string s_singleFramePattern =
+        string("^") +
+            "(.*?)" +       // file name
+            R"((-?\d+))" +  // frame
+            s_extension +   // ext
+        "$";
+
+    // Regular expression pattern for matching single file path names where the
+	// frame may be optional.
+	// Example:
+	//     /film/shot/renders/hero_bty.exr
+    static const string s_optionalFramePattern =
+        string("^") +
+            "(.*?)" +        // file name
+            R"((-?\d+)?)" +  // optional frame
+            s_extension +    // ext
+        "$";
 
     // Not using this field
     match.padChars.clear();
 
 #if HAVE_REGEX == 1
-    static const std::regex rx(s_pattern,
+    static const std::regex s_rxSingleFrame(s_singleFramePattern.c_str(),
             std::regex_constants::optimize|std::regex_constants::ECMAScript);
 
+    static const std::regex s_rxOptionalFrame(s_optionalFramePattern.c_str(),
+        std::regex_constants::optimize|std::regex_constants::ECMAScript);
+
+    const std::regex &rx = require_frame ? s_rxSingleFrame : s_rxOptionalFrame;
     std::smatch submatch;
 
     if (!std::regex_match(path, submatch, rx)) {
@@ -85,7 +113,10 @@ bool getSingleFrameMatch(SeqPatternMatch &match, const std::string &path) {
     return true;
 
 #else
-    static const pcrecpp::RE* rx = new pcrecpp::RE(s_pattern);
+    static const pcrecpp::RE* s_rxSingleFrame = new pcrecpp::RE(s_singleFramePattern.c_str());
+    static const pcrecpp::RE* s_rxOptionalFrame = new pcrecpp::RE(s_optionalFramePattern.c_str());
+
+    const pcrecpp::RE* &rx = require_frame ? s_rxSingleFrame : s_rxOptionalFrame;
     return rx->FullMatch(path, &(match.base), &(match.range), &(match.ext));
 
 #endif

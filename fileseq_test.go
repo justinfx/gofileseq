@@ -328,6 +328,9 @@ func TestNewFileSequence(t *testing.T) {
 		{"/dir/f.1-100$F04.jpeg",
 			"/dir/f.1-100$F04.jpeg", 1, 100, 4,
 			100, ".jpeg"},
+		{"/dir/f.tmp12345@@@@@",
+			"/dir/f.tmp12345@@@@@", 12345, 12345, 5,
+			1, ""},
 	}
 	for _, tt := range table {
 		seq, err := NewFileSequence(tt.path)
@@ -336,7 +339,7 @@ func TestNewFileSequence(t *testing.T) {
 		}
 		actual := seq.String()
 		if actual != tt.outPath {
-			t.Errorf("%s != %s", actual, tt.outPath)
+			t.Errorf("Expected %s; got %s (for path: %s)", tt.outPath, actual, tt.path)
 		}
 		if seq.Start() != tt.start {
 			t.Errorf("Expected %q start to be %d, got %d", tt.path, tt.start, seq.Start())
@@ -747,20 +750,6 @@ func TestListFiles(t *testing.T) {
 }
 
 func TestFindSequencesInList(t *testing.T) {
-	/*
-			"testdata": {
-			"seqD.2-10@.gif",
-			"seqC.-5-2,4-10,20-21,27-30@@.tif",
-			"seqB.5-14,16-18,20#.jpg",
-			"seqA.1,3-6,8-10#.exr",
-			"complex.5-7#.tar.gz",
-		},
-		"testdata/mixed": {
-			"seq.-1-5@@.ext",
-			"seq.-1-5#.ext",
-			"seq.-1-5,1001@@@@@.ext",
-		},
-	*/
 	table := []struct {
 		Name   string
 		Paths  []string
@@ -827,6 +816,38 @@ func TestFindSequencesInList(t *testing.T) {
 			Expect: []string{
 				"/path/to/foo.1-3####.ext",
 				"/path/to/bar.1-3#.ext",
+			},
+		},
+		{
+			Name: "ambiguous single files",
+			Paths: []string{
+				"/path/to/single/123",
+				"/path/to/single/123.ext",
+				"/path/to/single/file0001.ext",
+				"/path/to/single/file.ext12345",
+				"/path/to/single/file.ext12345z",
+			},
+			Opts: []FileOption{SingleFiles},
+			Expect: []string{
+				"/path/to/single/123@@@",
+				"/path/to/single/123@@@.ext",
+				"/path/to/single/file1#.ext",
+				"/path/to/single/file.ext12345",
+				"/path/to/single/file.ext12345z",
+			},
+		},
+		{
+			Name: "ambiguous single files disabled",
+			Paths: []string{
+				"/path/to/single/123",
+				"/path/to/single/123.ext",
+				"/path/to/single/file0001.ext",
+				"/path/to/single/file.ext12345",
+				"/path/to/single/file.ext12345z",
+			},
+			Expect: []string{
+				"/path/to/single/123@@@.ext",
+				"/path/to/single/file1#.ext",
 			},
 		},
 	}

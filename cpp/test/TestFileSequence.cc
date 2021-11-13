@@ -149,6 +149,10 @@ protected:
             Case t = {"/dir/no_frames.tar.gz", "/dir/no_frames.tar.gz", 0, 0, 0, 1, ".gz"};
             m_cases.push_back(t);
         }
+        {
+            Case t = {"/dir/f.tmp12345@@@@@", "/dir/f.tmp12345@@@@@", 12345, 12345, 5, 1, ""};
+            m_cases.push_back(t);
+        }
     }
 
     std::vector<Case> m_cases;
