@@ -800,9 +800,17 @@ func findSequencesInList(paths []*fileItem, opts ...FileOption) (FileSequences, 
 		if err != nil {
 			return err
 		}
-		if pad == "" {
+
+		// Always use the previously parsed basename, range, and ext
+		fs.basename = baseName
+		fs.ext = ext
+		if frange == "" {
 			fs.SetFrameSet(nil)
+			fs.SetPadding("")
+		} else {
+			fs.SetFrameRange(frange)
 		}
+
 		fseqs = append(fseqs, fs)
 
 		buf.Reset()
