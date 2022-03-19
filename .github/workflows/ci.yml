@@ -19,7 +19,7 @@ jobs:
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       matrix:
-        go: [ 1.17.x ]
+        go: [ 1.18.x ]
         os: [ ubuntu-latest, macOs-latest, windows-latest ]
     steps:
       - name: Checkout
@@ -48,7 +48,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.17
+          go-version: 1.18
       - name: Release 🚀
         uses: goreleaser/goreleaser-action@v2
         with:
