@@ -44,7 +44,7 @@ Install
 -------
 
 ```bash
-go get github.com/justinfx/gofileseq
+go get github.com/justinfx/gofileseq/v2
 ```
 
 Also included is a [`seqls`](https://github.com/justinfx/gofileseq/tree/master/cmd/seqls) tool, which uses `gofileseq` to produce an executable, used for listing sequences on the filesystem:
@@ -55,7 +55,7 @@ Download the latest [binary release](https://github.com/justinfx/gofileseq/relea
 
 Or install from source:
 ```bash
-go get github.com/justinfx/gofileseq/cmd/seqls
+go get github.com/justinfx/gofileseq/v2/cmd/seqls
 seql some/images
 # some/images/file_foo.1-100@@@.tif
 ```
