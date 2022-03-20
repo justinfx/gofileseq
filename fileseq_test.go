@@ -821,6 +821,7 @@ func TestFindSequencesInList(t *testing.T) {
 		{
 			Name: "ambiguous single files",
 			Paths: []string{
+				"/path/to/complex_name_15-14-56-14.ext",
 				"/path/to/single/123",
 				"/path/to/single/123.ext",
 				"/path/to/single/file0001.ext",
@@ -829,6 +830,7 @@ func TestFindSequencesInList(t *testing.T) {
 			},
 			Opts: []FileOption{SingleFiles},
 			Expect: []string{
+				"/path/to/complex_name_15-14-56-14@@@.ext",
 				"/path/to/single/123@@@",
 				"/path/to/single/123@@@.ext",
 				"/path/to/single/file1#.ext",
@@ -839,6 +841,7 @@ func TestFindSequencesInList(t *testing.T) {
 		{
 			Name: "ambiguous single files disabled",
 			Paths: []string{
+				"/path/to/complex_name_15-14-56-14.ext",
 				"/path/to/single/123",
 				"/path/to/single/123.ext",
 				"/path/to/single/file0001.ext",
@@ -846,6 +849,7 @@ func TestFindSequencesInList(t *testing.T) {
 				"/path/to/single/file.ext12345z",
 			},
 			Expect: []string{
+				"/path/to/complex_name_15-14-56-14@@@.ext",
 				"/path/to/single/123@@@.ext",
 				"/path/to/single/file1#.ext",
 			},
