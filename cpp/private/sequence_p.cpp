@@ -188,7 +188,7 @@ size_t getPadSize(const std::string &pad, PadSyntax syntax) {
             rx = s_houdini_rx;
             break;
         case PadSyntaxUdim:
-            rx = &s_udim_rx;
+            rx = s_udim_rx;
             break;
         default:
             std::cerr << "warning: unhandled fileseq pad format "
