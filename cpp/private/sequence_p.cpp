@@ -28,7 +28,7 @@ bool getSplitPatternMatch(SeqPatternMatch &match, const std::string &path) {
             R"(^(.*?))" // dir and basename
             R"(([\d-][:xy\d,-]*)?)" // optional frame range
             R"(([#@]+|%\d*d|\$F\d*))" // padding: chars, printf, houdini
-            R"(((?:\.[a-zA-Z0-9]+)*)$)"; // extension
+            R"(((?:\.\w*[a-zA-Z]\w)*(?:\.[^.]+)?)$)"; // extension
 
     match.base.clear();
     match.range.clear();
@@ -66,7 +66,7 @@ bool getSingleFrameMatch(SeqPatternMatch &match, const std::string &path, bool r
         // multiple extension parts:
         "("
             R"((?:\.\w*[a-zA-Z]\w)*)"  // optional leading alnum ext prefix (.foo.1bar)
-            R"((?:\.[a-zA-Z0-9]+)?)"   // ext suffix
+            R"((?:\.[^.]+)?)"          // ext suffix
         ")";
 
 	// Regular expression pattern for matching single file path names containing a frame.
