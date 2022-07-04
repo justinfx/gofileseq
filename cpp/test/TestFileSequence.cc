@@ -52,6 +52,14 @@ protected:
             m_cases.push_back(t);
         }
         {
+            Case t = {"/dir/f.1-100<UDIM>.f", "/dir/f.1-100<UDIM>.f", 1, 100, 4, 100, ".f"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"/dir/f.1-100%(UDIM)d.f", "/dir/f.1-100%(UDIM)d.f", 1, 100, 4, 100, ".f"};
+            m_cases.push_back(t);
+        }
+        {
             Case t = {
                 "/dir/f.1-10,50,60-90x2##.mp4",
                 "/dir/f.1-10,50,60-90x2##.mp4",
@@ -217,6 +225,14 @@ protected:
         }
         {
             Case t = {"file.1-100$F04.exr", 100, 4, 5, "file.0005.exr"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"file.1-100<UDIM>.exr", 100, 4, 5, "file.0005.exr"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"file.1-100%(UDIM)d.exr", 100, 4, 5, "file.0005.exr"};
             m_cases.push_back(t);
         }
         {
@@ -400,6 +416,8 @@ protected:
         {Case t = {"/path/to/file%s_1-100x10$F.exr", "file%s_", 1, 91, "$F"}; m_cases.push_back(t);}
         {Case t = {"/path/to/file%s_1-100x10$F2.exr", "file%s_", 1, 91, "$F2"}; m_cases.push_back(t);}
         {Case t = {"/path/to/file%s_1-100x10$F02.exr", "file%s_", 1, 91, "$F02"}; m_cases.push_back(t);}
+        {Case t = {"/path/to/file%s_1-100x10<UDIM>.exr", "file%s_", 1, 91, "<UDIM>"}; m_cases.push_back(t);}
+        {Case t = {"/path/to/file%s_1-100x10%(UDIM)d.exr", "file%s_", 1, 91, "%(UDIM)d"}; m_cases.push_back(t);}
         {Case t = {"/path/to/file%s.-10--1x2##.exr", "file%s.", -10, -2, "##"}; m_cases.push_back(t);}
         {Case t = {"/path/to/file%s1,2,3,5-10,20-30#.exr", "file%s", 1, 30, "#"}; m_cases.push_back(t);}
     }

@@ -15,7 +15,7 @@ Support for:
     Padding: #=4 padded, @=single pad
 	Printf Syntax Padding: %04d=4 padded, %01d=1 padded
 	Houdini Syntax Padding: $F4=4 padding, $F=1 padded
-
+	Udim Syntax Padding: <UDIM> or %(UDIM)d, always 4 padded
 */
 package fileseq
 
@@ -67,6 +67,7 @@ var (
 			`[#@]+` + // standard pad chars
 			`|%\d*d` + // or printf padding
 			`|\$F\d*` + // or houdini padding
+			`|<UDIM>|%\(UDIM\)d` + // or UDIM padding
 			`)` + // end <pad>
 			extPatternStr +
 			`$`,
@@ -102,6 +103,10 @@ var (
 	// Regular expression pattern for matching padding against
 	// houdini syntax. E.g. $F04
 	houdiniPattern = regexp.MustCompile(`^\$F(\d*)$`)
+
+	// Regular expression pattern for matching padding against
+	// UDIM syntax. E.g. <UDIM> or %(UDIM)d
+	udimPattern = regexp.MustCompile(`^<UDIM>|%\(UDIM\)d$`)
 )
 
 // IsFrameRange returns true if the given string is a valid frame

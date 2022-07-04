@@ -21,13 +21,16 @@ bool getSplitPatternMatch(SeqPatternMatch &match, const std::string &path) {
     // Regular expression for matching a file sequence string.
     // Example:
     //     /film/shot/renders/hero_bty.1-100#.exr
+    //     /film/shot/renders/hero_bty.1-100#.tar.gz
     //     /film/shot/renders/hero_bty.@@.exr
     //     /film/shot/renders/hero_bty.%02d.exr
     //     /film/shot/renders/hero_bty.$F02.exr
+    //     /film/shot/renders/hero_bty.<UDIM>.exr
+    //     /film/shot/renders/hero_bty.%(UDIM)d.exr
     static const char* s_pattern =
             R"(^(.*?))" // dir and basename
             R"(([\d-][:xy\d,-]*)?)" // optional frame range
-            R"(([#@]+|%\d*d|\$F\d*))" // padding: chars, printf, houdini
+            R"(([#@]+|%\d*d|\$F\d*|<UDIM>|%\(UDIM\)d))" // padding: chars, printf, houdini, udim
             R"(((?:\.\w*[a-zA-Z]\w)*(?:\.[^.]+)?)$)"; // extension
 
     match.base.clear();
@@ -128,6 +131,9 @@ size_t getPadSize(const std::string &pad, PadSyntax syntax) {
     static const char *s_printf_pattern = R"(^%(\d*)d$)";
     // houdini:  $F, $F4, $F04
     static const char *s_houdini_pattern = R"(^\$F(\d*)$)";
+    // UDIM:  <UDIM>, %(UDIM)d
+    static const char *s_udim_pattern = R"(^(<UDIM>|%\(UDIM\)d)$)";
+    static const size_t udim_size = 4;
 
     if (pad.empty()) {
         return 0;
@@ -139,6 +145,7 @@ size_t getPadSize(const std::string &pad, PadSyntax syntax) {
     static const auto flags = std::regex_constants::optimize|std::regex_constants::ECMAScript;
     static const std::regex s_printf_rx(s_printf_pattern, flags);
     static const std::regex s_houdini_rx(s_houdini_pattern, flags);
+    static const std::regex s_udim_rx(s_udim_pattern, flags);
 
     const std::regex* rx;
     switch (syntax) {
@@ -147,6 +154,9 @@ size_t getPadSize(const std::string &pad, PadSyntax syntax) {
             break;
         case PadSyntaxHoudini:
             rx = &s_houdini_rx;
+            break;
+        case PadSyntaxUdim:
+            rx = &s_udim_rx;
             break;
         default:
             std::cerr << "warning: unhandled fileseq pad format "
@@ -158,11 +168,16 @@ size_t getPadSize(const std::string &pad, PadSyntax syntax) {
     if (!std::regex_match(pad, submatch, *rx)) {
         return val;
     }
+    // udim has a fixed size
+    if (syntax == PadSyntaxUdim) {
+        return udim_size;
+    }
     val = !submatch[1].str().empty() ? std::stol(submatch[1].str()) : 1;
 
 #else
     static const pcrecpp::RE* s_printf_rx = new pcrecpp::RE(s_printf_pattern);
     static const pcrecpp::RE* s_houdini_rx = new pcrecpp::RE(s_houdini_pattern);
+    static const pcrecpp::RE* s_udim_rx = new pcrecpp::RE(s_udim_pattern);
 
     const pcrecpp::RE* rx;
     switch (syntax) {
@@ -171,6 +186,9 @@ size_t getPadSize(const std::string &pad, PadSyntax syntax) {
             break;
         case PadSyntaxHoudini:
             rx = s_houdini_rx;
+            break;
+        case PadSyntaxUdim:
+            rx = &s_udim_rx;
             break;
         default:
             std::cerr << "warning: unhandled fileseq pad format "
@@ -181,6 +199,10 @@ size_t getPadSize(const std::string &pad, PadSyntax syntax) {
     std::string str;
     if (!(rx->FullMatch(pad, &str))) {
         return val;
+    }
+    // udim has a fixed size
+    if (syntax == PadSyntaxUdim) {
+        return udim_size;
     }
     val = !str.empty() ? std::stol(str) : 1;
 

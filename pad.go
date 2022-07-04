@@ -114,6 +114,11 @@ func (m *paddingMap) PaddingCharsSize(chars string) int {
 		return 0
 	}
 
+	// udim is a fixed padding size
+	if udimPattern.MatchString(chars) {
+		return 4
+	}
+
 	// check for alternate padding syntax
 	var match []string
 	for _, rx := range []*regexp.Regexp{printfPattern, houdiniPattern} {

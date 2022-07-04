@@ -139,6 +139,9 @@ size_t PaddingMapper::getPaddingCharsSize(const std::string &chars) const {
     if ((size = internal::getPadSize(chars, internal::PadSyntaxHoudini)) > 0) {
         return size;
     }
+    if ((size = internal::getPadSize(chars, internal::PadSyntaxUdim)) > 0) {
+        return size;
+    }
 
     // standard pad chars
     CharSizeMap::const_iterator found;

@@ -1,7 +1,8 @@
 Changes:
 
-2.10.1
+2.11.0
 ----------------
+* go/cpp - Implement UDIM style syntax for padding
 * go/cpp - Fix parsing error by relaxing acceptable characters in extension component (align with pyfileseq)
 
 2.10.0

@@ -201,6 +201,8 @@ func TestFrameSetSplitPattern(t *testing.T) {
 		{"/path/to/file%s_1-100x10%%02d.exr", "file%s_", 1, 91, "%02d"},
 		{"/path/to/file%s_1-100x10$F2.exr", "file%s_", 1, 91, "$F2"},
 		{"/path/to/file%s_1-100x10$F02.exr", "file%s_", 1, 91, "$F02"},
+		{"/path/to/file%s_1-100x10<UDIM>.exr", "file%s_", 1, 91, "<UDIM>"},
+		{"/path/to/file%s_1-100x10%%(UDIM)d.exr", "file%s_", 1, 91, "%(UDIM)d"},
 	}
 
 	// ref: splitPattern range directive chars
@@ -328,6 +330,12 @@ func TestNewFileSequence(t *testing.T) {
 		{"/dir/f.1-100$F04.jpeg",
 			"/dir/f.1-100$F04.jpeg", 1, 100, 4,
 			100, ".jpeg"},
+		{"/dir/f.1-100<UDIM>.jpeg",
+			"/dir/f.1-100<UDIM>.jpeg", 1, 100, 4,
+			100, ".jpeg"},
+		{"/dir/f.1-100%(UDIM)d.jpeg",
+			"/dir/f.1-100%(UDIM)d.jpeg", 1, 100, 4,
+			100, ".jpeg"},
 		{"/dir/f.tmp12345@@@@@",
 			"/dir/f.tmp12345@@@@@", 12345, 12345, 5,
 			1, ""},
@@ -372,6 +380,8 @@ func TestFileSequenceSplit(t *testing.T) {
 		{"/dir/f.-1-100#.jpeg", []string{"-1-100"}},
 		{"/dir/f.-1-100%04d.jpeg", []string{"-1-100"}},
 		{"/dir/f.-1-100$F04.jpeg", []string{"-1-100"}},
+		{"/dir/f.-1-100<UDIM>.jpeg", []string{"-1-100"}},
+		{"/dir/f.-1-100%(UDIM)d.jpeg", []string{"-1-100"}},
 		{"/dir/f.1-10,50,60-90x2##.exr", []string{"1-10", "50", "60-90x2"}},
 		{"/dir/f.1-10,50,60-90x2##.tar.gz", []string{"1-10", "50", "60-90x2"}},
 		{"/dir/f.exr", []string{""}},
@@ -619,6 +629,8 @@ func TestPaddingCharsSize(t *testing.T) {
 				{"$F", 1},
 				{"$F2", 2},
 				{"$F04", 4},
+				{"<UDIM>", 4},
+				{"%(UDIM)d", 4},
 			},
 		},
 		{
@@ -636,6 +648,8 @@ func TestPaddingCharsSize(t *testing.T) {
 				{"%04d", 4},
 				{"$F2", 2},
 				{"$F04", 4},
+				{"<UDIM>", 4},
+				{"%(UDIM)d", 4},
 			},
 		},
 	}
@@ -907,8 +921,10 @@ func TestFindSequenceOnDisk(t *testing.T) {
 				"testdata/seqA.@@@@.exr":      "testdata/seqA.1,3-6,8-10####.exr",
 				"testdata/seqA.@.jpg":         "",
 
-				"testdata/seqC.%02d.tif": "testdata/seqC.-5-2,4-10,20-21,27-30##.tif",
-				"testdata/seqC.$F02.tif": "testdata/seqC.-5-2,4-10,20-21,27-30##.tif",
+				"testdata/seqC.%02d.tif":     "testdata/seqC.-5-2,4-10,20-21,27-30##.tif",
+				"testdata/seqC.$F02.tif":     "testdata/seqC.-5-2,4-10,20-21,27-30##.tif",
+				"testdata/seqA.<UDIM>.exr":   "testdata/seqA.1,3-6,8-10####.exr",
+				"testdata/seqA.%(UDIM)d.exr": "testdata/seqA.1,3-6,8-10####.exr",
 
 				"testdata/mixed/seq.####.ext":  "testdata/mixed/seq.-1-5####.ext",
 				"testdata/mixed/seq.#.ext":     "",
@@ -931,8 +947,10 @@ func TestFindSequenceOnDisk(t *testing.T) {
 				"testdata/seqA.@.exr":      "",
 				"testdata/seqA.@.jpg":      "",
 
-				"testdata/seqC.%02d.tif": "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
-				"testdata/seqC.$F02.tif": "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
+				"testdata/seqC.%02d.tif":     "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
+				"testdata/seqC.$F02.tif":     "testdata/seqC.-5-2,4-10,20-21,27-30@@.tif",
+				"testdata/seqA.<UDIM>.exr":   "testdata/seqA.1,3-6,8-10#.exr",
+				"testdata/seqA.%(UDIM)d.exr": "testdata/seqA.1,3-6,8-10#.exr",
 
 				"testdata/mixed/seq.#.ext":     "testdata/mixed/seq.-1-5#.ext",
 				"testdata/mixed/seq.@@.ext":    "testdata/mixed/seq.-1-5@@.ext",

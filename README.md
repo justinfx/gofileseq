@@ -28,6 +28,7 @@ Support for:
 * Padding: #=4 padded, @=single pad
 * Printf Syntax Padding: %04d=4 padded, %01d=1 padded
 * Houdini Syntax Padding: $F4=4 padding, $F=1 padded
+* Udim Syntax Padding: <UDIM> or %(UDIM)d, always 4 padded
 	
 Sequence Formats
 ----------------
@@ -39,6 +40,8 @@ Sequences of files are expected to follow a pattern similar to:
 * /path/to/some/file_foo.1-100@@@.tif
 * /path/to/some/file_foo.1-100%03d.tif
 * /path/to/some/file_foo.1-100$F3.tif
+* /path/to/some/file_foo.1-100<UDIM>.tif
+* /path/to/some/file_foo.1-100%(UDIM)d.tif
 
 Install
 -------

@@ -34,6 +34,7 @@ bool getSingleFrameMatch(SeqPatternMatch &match, const std::string &path, bool r
 enum PadSyntax {
     PadSyntaxPrintf = 1,  // %04d
     PadSyntaxHoudini = 2, // $F, $F4, $F04
+    PadSyntaxUdim = 3,    // <UDIM>, %(UDIM)d
 };
 
 // Try to match padding syntax, and return the parsed padding size.
