@@ -331,6 +331,9 @@ func TestNewFileSequence(t *testing.T) {
 		{"/dir/f.tmp12345@@@@@",
 			"/dir/f.tmp12345@@@@@", 12345, 12345, 5,
 			1, ""},
+		{"/dir/f.1-100#.tar.gz-1",
+			"/dir/f.1-100#.tar.gz-1", 1, 100, 4,
+			100, ".tar.gz-1"},
 	}
 	for _, tt := range table {
 		seq, err := NewFileSequence(tt.path)

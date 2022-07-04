@@ -28,7 +28,7 @@ import (
 	"strings"
 )
 
-const Version = "2.10.0"
+const Version = "2.10.1"
 
 var (
 	// Regular expression patterns for matching frame set strings.
@@ -49,7 +49,7 @@ var (
 		`(?P<ext>` +
 		// multiple extension parts:
 		`(?:\.\w*[a-zA-Z]\w)*` + // optional leading alnum ext prefix (.foo.1bar)
-		`(?:\.[a-zA-Z0-9]+)?` + // ext suffix
+		`(?:\.[^.]+)?` + // ext suffix
 		`)`
 
 	// Regular expression for matching a file sequence string.
