@@ -277,13 +277,24 @@ protected:
 };
 
 
-TEST_F( TestFrameSetInverted, Inverted ) {
+TEST_F( TestFrameSetInverted, InvertedFrameRange ) {
     for (size_t i=0; i < m_cases.size(); ++i) {
         Case t = m_cases[i];
 
         fileseq::FrameSet s(t.range);
 
         EXPECT_EQ(t.expected, s.invertedFrameRange(t.zfill))
+            << "Given invertedFrameRange(pad=" << t.zfill << ") on range " << t.range;
+    }
+};
+
+TEST_F( TestFrameSetInverted, Inverted ) {
+    for (size_t i=0; i < m_cases.size(); ++i) {
+        Case t = m_cases[i];
+
+        fileseq::FrameSet s(t.range);
+        auto inverted = s.inverted();
+        EXPECT_EQ(t.expected, inverted.frameRange(t.zfill))
             << "Given invertedFrameRange(pad=" << t.zfill << ") on range " << t.range;
     }
 };

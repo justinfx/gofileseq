@@ -259,7 +259,6 @@ FrameSet FrameSet::inverted() const {
     m_frameData->ranges.inverted(ranges);
 
     // Create a new internal data member and swap in our ranges
-    newFrameSet.m_frameData = new internal::FrameSetData();
     newFrameSet.m_frameData->frameRange = ranges.string();
     std::swap(newFrameSet.m_frameData->ranges, ranges);
 
@@ -295,7 +294,6 @@ FrameSet FrameSet::normalized() const {
     m_frameData->ranges.normalized(ranges);
 
     // Create a new internal data member and swap in our ranges
-    newFrameSet.m_frameData = new internal::FrameSetData();
     newFrameSet.m_frameData->frameRange = ranges.string();
     std::swap(newFrameSet.m_frameData->ranges, ranges);
 
