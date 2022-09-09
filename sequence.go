@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+
+	"github.com/justinfx/gofileseq/v2/exp/peg"
 )
 
 // A FileSequence represents a path to a sequence of files,
@@ -72,82 +74,37 @@ func NewFileSequence(sequence string) (*FileSequence, error) {
 //     /path/to/image_foo.1-10x2##.jpg => /path/to/image_foo.00000001.jpg ...
 //
 func NewFileSequencePad(sequence string, style PadStyle) (*FileSequence, error) {
-	var dir, basename, pad, ext string
-	var frameSet *FrameSet
-	var err error
-
 	// Determine which style of padding to use
 	padder, ok := padders[style]
 	if !ok {
 		padder = defaultPadding
 	}
 
-	parts := splitPattern.FindStringSubmatch(sequence)
+	parsed, err := peg.ParseSeq(sequence)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse sequence %q: %v", sequence, err)
+	}
 
-	if len(parts) == 0 {
-		// If no match at this point, we are dealing with a possible
-		// path that contains no range. Maybe a single frame or no frame.
+	if parsed.Range != "" && parsed.Pad == "" && parsed.IsRangeSingle() {
+		parsed.Pad = padder.PaddingChars(len(parsed.Range))
+	}
 
-		for _, pad := range defaultPadding.AllChars() {
-			if strings.Contains(sequence, pad) {
-				return nil, fmt.Errorf("Failed to parse sequence: %s", sequence)
-			}
-		}
-		// We assume the sequence is just a single file path, containing
-		// no frame patterns
-		dir, basename = filepath.Split(sequence)
-		idx := strings.LastIndex(basename, ".")
-		if idx > -1 {
-			basename, ext = basename[:idx], basename[idx:]
-		}
-
-		if dir == "" && basename == "" && ext != "" {
-			// Just assume all we have is a file extension
-
-		} else {
-			// Try to see if we can at least find a specific frame
-			// number, a la  .<frame>.ext
-			parts = singleFramePattern.FindStringSubmatch(sequence)
-			if len(parts) > 0 {
-				frameStr := parts[2]
-				frameSet, err = NewFrameSet(frameStr)
-				if err != nil {
-					frameSet = nil
-				} else {
-					// Reparse the dir/basename to not include the trailing frame
-					dir, basename = filepath.Split(parts[1])
-
-					// Calculate the padding chars
-					pad = padder.PaddingChars(len(strings.TrimSpace(frameStr)))
-				}
-				ext = parts[3]
-			}
-		}
-
-	} else {
-		// We are dealing with a pattern containing a frame range
-
-		frameSet, err = NewFrameSet(parts[2])
-		if err != nil {
-			frameSet = nil
-		}
-
-		dir, basename = filepath.Split(parts[1])
-		pad = parts[3]
-		ext = parts[4]
+	frameSet, err := NewFrameSet(parsed.Range)
+	if err != nil {
+		frameSet = nil
 	}
 
 	seq := &FileSequence{
-		basename:  basename,
-		dir:       dir,
-		ext:       ext,
-		padChar:   pad,
+		basename:  parsed.Base,
+		dir:       parsed.Dir,
+		ext:       parsed.Ext,
+		padChar:   parsed.Pad,
 		zfill:     0, // Fill will be calculated after SetPadding()
 		frameSet:  frameSet,
 		padMapper: padder,
 	}
 
-	seq.SetPadding(pad)
+	seq.SetPadding(parsed.Pad)
 
 	return seq, nil
 }
@@ -710,9 +667,6 @@ func findSequencesInList(paths []*fileItem, opts ...FileOption) (FileSequences, 
 	var (
 		buf      strings.Builder
 		seqCount int
-		baseName string
-		frameStr string
-		ext      string
 	)
 
 	for _, item := range paths {
@@ -720,18 +674,13 @@ func findSequencesInList(paths []*fileItem, opts ...FileOption) (FileSequences, 
 			continue
 		}
 
-		match := optionalFramePattern.FindStringSubmatch(item.FileName)
-
 		ok := true
-		if len(match) == 0 {
+		parsed, err := peg.ParseSeq(item.FileName)
+		if err != nil {
 			ok = false
-			baseName, frameStr, ext = "", "", ""
-		} else {
-			baseName, frameStr, ext = match[1], match[2], match[3]
+		} else if parsed.Range == "" || (parsed.Base == "" && parsed.Ext == "") {
 			// having no frame, or having only a frame, is not considered a sequence
-			if frameStr == "" || (baseName == "" && ext == "") {
-				ok = false
-			}
+			ok = false
 		}
 
 		if !ok {
@@ -744,13 +693,13 @@ func findSequencesInList(paths []*fileItem, opts ...FileOption) (FileSequences, 
 					return nil, err
 				}
 				// Preserve the parsed base/frame/ext
-				fs.basename = baseName
-				fs.ext = ext
-				if frameStr == "" {
+				fs.basename = parsed.Base
+				fs.ext = parsed.Ext
+				if parsed.Range == "" {
 					fs.SetFrameSet(nil)
 					fs.SetPadding("")
 				} else {
-					fs.SetFrameRange(frameStr)
+					fs.SetFrameRange(parsed.Range)
 				}
 				files = append(files, fs)
 
@@ -759,16 +708,16 @@ func findSequencesInList(paths []*fileItem, opts ...FileOption) (FileSequences, 
 			continue
 		}
 
-		frameNum, _ := strconv.Atoi(frameStr)
-		frameWidth := len(frameStr)
+		frameNum, _ := strconv.Atoi(parsed.Range)
+		frameWidth := len(parsed.Range)
 
-		key := SeqKey{item.DirName, baseName, ext}
+		key := SeqKey{item.DirName, parsed.Base, parsed.Ext}
 		seq, ok := seqs[key]
 
 		seq.Frames = append(seq.Frames, FrameInfo{
-			Frame:    frameStr,
+			Frame:    parsed.Range,
 			FrameNum: frameNum,
-			MinWidth: frameMinSize(frameStr),
+			MinWidth: frameMinSize(parsed.Range),
 		})
 
 		if !ok {
@@ -783,9 +732,7 @@ func findSequencesInList(paths []*fileItem, opts ...FileOption) (FileSequences, 
 		seqs[key] = seq
 	}
 
-	var dirName, frange, pad string
-	baseName = ""
-	ext = ""
+	var dirName, baseName, frange, pad, ext string
 
 	fseqs := make(FileSequences, 0, seqCount)
 

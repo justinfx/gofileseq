@@ -3,6 +3,7 @@ package fileseq
 import (
 	"fmt"
 
+	"github.com/justinfx/gofileseq/v2/exp/peg"
 	"github.com/justinfx/gofileseq/v2/ranges"
 )
 
@@ -18,7 +19,7 @@ type FrameSet struct {
 // Returns an error if the frame range could not be parsed.
 func NewFrameSet(frange string) (*FrameSet, error) {
 	// Process the frame range and get a slice of match slices
-	matches, err := frameRangeMatches(frange)
+	matches, err := peg.ParseRange(frange)
 	if err != nil {
 		return nil, err
 	}
@@ -36,27 +37,18 @@ func NewFrameSet(frange string) (*FrameSet, error) {
 }
 
 // Process a rangePattern match group
-func (s *FrameSet) handleMatch(match []string) error {
-	switch len(match) {
+func (s *FrameSet) handleMatch(match *peg.ParsedRange) error {
+	cmpts := match.Cmpts
+	switch len(cmpts) {
 
 	// Single frame match
 	case 1:
-		f, err := parseInt(match[0])
-		if err != nil {
-			return err
-		}
+		f := cmpts[0]
 		s.rangePtr.AppendUnique(f, f, 1)
 
 	// Simple frame range
 	case 2:
-		start, err := parseInt(match[0])
-		if err != nil {
-			return err
-		}
-		end, err := parseInt(match[1])
-		if err != nil {
-			return err
-		}
+		start, end := cmpts[0], cmpts[1]
 
 		// Handle descending frame ranges, like 10-1
 		var inc int
@@ -69,35 +61,17 @@ func (s *FrameSet) handleMatch(match []string) error {
 		s.rangePtr.AppendUnique(start, end, inc)
 
 	// Complex frame range
-	case 4:
-		var (
-			err               error
-			mod               string
-			start, end, chunk int
-		)
-		chunk, err = parseInt(match[3])
-		if err != nil {
-			return err
-		}
+	case 3:
+		start, end, chunk := cmpts[0], cmpts[1], cmpts[2]
 		if chunk == 0 {
-			return fmt.Errorf("Failed to parse part of range %v. "+
-				"Encountered invalid 0 value", match[3])
-		}
-		if start, err = parseInt(match[0]); err != nil {
-			return err
-		}
-		if end, err = parseInt(match[1]); err != nil {
-			return err
-		}
-		if mod = match[2]; !isModifier(mod) {
-			return fmt.Errorf("%q is not one of the valid modifier 'xy:'", mod)
+			return fmt.Errorf("failed to parse range %q: invalid chunk value 0", match.Range)
 		}
 
-		switch mod {
-		case `x`:
+		switch match.StepType {
+		case peg.StepChunk:
 			s.rangePtr.AppendUnique(start, end, chunk)
 
-		case `y`:
+		case peg.FillChunk:
 			// TODO: Add proper support for adding inverse of range.
 			// This approach will add excessive amounts of singe
 			// range elements. They could be compressed into chunks
@@ -113,7 +87,7 @@ func (s *FrameSet) handleMatch(match []string) error {
 				s.rangePtr.AppendUnique(val, val, 1)
 			}
 
-		case `:`:
+		case peg.StaggerChunk:
 			for ; chunk > 0; chunk-- {
 				s.rangePtr.AppendUnique(start, end, chunk)
 			}

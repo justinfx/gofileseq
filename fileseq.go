@@ -20,69 +20,23 @@ Support for:
 package fileseq
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"sort"
-	"strconv"
 	"strings"
+
+	"github.com/justinfx/gofileseq/v2/exp/peg"
 )
 
 const Version = "2.11.0"
 
 var (
-	// Regular expression patterns for matching frame set strings.
-	// Examples:
-	//     1-100
-	//     100
-	//     1-100x5
-	rangePatterns = []*regexp.Regexp{
-		// Frame range:  1-10
-		regexp.MustCompile(`^(-?\d+)-(-?\d+)$`),
-		// Single frame:  10
-		regexp.MustCompile(`^(-?\d+)$`),
-		// Complex range:  1-10x2
-		regexp.MustCompile(`^(-?\d+)-(-?\d+)([:xy])(-?\d+)$`),
-	}
-
 	extPatternStr = `` +
 		`(?P<ext>` +
 		// multiple extension parts:
 		`(?:\.\w*[a-zA-Z]\w)*` + // optional leading alnum ext prefix (.foo.1bar)
 		`(?:\.[^.]+)?` + // ext suffix
 		`)`
-
-	// Regular expression for matching a file sequence string.
-	// Example:
-	//     /film/shot/renders/hero_bty.1-100#.exr
-	//     /film/shot/renders/hero_bty.@@.exr
-	//     /film/shot/renders/hero_bty.1-100%04d.exr
-	//     /film/shot/renders/hero_bty.1-100$F04.exr
-	splitPattern = regexp.MustCompile(
-		`^` +
-			`(?P<name>.*?)` +
-			`(?P<range>[\d-][:xy\d,-]*)?` +
-			// padding options
-			`(?P<pad>` +
-			`[#@]+` + // standard pad chars
-			`|%\d*d` + // or printf padding
-			`|\$F\d*` + // or houdini padding
-			`|<UDIM>|%\(UDIM\)d` + // or UDIM padding
-			`)` + // end <pad>
-			extPatternStr +
-			`$`,
-	)
-
-	// Regular expression pattern for matching single file path names containing a frame.
-	// Example:
-	//     /film/shot/renders/hero_bty.100.exr
-	singleFramePattern = regexp.MustCompile(
-		`^` +
-			`(?P<name>.*?)` +
-			`(?P<frame>-?\d+)` +
-			extPatternStr +
-			`$`,
-	)
 
 	// Regular expression pattern for matching single file path names where the
 	// frame may be optional.
@@ -112,7 +66,7 @@ var (
 // IsFrameRange returns true if the given string is a valid frame
 // range format.  Any padding characters, such as '#' and '@' are ignored.
 func IsFrameRange(frange string) bool {
-	_, err := frameRangeMatches(frange)
+	_, err := peg.ParseRange(frange)
 	if err == nil {
 		return true
 	}
@@ -211,50 +165,6 @@ func FramesToFrameRange(frames []int, sorted bool, zfill int) string {
 	return buf.String()
 }
 
-// frameRangeMatches breaks down the string frame range
-// into groups of range matches, for further processing.
-func frameRangeMatches(frange string) ([][]string, error) {
-	for _, k := range defaultPadding.AllChars() {
-		frange = strings.Replace(frange, k, "", -1)
-	}
-
-	var (
-		matched bool
-		match   []string
-		rx      *regexp.Regexp
-	)
-
-	frange = strings.Replace(frange, " ", "", -1)
-
-	// For each comma-sep component, we will parse a frame range
-	parts := strings.Split(frange, ",")
-	size := len(parts)
-	matches := make([][]string, size, size)
-
-	for i, part := range parts {
-
-		matched = false
-
-		// Build up frames for all comma-sep components
-		for _, rx = range rangePatterns {
-			if match = rx.FindStringSubmatch(part); match == nil {
-				continue
-			}
-			matched = true
-			matches[i] = match[1:]
-		}
-
-		// If any component of the comma-sep frame range fails to
-		// parse, we bail out
-		if !matched {
-			err := fmt.Errorf("Failed to parse frame range: %s on part %q", frange, part)
-			return nil, err
-		}
-	}
-
-	return matches, nil
-}
-
 // Expands a start, end, and stepping value
 // into the full range of int values.
 func toRange(start, end, step int) []int {
@@ -274,31 +184,4 @@ func toRange(start, end, step int) []int {
 		}
 	}
 	return nums
-}
-
-// Parse an int from a specific part of a frame
-// range string component
-var parseIntErr error = errors.New("Failed to parse int from part of range string")
-
-func parseInt(s string) (int, error) {
-	val, err := strconv.Atoi(s)
-	if err != nil {
-		return 0, parseIntErr
-	}
-	return val, nil
-}
-
-// Return whether a string component from a frame
-// range string is a valid modifier symbol
-func isModifier(s string) bool {
-	return len(s) == 1 && strings.ContainsAny(s, "xy:")
-}
-
-// Return the min/max frames from an unsorted list
-func minMaxFrame(frames []int) (int, int) {
-	srcframes := make([]int, len(frames), len(frames))
-	copy(srcframes, frames)
-	sort.Ints(srcframes)
-	min, max := srcframes[0], srcframes[len(srcframes)-1]
-	return min, max
 }

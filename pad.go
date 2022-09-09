@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/justinfx/gofileseq/v2/exp/peg"
 )
 
 type PadStyle int
@@ -155,48 +157,37 @@ func PadFrameRange(frange string, pad int) string {
 		return frange
 	}
 
-	size := strings.Count(frange, ",") + 1
-	parts := make([]string, size, size)
-
-	for i, part := range strings.Split(frange, ",") {
-
-		didMatch := false
-
-		for _, rx := range rangePatterns {
-			matched := rx.FindStringSubmatch(part)
-			if len(matched) == 0 {
-				continue
-			}
-			matched = matched[1:]
-			size = len(matched)
-			switch size {
-			case 1:
-				parts[i] = zfillString(matched[0], pad)
-			case 2:
-				parts[i] = fmt.Sprintf("%s-%s",
-					zfillString(matched[0], pad),
-					zfillString(matched[1], pad))
-			case 4:
-				parts[i] = fmt.Sprintf("%s-%s%s%s",
-					zfillString(matched[0], pad),
-					zfillString(matched[1], pad),
-					matched[2], matched[3])
-			default:
-				// No match. Try the next pattern
-				continue
-			}
-			// If we got here, we matched a case and can stop
-			// checking the rest of the patterns
-			didMatch = true
-			break
-		}
-		// If we didn't match one of our expected patterns
-		// then just take the original part and add it unmodified
-		if !didMatch {
-			parts = append(parts, part)
-		}
+	parts, err := peg.ParseRange(frange)
+	if err != nil {
+		// invalid
+		return frange
 	}
-	return strings.Join(parts, ",")
+
+	var builder strings.Builder
+
+	for i, part := range parts {
+		switch len(part.Cmpts) {
+		case 1:
+			part.Range = zfillInt(part.Cmpts[0], pad)
+		case 2:
+			part.Range = fmt.Sprintf("%s-%s",
+				zfillInt(part.Cmpts[0], pad),
+				zfillInt(part.Cmpts[1], pad))
+		case 3:
+			part.Range = fmt.Sprintf("%s-%s%s%d",
+				zfillInt(part.Cmpts[0], pad),
+				zfillInt(part.Cmpts[1], pad),
+				part.StepType, part.Cmpts[2])
+		default:
+			// No match. Try the next pattern
+			continue
+		}
+		if i > 0 {
+			builder.WriteString(",")
+		}
+		builder.WriteString(part.Range)
+	}
+	return builder.String()
 }
 
 // Left pads a string to a given with, using "0".

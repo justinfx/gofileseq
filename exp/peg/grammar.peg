@@ -1,0 +1,126 @@
+package peg
+
+type Parser Peg {
+	parser
+}
+
+Pattern
+    <- (
+          Sequence  { p.parsedType = seqType }
+        / Ranges    { p.parsedType = rangeType }
+       )
+       END
+
+Sequence
+    <- < Dir >          { p.Seq().Dir = text }
+       < Base? >        { p.Seq().Base = text }
+       < Ranges? >      { p.Seq().Range = text }
+       < PadChars? >    { p.Seq().Pad = text }
+       < Ext? >         { p.Seq().Ext = text }
+
+Dir
+    <- < DirElem+ >
+
+DirElem
+    <- NOTSLASH* SLASH
+
+Base
+    <-
+       # Maybe hidden file
+       DOT?
+       BaseElem
+       (
+           # Base name immediately ends with dot
+           RANGEDELIM END
+
+           # Multiple dot components with no range.
+           # Also ignore pad chars with no range.
+         / ( !( (DOT? PadChars)? ExtElem END) DOT BaseElem )*
+       )
+       # Grab trailing dot if not part of the extension
+       ( !(ExtElem END) DOT )?
+
+BaseElem
+    <-
+       NOTDIGIT CHAR+ RANGEDELIM+
+
+     / NOTDIGIT CHAR*
+
+       # Starting with digit is ok as long as it is immediately
+       # followed by word characters. Don't want to confuse with
+       # a range too early.
+     / DIGIT WORDCHAR CHAR*
+
+Ranges
+    <- _ Range _ ( ',' _ Range _ )*
+
+Range
+    <- < StartStop / Start >
+        {
+            p.Ranges().current.Range = text
+            p.Ranges().add()
+        }
+
+StartStop
+    <- _ Start _ '-' _ Stop _ Step? _
+
+Start
+    <- _ < Num > _      { p.Ranges().current.addCmpt(text) }
+
+Stop
+    <- _ < Num > _      { p.Ranges().current.addCmpt(text) }
+
+Step
+    <- < StepType >     { p.Ranges().current.StepType = StepType(text) }
+       < Num >          { p.Ranges().current.addCmpt(text) }
+
+StepType
+    <- CHAR_STAGGER
+     / CHAR_CHUNK
+     / CHAR_FILL
+
+PadChars
+    <- PAD_HASH+
+     / PAD_PRINTF
+     / PAD_HOUDINI
+     / PAD_UDIM
+
+Ext
+    <- ExtElem* END
+
+ExtElem
+    <- DOT CHAR+
+
+Num
+    <- '-'? [0-9]+
+
+CHAR_STAGGER <- ':'
+CHAR_CHUNK   <- 'x'
+CHAR_FILL    <- 'y'
+
+PAD_HASH    <- [#@]
+PAD_PRINTF  <- '%' DIGIT* 'd'
+PAD_HOUDINI <- '$F' DIGIT*
+PAD_UDIM    <- '<UDIM>' / '%(UDIM)d'
+
+SLASH       <- [/\\]
+NOTSLASH    <- [^/\\]
+DOT         <- '.'
+RANGEDELIM  <- [:._\-]
+WORDCHAR    <- [0-9A-Za-z_]
+ALPHA       <- [[a-z]]
+DIGIT       <- [0-9]
+NOTDIGIT    <- [^0-9]
+CHAR        <- [^<>"/\\|?*.]
+
+_
+  <- Whitespace*
+
+Whitespace
+  <- ' ' / '\t' / EOL
+
+EOL
+  <- '\r\n' / '\n' / '\r'
+
+END
+    <- !.
