@@ -34,6 +34,21 @@ protected:
             m_cases.push_back(t);
         }
         {
+            fileseq::Frame arr[] = {1, 2};
+            Case t = {FRAME_ARR_TO_VEC(arr), true, 0, "1,2"};
+            m_cases.push_back(t);
+        }
+        {
+            fileseq::Frame arr[] = {1, 3};
+            Case t = {FRAME_ARR_TO_VEC(arr), true, 0, "1,3"};
+            m_cases.push_back(t);
+        }
+        {
+            fileseq::Frame arr[] = {2, 4};
+            Case t = {FRAME_ARR_TO_VEC(arr), true, 0, "2-4x2"};
+            m_cases.push_back(t);
+        }
+        {
             fileseq::Frame arr[] = {1, 2, 3, 4, 5};
             Case t = {FRAME_ARR_TO_VEC(arr), true, 0, "1-5"};
             m_cases.push_back(t);
@@ -403,6 +418,14 @@ protected:
         }
         {
             Case t = {PadStyleHash4, "testdata/seqA.$F4.exr", "testdata/seqA.1,3-6,8-10#.exr"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {PadStyleHash4, "testdata/2frame/foo.0001.ext", "testdata/2frame/foo.1,2#.ext"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {PadStyleHash4, "testdata/2frame/foo.#.ext", "testdata/2frame/foo.1,2#.ext"};
             m_cases.push_back(t);
         }
     }
