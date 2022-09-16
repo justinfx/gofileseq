@@ -45,7 +45,7 @@ protected:
         }
         {
             fileseq::Frame arr[] = {2, 4};
-            Case t = {FRAME_ARR_TO_VEC(arr), true, 0, "2-4x2"};
+            Case t = {FRAME_ARR_TO_VEC(arr), true, 0, "2,4"};
             m_cases.push_back(t);
         }
         {
