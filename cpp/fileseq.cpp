@@ -31,8 +31,8 @@ std::string framesToFrameRange(const Frames &frames,
         return internal::zfill(frames[0], zfill);
     }
 
-    Frames::const_iterator framesIt = frames.begin();
-    Frames::const_iterator framesEnd = frames.end();
+    auto framesIt = frames.begin();
+    auto framesEnd = frames.end();
 
     Frames sortedFrames;
 
@@ -66,8 +66,8 @@ std::string framesToFrameRange(const Frames &frames,
                     buf << ",";
                 }
                 buf << internal::zfill(framesIt[i], zfill);
+                hasWritten = true;
             }
-            hasWritten = true;
             break;
         }
 
