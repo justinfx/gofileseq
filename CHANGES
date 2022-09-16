@@ -3,6 +3,7 @@ Changes:
 2.11.1
 ----------------
 * cpp - Fix FrameSet::inverted() memory leak
+* cpp - Fix framesToFrameRange() bad formatting with 2 frames
 
 2.11.0
 ----------------
