@@ -645,11 +645,9 @@ func FindSequencesOnDisk(path *C.char, opts C.FileOption) (FileSequences, uint64
 
 	case fileseq.PadStyleHash1:
 		fileOpts = append(fileOpts, fileseq.FileOptPadStyleHash1)
-		fmt.Println("pad style hash1")
 
 	case fileseq.PadStyleHash4:
 		fileOpts = append(fileOpts, fileseq.FileOptPadStyleHash4)
-		fmt.Println("pad style hash4")
 
 	}
 
@@ -676,7 +674,6 @@ func FindSequencesOnDisk(path *C.char, opts C.FileOption) (FileSequences, uint64
 }
 
 // Required by CGO
-//
 func main() {
 
 }

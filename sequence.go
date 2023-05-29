@@ -964,7 +964,7 @@ func FindSequenceOnDiskPad(pattern string, padStyle PadStyle, opts ...FileOption
 	fs, err := NewFileSequencePad(pattern, padStyle)
 	if err != nil {
 		// Treat a bad pattern as a non-match
-		fmt.Println(err.Error())
+		//fmt.Println(err.Error())
 		return nil, nil
 	}
 

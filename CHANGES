@@ -1,5 +1,9 @@
 Changes:
 
+2.11.2
+----------------
+* go: remove print statement from FindSequenceOnDiskPad
+
 2.11.1
 ----------------
 * cpp - Fix FrameSet::inverted() memory leak
