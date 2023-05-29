@@ -28,10 +28,15 @@ bool getSplitPatternMatch(SeqPatternMatch &match, const std::string &path) {
     //     /film/shot/renders/hero_bty.<UDIM>.exr
     //     /film/shot/renders/hero_bty.%(UDIM)d.exr
     static const char* s_pattern =
-            R"(^(.*?))" // dir and basename
+            "^"
+            R"((.*?))" // dir and basename
             R"(([\d-][:xy\d,-]*)?)" // optional frame range
             R"(([#@]+|%\d*d|\$F\d*|<UDIM>|%\(UDIM\)d))" // padding: chars, printf, houdini, udim
-            R"(((?:\.\w*[a-zA-Z]\w)*(?:\.[^.]+)?)$)"; // extension
+            "("                              // extension
+                R"((?:\.\w*[a-zA-Z]\w?)*)"   // optional leading alnum ext prefix (.foo.1bar)
+                R"((?:\.[^.]+)?)"            // ext suffix
+            ")"
+            "$";
 
     match.base.clear();
     match.range.clear();
@@ -68,8 +73,8 @@ bool getSingleFrameMatch(SeqPatternMatch &match, const std::string &path, bool r
     static const string s_extension =
         // multiple extension parts:
         "("
-            R"((?:\.\w*[a-zA-Z]\w)*)"  // optional leading alnum ext prefix (.foo.1bar)
-            R"((?:\.[^.]+)?)"          // ext suffix
+            R"((?:\.\w*[a-zA-Z]\w?)*)"  // optional leading alnum ext prefix (.foo.1bar)
+            R"((?:\.[^.]+)?)"           // ext suffix
         ")";
 
 	// Regular expression pattern for matching single file path names containing a frame.

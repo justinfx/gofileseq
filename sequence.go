@@ -17,15 +17,16 @@ import (
 // to dictate how much padding the actual file numbers have.
 //
 // Valid padding characters:
-//     @ - 1 pad width (@@@@ is equal to 4 padding)
-//     # - 4 pad width (## is equal to 8 padding)
+//
+//	@ - 1 pad width (@@@@ is equal to 4 padding)
+//	# - 4 pad width (## is equal to 8 padding)
 //
 // Example paths and padding:
-//     /path/to/single_image.0100.jpg
-//     /path/to/image_foo.1-10x2#.jpg   (i.e. 0001)
-//     /path/to/image_foo.1-10x2@.jpg   (i.e. 1)
-//     /path/to/image_foo.1-10x2@@@.jpg (i.e. 001)
 //
+//	/path/to/single_image.0100.jpg
+//	/path/to/image_foo.1-10x2#.jpg   (i.e. 0001)
+//	/path/to/image_foo.1-10x2@.jpg   (i.e. 1)
+//	/path/to/image_foo.1-10x2@@@.jpg (i.e. 001)
 type FileSequence struct {
 	basename  string
 	dir       string
@@ -42,12 +43,12 @@ type FileSequence struct {
 // If error is non-nil, then the given sequence string could not
 // be successfully parsed.
 //
-// PadStyleDefault is used as the padding character formatter
+// # PadStyleDefault is used as the padding character formatter
 //
 // Example paths:
-//     /path/to/image_foo.1-10x2#.jpg
-//     /path/to/single_image.0100.jpg
 //
+//	/path/to/image_foo.1-10x2#.jpg
+//	/path/to/single_image.0100.jpg
 func NewFileSequence(sequence string) (*FileSequence, error) {
 	return NewFileSequencePad(sequence, PadStyleDefault)
 }
@@ -62,15 +63,16 @@ func NewFileSequence(sequence string) (*FileSequence, error) {
 // order to convert between padding characters and their numeric width.
 //
 // Example path w/ PadStyleHash1:
-//     /path/to/image_foo.1-10x2#.jpg => /path/to/image_foo.1.jpg ...
-//     /path/to/image_foo.1-10x2@.jpg => /path/to/image_foo.1.jpg ...
-//     /path/to/image_foo.1-10x2##.jpg => /path/to/image_foo.01.jpg ...
+//
+//	/path/to/image_foo.1-10x2#.jpg => /path/to/image_foo.1.jpg ...
+//	/path/to/image_foo.1-10x2@.jpg => /path/to/image_foo.1.jpg ...
+//	/path/to/image_foo.1-10x2##.jpg => /path/to/image_foo.01.jpg ...
 //
 // Example path w/ PadStyleHash4:
-//     /path/to/image_foo.1-10x2#.jpg => /path/to/image_foo.0001.jpg ...
-//     /path/to/image_foo.1-10x2@.jpg => /path/to/image_foo.1.jpg ...
-//     /path/to/image_foo.1-10x2##.jpg => /path/to/image_foo.00000001.jpg ...
 //
+//	/path/to/image_foo.1-10x2#.jpg => /path/to/image_foo.0001.jpg ...
+//	/path/to/image_foo.1-10x2@.jpg => /path/to/image_foo.1.jpg ...
+//	/path/to/image_foo.1-10x2##.jpg => /path/to/image_foo.00000001.jpg ...
 func NewFileSequencePad(sequence string, style PadStyle) (*FileSequence, error) {
 	var dir, basename, pad, ext string
 	var frameSet *FrameSet
@@ -157,21 +159,21 @@ Format returns the file sequence as a formatted string according to
 the given template.
 
 Utilizes Go text/template format syntax.  Available functions include:
-    dir      - the directory name.
-    base     - the basename of the sequence (leading up to the frame range).
-    ext      - the file extension of the sequence including leading period.
-    startf   - the start frame.
-    endf     - the end frame.
-    len      - the length of the frame range.
-    pad      - the detected padding characters (i.e. # , @@@ , ...).
-    frange   - the frame range.
-    inverted - the inverted frame range. (returns empty string if none)
-    zfill    - the int width of the frame padding
+
+	dir      - the directory name.
+	base     - the basename of the sequence (leading up to the frame range).
+	ext      - the file extension of the sequence including leading period.
+	startf   - the start frame.
+	endf     - the end frame.
+	len      - the length of the frame range.
+	pad      - the detected padding characters (i.e. # , @@@ , ...).
+	frange   - the frame range.
+	inverted - the inverted frame range. (returns empty string if none)
+	zfill    - the int width of the frame padding
 
 Example:
 
 	{{dir}}{{base}}{{frange}}{{pad}}{{ext}}
-
 */
 func (s *FileSequence) Format(tpl string) (string, error) {
 	c := map[string]interface{}{
@@ -919,11 +921,12 @@ func findSequencesInList(paths []*fileItem, opts ...FileOption) (FileSequences, 
 // is returned.
 //
 // Example:
-//    // Find matches with any frame value
-//    FindSequenceOnDisk("/path/to/seq.#.ext")
 //
-//    // Find matches specifically having 4-padded frames
-//    FindSequenceOnDisk("/path/to/seq.#.ext", StrictPadding)
+//	// Find matches with any frame value
+//	FindSequenceOnDisk("/path/to/seq.#.ext")
+//
+//	// Find matches specifically having 4-padded frames
+//	FindSequenceOnDisk("/path/to/seq.#.ext", StrictPadding)
 func FindSequenceOnDisk(pattern string, opts ...FileOption) (*FileSequence, error) {
 	return FindSequenceOnDiskPad(pattern, PadStyleDefault, opts...)
 }

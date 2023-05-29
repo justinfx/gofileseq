@@ -382,6 +382,14 @@ protected:
             Case t = {PadStyleHash1, "testdata/_MISSING_.0010.tif", ""};
             m_cases.push_back(t);
         }
+        {
+            Case t = {PadStyleHash1, "testdata/complex.@.tar.gz", "testdata/complex.5-7####.tar.gz"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {PadStyleHash1, "testdata/complex_frame_only/@.a.jpg", "testdata/complex_frame_only/1-3#.a.jpg"};
+            m_cases.push_back(t);
+        }
 
         // PadStyleHash4
         {
@@ -428,6 +436,14 @@ protected:
             Case t = {PadStyleHash4, "testdata/2frame/foo.#.ext", "testdata/2frame/foo.1,2#.ext"};
             m_cases.push_back(t);
         }
+        {
+            Case t = {PadStyleHash4, "testdata/complex.@.tar.gz", "testdata/complex.5-7#.tar.gz"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {PadStyleHash4, "testdata/complex_frame_only/@.a.jpg", "testdata/complex_frame_only/1-3@.a.jpg"};
+            m_cases.push_back(t);
+        }
     }
 
     std::vector<Case> m_cases;
@@ -449,11 +465,11 @@ TEST_F( TestFindSequenceOnDisk, FindSeq ) {
         }
 
         if (!t.expected.empty()) {
-            EXPECT_EQ(t.expected, seq.string());
+            EXPECT_EQ(t.expected, seq.string()) << "for test case #" << i;
         }
 
         // Sanity check
-        if (seq.index(0) == "" && !t.expected.empty()) {
+        if (seq.index(0).empty() && !t.expected.empty()) {
             ADD_FAILURE() << "Expected non-empty string for index(0) of input: " << t.input;
         }
         if (t.expected.empty()) {
