@@ -542,6 +542,25 @@ const (
 	StrictPadding
 )
 
+type findSeqOptions struct {
+	FileOptions []FileOption
+	SeqTemplate *FileSequence
+}
+
+func (o *findSeqOptions) GetFileOptions() []FileOption {
+	if o == nil {
+		return nil
+	}
+	return o.FileOptions
+}
+
+func (o *findSeqOptions) GetSeqTemplate() *FileSequence {
+	if o == nil {
+		return nil
+	}
+	return o.SeqTemplate
+}
+
 // FindSequencesOnDisk searches a given directory path and
 // sorts all valid sequence-compatible files into a list of
 // FileSequences
@@ -554,14 +573,14 @@ const (
 // If there are any errors reading the directory or the files,
 // a non-nil error will be returned.
 func FindSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error) {
-	return findSequencesOnDisk(path, opts...)
+	return findSequencesOnDisk(path, &findSeqOptions{FileOptions: opts})
 }
 
 // ListFiles is an alias for FindSequencesOnDisk, passing the SingleFiles option.
 // It. will include all files in the results. Even those that do not contain
 // frame range patterns. It is like an ls, but with collapsed sequences.
 func ListFiles(path string) (FileSequences, error) {
-	return findSequencesOnDisk(path, SingleFiles)
+	return findSequencesOnDisk(path, &findSeqOptions{FileOptions: []FileOption{SingleFiles}})
 }
 
 type fileItem struct {
@@ -569,7 +588,7 @@ type fileItem struct {
 	FileName string
 }
 
-func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error) {
+func findSequencesOnDisk(path string, opts *findSeqOptions) (FileSequences, error) {
 	root, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -619,7 +638,7 @@ func findSequencesOnDisk(path string, opts ...FileOption) (FileSequences, error)
 		fileItems = append(fileItems, &fileItem{path, info.Name()})
 	}
 
-	return findSequencesInList(fileItems, opts...)
+	return findSequencesInList(fileItems, opts)
 }
 
 // FindSequencesInList takes a list of individual file paths and compresses them into
@@ -651,10 +670,10 @@ func FindSequencesInList(paths []string, opts ...FileOption) (FileSequences, err
 		items[i] = &item
 	}
 
-	return findSequencesInList(items, opts...)
+	return findSequencesInList(items, &findSeqOptions{FileOptions: opts})
 }
 
-func findSequencesInList(paths []*fileItem, opts ...FileOption) (FileSequences, error) {
+func findSequencesInList(paths []*fileItem, opts *findSeqOptions) (FileSequences, error) {
 	// Get options
 	var (
 		singleFiles bool
@@ -662,7 +681,7 @@ func findSequencesInList(paths []*fileItem, opts ...FileOption) (FileSequences, 
 		padStyle    = PadStyleDefault
 	)
 
-	for _, opt := range opts {
+	for _, opt := range opts.GetFileOptions() {
 		switch opt {
 		case SingleFiles:
 			singleFiles = true
@@ -712,59 +731,86 @@ func findSequencesInList(paths []*fileItem, opts ...FileOption) (FileSequences, 
 	var (
 		buf      strings.Builder
 		seqCount int
+		dirName  string
 		baseName string
 		frameStr string
 		ext      string
 	)
+
+	using := opts.GetSeqTemplate()
+	if using != nil {
+		dirName = using.Dirname()
+		baseName = using.Basename()
+		ext = using.Ext()
+	}
 
 	for _, item := range paths {
 		if !hiddenFiles && strings.HasPrefix(item.FileName, ".") {
 			continue
 		}
 
-		match := optionalFramePattern.FindStringSubmatch(item.FileName)
-
 		ok := true
-		if len(match) == 0 {
-			ok = false
-			baseName, frameStr, ext = "", "", ""
+
+		if using != nil {
+			// when a FileSequence template has been provided, we can
+			// directly set expected values from that, instead of having
+			// to make assumptions from the path string
+
+			// effectively a "glob" against the using pattern: <basename>*<ext>
+			if !(strings.HasPrefix(item.FileName, baseName) && strings.HasSuffix(item.FileName, ext)) {
+				continue
+			}
+			frameStr = item.FileName[len(baseName) : len(item.FileName)-len(ext)]
+			_ = frameStr
+
 		} else {
-			baseName, frameStr, ext = match[1], match[2], match[3]
-			// having no frame, or having only a frame, is not considered a sequence
-			if frameStr == "" || (baseName == "" && ext == "") {
+			// otherwise, we need to do some tests on the path and figure
+			// out the values
+
+			dirName = item.DirName
+			baseName, frameStr, ext = "", "", ""
+
+			match := optionalFramePattern.FindStringSubmatch(item.FileName)
+			if len(match) == 0 {
 				ok = false
-			}
-		}
-
-		if !ok {
-			if singleFiles {
-				buf.WriteString(item.DirName)
-				buf.WriteString(item.FileName)
-
-				fs, err := NewFileSequencePad(buf.String(), padStyle)
-				if err != nil {
-					return nil, err
+			} else {
+				baseName, frameStr, ext = match[1], match[2], match[3]
+				// having no frame, or having only a frame, is not considered a sequence
+				if frameStr == "" || (baseName == "" && ext == "") {
+					ok = false
 				}
-				// Preserve the parsed base/frame/ext
-				fs.basename = baseName
-				fs.ext = ext
-				if frameStr == "" {
-					fs.SetFrameSet(nil)
-					fs.SetPadding("")
-				} else {
-					fs.SetFrameRange(frameStr)
-				}
-				files = append(files, fs)
-
-				buf.Reset()
 			}
-			continue
+
+			if !ok {
+				if singleFiles {
+					buf.WriteString(dirName)
+					buf.WriteString(item.FileName)
+
+					fs, err := NewFileSequencePad(buf.String(), padStyle)
+					if err != nil {
+						return nil, err
+					}
+					// Preserve the parsed base/frame/ext
+					fs.basename = baseName
+					fs.ext = ext
+					if frameStr == "" {
+						fs.SetFrameSet(nil)
+						fs.SetPadding("")
+					} else {
+						fs.SetFrameRange(frameStr)
+					}
+					files = append(files, fs)
+
+					buf.Reset()
+				}
+				continue
+			}
 		}
 
 		frameNum, _ := strconv.Atoi(frameStr)
 		frameWidth := len(frameStr)
 
-		key := SeqKey{item.DirName, baseName, ext}
+		key := SeqKey{dirName, baseName, ext}
 		seq, ok := seqs[key]
 
 		seq.Frames = append(seq.Frames, FrameInfo{
@@ -785,7 +831,8 @@ func findSequencesInList(paths []*fileItem, opts ...FileOption) (FileSequences, 
 		seqs[key] = seq
 	}
 
-	var dirName, frange, pad string
+	var frange, pad string
+	dirName = ""
 	baseName = ""
 	ext = ""
 
@@ -971,7 +1018,7 @@ func FindSequenceOnDiskPad(pattern string, padStyle PadStyle, opts ...FileOption
 		return nil, nil
 	}
 
-	seqs, err := FindSequencesOnDisk(fs.Dirname(), optsCopy...)
+	seqs, err := findSequencesOnDisk(fs.Dirname(), &findSeqOptions{FileOptions: optsCopy, SeqTemplate: fs})
 	if err != nil {
 		return nil, fmt.Errorf("failed to find %q: %s", pattern, err.Error())
 	}

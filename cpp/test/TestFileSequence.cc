@@ -165,6 +165,18 @@ protected:
             Case t = {"/dir/f.1-10#.tar.gz-1", "/dir/f.1-10#.tar.gz-1", 1, 10, 4, 10, ".tar.gz-1"};
             m_cases.push_back(t);
         }
+        {
+            Case t = {"/dir/100.a.ext", "/dir/100@@@.a.ext", 100, 100, 3, 1, ".a.ext"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"/dir/100.1.ext", "/dir/100.1@.ext", 1, 1, 1, 1, ".ext"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"/dir/100@.1.ext", "/dir/100@.1.ext", 100, 100, 1, 1, ".1.ext"};
+            m_cases.push_back(t);
+        }
     }
 
     std::vector<Case> m_cases;

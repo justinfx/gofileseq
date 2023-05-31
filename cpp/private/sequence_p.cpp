@@ -29,13 +29,15 @@ bool getSplitPatternMatch(SeqPatternMatch &match, const std::string &path) {
     //     /film/shot/renders/hero_bty.%(UDIM)d.exr
     static const char* s_pattern =
             "^"
-            R"((.*?))" // dir and basename
-            R"(([\d-][:xy\d,-]*)?)" // optional frame range
-            R"(([#@]+|%\d*d|\$F\d*|<UDIM>|%\(UDIM\)d))" // padding: chars, printf, houdini, udim
-            "("                              // extension
-                R"((?:\.\w*[a-zA-Z]\w?)*)"   // optional leading alnum ext prefix (.foo.1bar)
-                R"((?:\.[^.]+)?)"            // ext suffix
+            R"((.*?))"                       // dir and basename
+            R"(([\d-][:xy\d,-]*)?)"          // optional frame range
+            "("                              // padding
+                R"([#@]+)"                   //   chars
+                R"(|%\d*d)"                  //   printf
+                R"(|\$F\d*)"                 //   houdini
+                R"(|<UDIM>|%\(UDIM\)d)"      //   udim
             ")"
+            R"((.*)?)"                       // extension
             "$";
 
     match.base.clear();

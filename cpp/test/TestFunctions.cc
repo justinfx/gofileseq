@@ -387,7 +387,11 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {PadStyleHash1, "testdata/complex_frame_only/@.a.jpg", "testdata/complex_frame_only/1-3#.a.jpg"};
+            Case t = {PadStyleHash1, "testdata/complex_ext/@.a.jpg", "testdata/complex_ext/1-3#.a.jpg"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {PadStyleHash1, "testdata/complex_ext/@@@.1.ext", "testdata/complex_ext/100-102###.1.ext"};
             m_cases.push_back(t);
         }
 
@@ -441,7 +445,11 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {PadStyleHash4, "testdata/complex_frame_only/@.a.jpg", "testdata/complex_frame_only/1-3@.a.jpg"};
+            Case t = {PadStyleHash4, "testdata/complex_ext/@.a.jpg", "testdata/complex_ext/1-3@.a.jpg"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {PadStyleHash4, "testdata/complex_ext/@@@.1.ext", "testdata/complex_ext/100-102@@@.1.ext"};
             m_cases.push_back(t);
         }
     }
@@ -461,7 +469,7 @@ TEST_F( TestFindSequenceOnDisk, FindSeq ) {
         ASSERT_TRUE(stat) << "#" << i << ": " << stat;
 
         if ( !seq.isValid() && !t.expected.empty() ) {
-            FAIL() << "Expected " << t.expected << "; got an invalid seq";
+            FAIL() << "Expected " << t.expected << "; got an invalid seq for input " << t.input;
         }
 
         if (!t.expected.empty()) {

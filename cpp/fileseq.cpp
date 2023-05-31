@@ -142,6 +142,14 @@ bool isFrameRange(const std::string &frange) {
     return frameRangeMatches(matches, frange);
 }
 
+// forward declare private impl using seqTemplate param
+Status findSequencesOnDisk(
+        FileSequences &seqs,
+        const std::string &path,
+        const FileSequence &seqTemplate,
+        FindSequenceOpts opts=kNoOpt,
+        PadStyle style=PadStyleDefault);
+
 FileSequence findSequenceOnDisk(const std::string &pattern, Status* ok) {
     return findSequenceOnDisk(pattern, PadStyleDefault, ok);
 }
@@ -159,7 +167,7 @@ FileSequence findSequenceOnDisk(const std::string &pattern, PadStyle style, Stat
     }
 
     FileSequences seqs;
-    localOk = findSequencesOnDisk(seqs, fs.dirname());
+    localOk = findSequencesOnDisk(seqs, fs.dirname(), fs);
     if (!localOk) {
         if (ok != NULL) {
             std::ostringstream err;
@@ -185,6 +193,7 @@ FileSequence findSequenceOnDisk(const std::string &pattern, PadStyle style, Stat
     return FileSequence();
 }
 
+// deprecated
 Status findSequencesOnDisk(FileSequences &seqs,
                            const std::string &path,
                            bool hiddenFiles,
@@ -273,6 +282,17 @@ Status findSequencesOnDisk(FileSequences &seqs,
                            FindSequenceOpts opts,
                            PadStyle style) {
 
+    static FileSequence emptyTmpl;
+    return findSequencesOnDisk(seqs, path, emptyTmpl, opts, style);
+}
+
+
+Status findSequencesOnDisk(FileSequences &seqs,
+                           const std::string &path,
+                           const FileSequence &seqTemplate,
+                           FindSequenceOpts opts,
+                           PadStyle style) {
+
     Status status;
 
     using namespace internal;
@@ -317,7 +337,13 @@ Status findSequencesOnDisk(FileSequences &seqs,
     SeqPatternMatch match;
     SeqsMap::iterator seqFound;
 
-    struct stat f_stat;
+    const bool useTemplate = seqTemplate.isValid();
+    if (useTemplate) {
+        match.base = seqTemplate.basename();
+        match.ext = seqTemplate.ext();
+    }
+
+    struct stat f_stat{};
     struct dirent* d_ent;
 
     errno = 0;
@@ -368,42 +394,61 @@ Status findSequencesOnDisk(FileSequences &seqs,
 
         }
 
-        // Are we matching a single frame (no range)?
-        bool ok = getSingleFrameMatch(match, name, /*require_frame */ false);
+        if (useTemplate) {
+			// when a FileSequence template has been provided, we can
+			// directly set expected values from that, instead of having
+			// to make assumptions from the path string
 
-        if (ok && (match.range.empty() || (match.base.empty() && match.ext.empty()))) {
-            ok = false;
-        }
+            // effectively a "glob" against the using template: <basename>*<ext>
+            if (!(strings::starts_with(name, match.base) &&
+                  strings::ends_with(name, match.ext))) {
+                continue;
+            }
+            match.range = name.substr(
+                    match.base.length(),
+                    name.length()-match.base.length()-match.ext.length());
+            // test
 
-        if (!ok) {
-            // Only keep it if we wanted single files
-            if (singleFiles) {
-                buf << name;
+        } else {
+            // otherwise, we need to do some tests on the path and figure
+			// out the values
 
-                fs = FileSequence(buf.str(), style, &status);
-                if (!status) {
-                    return status;
-                }
-                // Preserve the parsed base/frame/ext
-                fs.setBasename(match.base);
-                fs.setExt(match.ext);
-                if (match.range.empty()) {
-                    fs.setFrameSet(FrameSet());
-                    fs.setPadding("");
-                } else {
-                    fs.setFrameRange(match.range);
-                }
-                files.push_back(fs);
+            // Are we matching a single frame (no range)?
+            bool ok = getSingleFrameMatch(match, name, /*require_frame */ false);
 
-                buf.str(root); // reset
+            if (ok && (match.range.empty() || (match.base.empty() && match.ext.empty()))) {
+                ok = false;
             }
 
-            continue;
+            if (!ok) {
+                // Only keep it if we wanted single files
+                if (singleFiles) {
+                    buf << name;
+
+                    fs = FileSequence(buf.str(), style, &status);
+                    if (!status) {
+                        return status;
+                    }
+                    // Preserve the parsed base/frame/ext
+                    fs.setBasename(match.base);
+                    fs.setExt(match.ext);
+                    if (match.range.empty()) {
+                        fs.setFrameSet(FrameSet());
+                        fs.setPadding("");
+                    } else {
+                        fs.setFrameRange(match.range);
+                    }
+                    files.push_back(fs);
+
+                    buf.str(root); // reset
+                }
+
+                continue;
+            }
         }
 
         char* pEnd;
         frame = Frame(std::strtol(match.range.c_str(), &pEnd, 10));
-
         frameWidth = match.range.size();
 
         SeqKey key = std::make_pair(match.base, match.ext);

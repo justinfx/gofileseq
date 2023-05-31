@@ -15,6 +15,13 @@ const char kPathSep =
                       '/';
 #endif
 
+// Return whether a string starts with a given prefix
+bool starts_with(const std::string &str, const std::string &prefix);
+
+
+// Return whether a string ends with a given suffix
+bool ends_with(const std::string &str, const std::string &suffix);
+
 
 // Return whether a string contains another substring
 bool contains(const std::string &str, const std::string &substr);

@@ -69,7 +69,7 @@ var (
 			`|\$F\d*` + // or houdini padding
 			`|<UDIM>|%\(UDIM\)d` + // or UDIM padding
 			`)` + // end <pad>
-			extPatternStr +
+			`(?P<ext>.*)?` +
 			`$`,
 	)
 
