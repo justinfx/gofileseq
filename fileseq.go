@@ -2,20 +2,20 @@
 Package fileseq is a library for parsing file sequence strings commonly
 used in VFX and animation applications.
 
-Frame Range Shorthand
+# Frame Range Shorthand
 
 Support for:
 
-    Standard: 1-10
-    Comma Delimited: 1-10,10-20
-    Chunked: 1-100x5
-    Filled: 1-100y5
-    Staggered: 1-100:3 (1-100x3, 1-100x2, 1-100)
-    Negative frame numbers: -10-100
-    Padding: #=4 padded, @=single pad
-	Printf Syntax Padding: %04d=4 padded, %01d=1 padded
-	Houdini Syntax Padding: $F4=4 padding, $F=1 padded
-	Udim Syntax Padding: <UDIM> or %(UDIM)d, always 4 padded
+	    Standard: 1-10
+	    Comma Delimited: 1-10,10-20
+	    Chunked: 1-100x5
+	    Filled: 1-100y5
+	    Staggered: 1-100:3 (1-100x3, 1-100x2, 1-100)
+	    Negative frame numbers: -10-100
+	    Padding: #=4 padded, @=single pad
+		Printf Syntax Padding: %04d=4 padded, %01d=1 padded
+		Houdini Syntax Padding: $F4=4 padding, $F=1 padded
+		Udim Syntax Padding: <UDIM> or %(UDIM)d, always 4 padded
 */
 package fileseq
 
@@ -48,7 +48,7 @@ var (
 	extPatternStr = `` +
 		`(?P<ext>` +
 		// multiple extension parts:
-		`(?:\.\w*[a-zA-Z]\w)*` + // optional leading alnum ext prefix (.foo.1bar)
+		`(?:\.\w*[a-zA-Z]\w?)*` + // optional leading alnum ext prefix (.foo.1bar)
 		`(?:\.[^.]+)?` + // ext suffix
 		`)`
 
@@ -69,7 +69,7 @@ var (
 			`|\$F\d*` + // or houdini padding
 			`|<UDIM>|%\(UDIM\)d` + // or UDIM padding
 			`)` + // end <pad>
-			extPatternStr +
+			`(?P<ext>.*)?` +
 			`$`,
 	)
 

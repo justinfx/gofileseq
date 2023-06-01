@@ -6,6 +6,22 @@ namespace fileseq {
 namespace strings {
 
 
+bool starts_with(const std::string &str, const std::string &prefix) {
+	if (str.length() < prefix.length()) {
+		return false;
+	}
+	return str.rfind(prefix, 0) == 0;
+}
+
+
+bool ends_with(const std::string &str, const std::string &suffix) {
+	if (str.length() < suffix.length()) {
+		return false;
+	}
+	return str.rfind(suffix) == str.size() - suffix.size();
+}
+
+
 bool contains(const std::string &str, const std::string &substr) {
     return (str.find(substr) != std::string::npos);
 }
