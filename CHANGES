@@ -3,6 +3,7 @@ Changes:
 2.12.0
 ----------------
 
+* cpp - use shared_ptr for internal map management instead of custom deleter
 * cpp - clang-tidy formatting
 
 2.11.2

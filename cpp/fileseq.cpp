@@ -12,6 +12,7 @@
 #include <dirent.h>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <string>
 #include <sstream>
 #include <sys/stat.h>
@@ -245,32 +246,7 @@ struct SeqInfo {
 // Key for sequence results map: basename, extension
 typedef std::pair< const std::string, const std::string > SeqKey;
 // Map type to track sequence results in a directory
-typedef std::map< SeqKey, SeqInfo* > SeqsMap;
-
-
-// Wrapper to make sure a SeqsMap is cleaned up properly
-// when it goes out of scope
-class SeqsMapCloser {
-public:
-    SeqsMapCloser(SeqsMap* m) : m_map(m) {}
-
-    ~SeqsMapCloser() {
-        if (m_map == NULL) {
-            return;
-        }
-
-        SeqsMap::iterator it;
-        for (it = m_map->begin(); it != m_map->end(); ++it) {
-            if (it->second != NULL) {
-                delete it->second;
-                it->second = NULL;
-            }
-        }
-    }
-
-private:
-    SeqsMap* m_map;
-};
+typedef std::map< SeqKey, std::shared_ptr<SeqInfo> > SeqsMap;
 
 
 } // internal
@@ -313,7 +289,6 @@ Status findSequencesOnDisk(FileSequences &seqs,
 
     // Track members of file sequences as we scan
     SeqsMap seqsMap;
-    SeqsMapCloser seqsMapCloser(&seqsMap);
 
     // Track individual files (if option allows)
     FileSequences files;
@@ -332,7 +307,7 @@ Status findSequencesOnDisk(FileSequences &seqs,
     size_t frameWidth;
     std::string name;
     FileSequence fs;
-    SeqInfo* seqInfo;
+    std::shared_ptr<SeqInfo> seqInfo;
     SeqPatternMatch match;
     SeqsMap::iterator seqFound;
 
@@ -456,7 +431,7 @@ Status findSequencesOnDisk(FileSequences &seqs,
         if (seqFound == seqsMap.end()) {
 
             // Doesn't exist yet. Create new entry
-            seqInfo = new SeqInfo;
+            seqInfo = std::make_shared<SeqInfo>();
             seqInfo->minWidth = frameWidth;
             seqInfo->padding = padder.getPaddingChars(frameWidth);
             seqsMap[key] = seqInfo;
