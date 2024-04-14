@@ -116,20 +116,30 @@ bool FileSequence::init(const std::string &path, PadStyle padStyle, Status* ok) 
     return true;
 }
 
-FileSequence::~FileSequence() {
-    if (m_seqData) {
-        delete m_seqData;
-        m_seqData = NULL;
-    }
-}
+FileSequence::~FileSequence() {} // NOLINT(*-use-equals-default)
 
 FileSequence::FileSequence(const FileSequence& rhs) {
-    if (m_seqData == NULL) {
-        delete m_seqData;
+    if (rhs.m_seqData) {
+        m_seqData = std::unique_ptr<internal::FileSequenceData>(
+                new internal::FileSequenceData(*rhs.m_seqData));
+    } else {
+        m_seqData = std::unique_ptr<internal::FileSequenceData>(
+                new internal::FileSequenceData());
     }
-
-    m_seqData = new internal::FileSequenceData(*(rhs.m_seqData));
     m_frameSet = rhs.m_frameSet;
+}
+
+FileSequence &FileSequence::operator=(FileSequence rhs) {
+    // Swap with copied arg
+    swap(*this, rhs);
+    return *this;
+}
+
+void swap(FileSequence &first, FileSequence &second) {
+    using std::swap;
+
+    swap(first.m_seqData, second.m_seqData);
+    swap(first.m_frameSet, second.m_frameSet);
 }
 
 bool FileSequence::isValid() const {

@@ -97,19 +97,10 @@ public:
     FileSequence(const FileSequence& rhs);
 
     // Assignment
-    FileSequence& operator=(FileSequence rhs) {
-        // Swap with copied arg
-        swap(*this, rhs);
-        return *this;
-    }
+    FileSequence& operator=(FileSequence rhs);
 
     // Swap functionality
-    friend void swap(FileSequence &first, FileSequence &second) {
-        using std::swap;
-
-        swap(first.m_seqData, second.m_seqData);
-        swap(first.m_frameSet, second.m_frameSet);
-    }
+    friend void swap(FileSequence &first, FileSequence &second);
 
     /*!
     Return whether the sequence was properly parsed and
@@ -321,7 +312,7 @@ private:
                                       bool singleFiles,
                                       PadStyle style);
 private:
-    internal::FileSequenceData* m_seqData;
+    std::unique_ptr<internal::FileSequenceData> m_seqData;
     FrameSet m_frameSet;
 
 };

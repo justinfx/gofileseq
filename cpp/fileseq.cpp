@@ -306,7 +306,6 @@ Status findSequencesOnDisk(FileSequences &seqs,
     Frame frame;
     size_t frameWidth;
     std::string name;
-    FileSequence fs;
     std::shared_ptr<SeqInfo> seqInfo;
     SeqPatternMatch match;
     SeqsMap::iterator seqFound;
@@ -399,7 +398,7 @@ Status findSequencesOnDisk(FileSequences &seqs,
                 if (singleFiles) {
                     buf << name;
 
-                    fs = FileSequence(buf.str(), style, &status);
+                    FileSequence fs {buf.str(), style, &status};
                     if (!status) {
                         return status;
                     }
@@ -516,7 +515,7 @@ Status findSequencesOnDisk(FileSequences &seqs,
         buf.str(root); // reset
         buf << name << frange << pad << ext;
 
-        fs = FileSequence(buf.str(), style, &status);
+        FileSequence fs {buf.str(), style, &status};
         // TODO: Maybe don't bail on the entire loop
         // if we can't process this particular sequence.
         // Report the error by some means (logger, ...)
