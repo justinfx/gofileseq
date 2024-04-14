@@ -12,6 +12,5 @@ var hierarchy =
     [ "fileseq::Ranges", "classfileseq_1_1Ranges.html", null ],
     [ "fileseq::RangesIterator", "classfileseq_1_1RangesIterator.html", null ],
     [ "fileseq::internal::SeqInfo", "structfileseq_1_1internal_1_1SeqInfo.html", null ],
-    [ "fileseq::internal::SeqsMapCloser", "classfileseq_1_1internal_1_1SeqsMapCloser.html", null ],
     [ "fileseq::Status", "classfileseq_1_1Status.html", null ]
 ];

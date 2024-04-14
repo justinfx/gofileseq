@@ -4,7 +4,6 @@ var annotated_dup =
       [ "internal", null, [
         [ "DirCloser", "classfileseq_1_1internal_1_1DirCloser.html", "classfileseq_1_1internal_1_1DirCloser" ],
         [ "SeqInfo", "structfileseq_1_1internal_1_1SeqInfo.html", "structfileseq_1_1internal_1_1SeqInfo" ],
-        [ "SeqsMapCloser", "classfileseq_1_1internal_1_1SeqsMapCloser.html", "classfileseq_1_1internal_1_1SeqsMapCloser" ],
         [ "PaddingMapper", "classfileseq_1_1internal_1_1PaddingMapper.html", "classfileseq_1_1internal_1_1PaddingMapper" ],
         [ "SingleHashPad", "classfileseq_1_1internal_1_1SingleHashPad.html", "classfileseq_1_1internal_1_1SingleHashPad" ],
         [ "MultiHashPad", "classfileseq_1_1internal_1_1MultiHashPad.html", "classfileseq_1_1internal_1_1MultiHashPad" ]

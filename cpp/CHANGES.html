@@ -88,6 +88,13 @@ $(document).ready(function(){initNavTree('CHANGES.html',''); initResizable(); })
 <div class="contents">
 <div class="textblock"><pre class="fragment">Changes:
 
+2.12.0
+----------------
+
+* cpp - fix potential FileSequence memory leak during copy; switch to unique_ptr private data member
+* cpp - use shared_ptr for internal map management instead of custom deleter
+* cpp - clang-tidy formatting
+
 2.11.2
 ----------------
 * go/cpp: fix regex to handle parsing complex extensions with single character component ("file.1.a.ext")
