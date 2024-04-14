@@ -17,7 +17,7 @@ builds:
       - linux
     ignore:
       - goos: darwin
-        goarch: 386
+        goarch: "386"
 
   - id: seqinfo
     main: ./cmd/seqinfo/
@@ -29,16 +29,19 @@ builds:
       - linux
     ignore:
       - goos: darwin
-        goarch: 386
+        goarch: "386"
 
 
 archives:
   - id: default
     wrap_in_directory: true
-    replacements:
-      386: 32-bit
-      amd64: 64-bit
-      darwin: osx
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}64-bit
+      {{- else if eq .Arch "386" }}32-bit
+      {{- else if eq .Arch "darwin" }}osx
+      {{- else }}{{ .Arch }}{{ end }}
     format_overrides:
       - goos: windows
         format: zip
