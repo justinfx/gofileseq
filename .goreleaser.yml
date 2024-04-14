@@ -37,7 +37,8 @@ archives:
     wrap_in_directory: true
     name_template: >-
       {{ .ProjectName }}_
-      {{- title .Os }}_
+      {{ .Version }}_
+      {{- tolower .Os }}_
       {{- if eq .Arch "amd64" }}64-bit
       {{- else if eq .Arch "386" }}32-bit
       {{- else if eq .Arch "darwin" }}osx
