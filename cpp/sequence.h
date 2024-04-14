@@ -5,6 +5,7 @@
 #include "pad.h"
 
 #include <ostream>
+#include <memory>
 #include <vector>
 
 namespace fileseq {
