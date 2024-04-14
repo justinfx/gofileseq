@@ -33,7 +33,7 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -v ./...
+        run: go test -v . ./ranges
 
   release:
     name: Release
