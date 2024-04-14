@@ -37,7 +37,7 @@ If an error occurs while reading the filesystem, it can be
 captured by passing a fileseq::Status pointer.
 */
 FileSequence findSequenceOnDisk(const std::string &pattern,
-                                Status* ok=NULL);
+                                Status* ok=nullptr);
 
 /*!
 FindSequenceOnDisk takes a string that is a compatible/parsible
@@ -50,7 +50,7 @@ captured by passing a fileseq::Status pointer.
 */
 FileSequence findSequenceOnDisk(const std::string &pattern,
                                 PadStyle style,
-                                Status* ok=NULL);
+                                Status* ok=nullptr);
 
 /*!
 FindSequenceOpts enums define behavior of finding

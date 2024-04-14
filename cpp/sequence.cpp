@@ -7,14 +7,13 @@
 
 #include <algorithm>
 #include <cerrno>
-#include <climits>
 #include <cstdlib>
 #include <sstream>
 
 namespace fileseq {
 
 
-FileSequence::FileSequence() : m_seqData(NULL) , m_frameSet() {
+FileSequence::FileSequence() : m_seqData(nullptr) , m_frameSet() {
 
 }
 
@@ -76,7 +75,7 @@ bool FileSequence::init(const std::string &path, PadStyle padStyle, Status* ok) 
         } else {
             // Try to see if we can at least find a specific frame
             // number, a la  .<frame>.ext
-            if ( (didMatch = internal::getSingleFrameMatch(match, path)) ) {
+            if ( internal::getSingleFrameMatch(match, path) ) {
 
                 frameSet = FrameSet(match.range);
                 if (frameSet.isValid()) {
@@ -86,7 +85,7 @@ bool FileSequence::init(const std::string &path, PadStyle padStyle, Status* ok) 
 
                     // Calculate the padding chars
                     fileseq::strings::trim(match.range);
-                    pad = padder.getPaddingChars(match.range.size());
+                    pad = padder.getPaddingChars(match.range.size()); // NOLINT(*-narrowing-conversions)
                 }
 
                 ext = match.ext;
@@ -135,7 +134,7 @@ FileSequence::FileSequence(const FileSequence& rhs) {
 
 bool FileSequence::isValid() const {
     // Sanity check
-    if (m_seqData == NULL) {
+    if (m_seqData == nullptr) {
         return false;
     }
 
@@ -182,7 +181,7 @@ void FileSequence::setDirname(const std::string& dirname) const {
     m_seqData->dir.assign(dirname);
 
     if (!dirname.empty() && dirname[dirname.size()-1] != fileseq::strings::kPathSep) {
-        // A non empty string does not yet end with the path sep.
+        // A non-empty string does not yet end with the path sep.
         // We will add it.
         m_seqData->dir.append(1, fileseq::strings::kPathSep);
     }
@@ -206,7 +205,7 @@ void FileSequence::setExt(const std::string& ext) const {
     m_seqData->ext.assign(ext);
 
     if (!ext.empty() && ext[0] != '.') {
-        // A non empty string does not yet start with a '.'
+        // A non-empty string does not yet start with a '.'
         // We will prepend it.
         m_seqData->ext.insert(0, 1, '.');
     }
@@ -224,12 +223,12 @@ void FileSequence::setPadding(const std::string &padChars) const {
 
     // Update the zfill using the pad mapping
     const PaddingMapper &mapper = getPadMapperForStyle(m_seqData->padStyle);
-    m_seqData->zfill = mapper.getPaddingCharsSize(padChars);
+    m_seqData->zfill = mapper.getPaddingCharsSize(padChars); // NOLINT(*-narrowing-conversions)
 }
 
 PadStyle FileSequence::paddingStyle() const {
     if (!isValid()) return PadStyleDefault;
-    return m_seqData->padStyle;;
+    return m_seqData->padStyle;
 }
 
 void FileSequence::setPaddingStyle(PadStyle style) const {

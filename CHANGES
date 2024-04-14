@@ -1,5 +1,10 @@
 Changes:
 
+2.12.0
+----------------
+
+* cpp - clang-tidy formatting
+
 2.11.2
 ----------------
 * go/cpp: fix regex to handle parsing complex extensions with single character component ("file.1.a.ext")

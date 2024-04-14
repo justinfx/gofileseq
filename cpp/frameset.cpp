@@ -83,7 +83,7 @@ void FrameSet::handleMatch(const internal::RangePatternMatch* match, Status* ok)
     ok->clearError();
 
     Frame start, end;
-    long step = 1;
+    long step;
 
     switch (num) {
 
@@ -181,11 +181,11 @@ std::string FrameSet::string() const {
 
 size_t FrameSet::length() const {
     return isValid() ? m_frameData->ranges.length() : 0;
-};
+}
 
 size_t FrameSet::index(Frame frame) const {
     return isValid() ? (size_t)m_frameData->ranges.index(frame) : 0;
-};
+}
 
 Frame FrameSet::frame(size_t index, Status* ok) const {
     if (!isValid()) {
@@ -193,7 +193,7 @@ Frame FrameSet::frame(size_t index, Status* ok) const {
     }
 
     return m_frameData->ranges.value(index, ok);
-};
+}
 
 void FrameSet::frames(Frames &frames) const {
     frames.clear();
@@ -213,7 +213,7 @@ void FrameSet::frames(Frames &frames) const {
     while (it.next()) {
         frames.push_back(*it);
     }
-};
+}
 
 RangesIterator FrameSet::iterFrames() const {
     if (!isValid()) {
@@ -224,16 +224,16 @@ RangesIterator FrameSet::iterFrames() const {
 }
 
 bool FrameSet::hasFrame(Frame frame) const {
-    return isValid() ? m_frameData->ranges.contains(frame) : false;
-};
+    return isValid() && m_frameData->ranges.contains(frame);
+}
 
 Frame FrameSet::start() const {
     return isValid() ? m_frameData->ranges.start() : 0;
-};
+}
 
 Frame FrameSet::end() const {
     return isValid() ? m_frameData->ranges.end() : 0;
-};
+}
 
 std::string FrameSet::frameRange(int pad) const {
     if (!isValid()) {
@@ -245,7 +245,7 @@ std::string FrameSet::frameRange(int pad) const {
     }
 
     return padFrameRange(m_frameData->frameRange, (size_t)pad);
-};
+}
 
 FrameSet FrameSet::inverted() const {
     FrameSet newFrameSet;
@@ -263,7 +263,7 @@ FrameSet FrameSet::inverted() const {
     std::swap(newFrameSet.m_frameData->ranges, ranges);
 
     return newFrameSet;
-};
+}
 
 std::string FrameSet::invertedFrameRange(int pad) const {
     if (!isValid()) {
@@ -280,7 +280,7 @@ std::string FrameSet::invertedFrameRange(int pad) const {
     }
 
     return frange;
-};
+}
 
 FrameSet FrameSet::normalized() const {
     FrameSet newFrameSet;
@@ -298,6 +298,6 @@ FrameSet FrameSet::normalized() const {
     std::swap(newFrameSet.m_frameData->ranges, ranges);
 
     return newFrameSet;
-};
+}
 
 } // fileseq

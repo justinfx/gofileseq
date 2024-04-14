@@ -108,7 +108,7 @@ const PaddingMapper& getPadMapperForStyle(PadStyle style) {
 
     }
 
-    // Should not get here. But sanity-check default..
+    // Should not get here. But sanity-check default.
     return s_multiHash;
 }
 
@@ -130,7 +130,7 @@ size_t PaddingMapper::getPaddingCharsSize(const std::string &chars) const {
         return 0;
     }
 
-    size_t size = 0;
+    size_t size;
 
     // check for alternate padding syntax
     if ((size = internal::getPadSize(chars, internal::PadSyntaxPrintf)) > 0) {

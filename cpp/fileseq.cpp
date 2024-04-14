@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
 #include "fileseq.h"
 #include "pad.h"
 #include "private/frameset_p.h"
@@ -13,8 +15,6 @@
 #include <string>
 #include <sstream>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include <utility>
 
 namespace fileseq {
@@ -47,9 +47,9 @@ std::string framesToFrameRange(const Frames &frames,
         framesEnd = sortedFrames.end();
     }
 
-    long step = 0;
+    long step;
     bool hasWritten = false;
-    Frames::size_type i = 0;
+    Frames::size_type i;
 
     std::string start, end;
     std::stringstream buf;
@@ -92,7 +92,6 @@ std::string framesToFrameRange(const Frames &frames,
         // Subsequent groups are comma-separated
         if (hasWritten) {
             buf << ",";
-            hasWritten = true;
         }
 
         // We only have a single frame to write for this group
@@ -155,26 +154,26 @@ FileSequence findSequenceOnDisk(const std::string &pattern, Status* ok) {
 }
 
 FileSequence findSequenceOnDisk(const std::string &pattern, PadStyle style, Status* ok) {
-    if (ok != NULL) ok->clearError();
+    if (ok != nullptr) ok->clearError();
 
     Status localOk;
-    FileSequence fs(pattern, style, &localOk);
+    FileSequence fs {pattern, style, &localOk};
 
     if (!localOk) {
         // Treat a bad pattern as a non-match
         std::cerr << "fileseq: " << localOk << std::endl;
-        return FileSequence();
+        return {};
     }
 
     FileSequences seqs;
     localOk = findSequencesOnDisk(seqs, fs.dirname(), fs);
     if (!localOk) {
-        if (ok != NULL) {
+        if (ok != nullptr) {
             std::ostringstream err;
             err << "Failed to find " << pattern << ": " << localOk;
             ok->setError(err.str());
         }
-        return FileSequence();
+        return {};
     }
 
     const std::string &base = fs.basename();
@@ -185,12 +184,12 @@ FileSequence findSequenceOnDisk(const std::string &pattern, PadStyle style, Stat
         // Find the first match and return it
         if (it->basename() == base && it->ext() == ext) {
             it->setPaddingStyle(style);
-            return (*it);
+            return *it;
         }
     }
 
     // If we get this far, we didn't find a match
-    return FileSequence();
+    return {};
 }
 
 // deprecated
@@ -220,10 +219,10 @@ namespace internal {
 // when it goes out of scope
 class DirCloser {
 public:
-    DirCloser(DIR* d) : m_dir(d) {}
+    explicit DirCloser(DIR* d) : m_dir(d) {}
 
     ~DirCloser() {
-        if (m_dir != NULL) {
+        if (m_dir != nullptr) {
             closedir(m_dir);
         }
     }
@@ -303,7 +302,7 @@ Status findSequencesOnDisk(FileSequences &seqs,
 
     // Open the directory
     DIR* dir;
-    if ( (dir = opendir(path.c_str())) == NULL ) {
+    if ( (dir = opendir(path.c_str())) == nullptr ) {
         status.setError(std::strerror(errno));
         return status;
     }
@@ -330,7 +329,7 @@ Status findSequencesOnDisk(FileSequences &seqs,
     std::ostringstream buf(root, std::ios_base::out | std::ios_base::ate);
 
     Frame frame;
-    size_t frameWidth = 0;
+    size_t frameWidth;
     std::string name;
     FileSequence fs;
     SeqInfo* seqInfo;
@@ -349,7 +348,7 @@ Status findSequencesOnDisk(FileSequences &seqs,
     errno = 0;
 
     // Read dir and sort files into groups
-    while ( (d_ent = readdir(dir)) != NULL ) {
+    while ( (d_ent = readdir(dir)) != nullptr ) {
 
         // Is it a directory?
         if (d_ent->d_type == DT_DIR) {
@@ -495,7 +494,7 @@ Status findSequencesOnDisk(FileSequences &seqs,
 
     seqs.reserve(seqsMap.size());
 
-    size_t pos = 0;
+    size_t pos;
     char digit;
     std::string ext, pad, frange;
 
@@ -519,7 +518,7 @@ Status findSequencesOnDisk(FileSequences &seqs,
                 // get reparsed as a range.
                 pos = 1;
                 // Check if the parsed number was preceded by a "-",
-                // if so, check before that char to see if its a number
+                // if so, check before that char to see if it's a number
                 if (name[name.size()-1] == '-' && name.size() >= 2) {
                     pos = 2;
                 }
@@ -569,3 +568,5 @@ Status findSequencesOnDisk(FileSequences &seqs,
 
 
 } // fileseq
+
+#pragma clang diagnostic pop

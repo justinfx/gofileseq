@@ -50,7 +50,7 @@ const PaddingMapper& getPadMapperForStyle(PadStyle style);
 class PaddingMapper {
 
 public:
-    virtual ~PaddingMapper() {}
+    virtual ~PaddingMapper() = default;
 
     // Return all supported padding characters
     std::string getAllChars() const;

@@ -1,3 +1,6 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "google-explicit-constructor"
+#pragma ide diagnostic ignored "modernize-use-equals-default"
 #ifndef FILESEQ_ERROR_H_
 #define FILESEQ_ERROR_H_
 
@@ -28,7 +31,7 @@ std::string to receive the error message.
 class Status {
 
 public:
-    Status() {}
+    Status() = default;
 
     //! If Status evaluates to false, it indicates an error state
     operator bool() const { return m_error.empty(); }
@@ -71,3 +74,5 @@ void setError(const std::string &msg, Status* stat);
 
 #endif // FILESEQ_ERROR_H_
 
+
+#pragma clang diagnostic pop

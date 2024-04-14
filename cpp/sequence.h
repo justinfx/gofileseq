@@ -66,7 +66,7 @@ public:
         /path/to/image_foo.1-10x2#.jpg
         /path/to/single_image.0100.jpg
     */
-    explicit FileSequence(const std::string &path, Status* ok=NULL);
+    explicit FileSequence(const std::string &path, Status* ok=nullptr);
 
     /*!
     Create a FileSequence from a string sequence path.
@@ -89,7 +89,7 @@ public:
         /path/to/image_foo.1-10x2@.jpg => /path/to/image_foo.1.jpg ...
         /path/to/image_foo.1-10x2##.jpg => /path/to/image_foo.00000001.jpg ...
     */
-    FileSequence(const std::string &path, PadStyle padStyle, Status* ok=NULL);
+    FileSequence(const std::string &path, PadStyle padStyle, Status* ok=nullptr);
 
     virtual ~FileSequence();
 
@@ -121,14 +121,14 @@ public:
     Return whether the sequence was properly parsed and
     is valid for use
     */
-    operator bool() const { return isValid(); };
+    operator bool() const { return isValid(); }; // NOLINT(*-explicit-constructor)
 
     /*!
     Return the string representation of the file sequence
     */
     std::string string() const;
 
-    operator std::string() const { return string(); }
+    operator std::string() const { return string(); } // NOLINT(*-explicit-constructor)
 
     friend std::ostream& operator<< (std::ostream& stream, const FileSequence& fs) {
         stream << fs.string();
@@ -178,7 +178,7 @@ public:
 
         {{dir}}{{base}}{{frange}}{{pad}}{{ext}}
     */
-    std::string format(const std::string &fmt, Status* ok=NULL) const;
+    std::string format(const std::string &fmt, Status* ok=nullptr) const;
 
     /*!
     Dirname returns the parsed directory component of the sequence string
@@ -249,7 +249,7 @@ public:
     /*!
     Set a new FrameSet, by way of providing a string frame range.
     */
-    void setFrameRange(const std::string &frange, Status* ok=NULL);
+    void setFrameRange(const std::string &frange, Status* ok=nullptr);
 
     /*!
     InvertedFrameRange returns a new frame range that represents all
@@ -310,8 +310,7 @@ public:
     void setFrameSet(const FrameSet &frameSet);
 
 private:
-    bool init(const std::string &frange, PadStyle padStyle, Status* ok=NULL);
-
+    bool init(const std::string &frange, PadStyle padStyle, Status* ok=nullptr);
 
     friend FileSequence findSequenceOnDisk(const std::string &pattern, Status* ok);
     friend FileSequence findSequenceOnDisk(const std::string &pattern, PadStyle style, Status* ok);
