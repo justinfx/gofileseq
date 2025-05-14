@@ -69,6 +69,9 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Setup dependencies
+        run: sudo apt-get install -y gcc llvm clang
+
       - name: Setup waf
         env:
           WAF_VERSION: waf-2.1.5
