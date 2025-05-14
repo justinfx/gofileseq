@@ -71,7 +71,7 @@ jobs:
 
       - name: Setup waf
         env:
-          WAF_VERSION: waf-2.1.15
+          WAF_VERSION: waf-2.1.5
         run: test -x waf-light || {
           cd $HOME &&
           wget "https://gitlab.com/ita1024/waf/-/archive/${WAF_VERSION}/waf-${WAF_VERSION}.tar.gz" &&
