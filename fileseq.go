@@ -28,7 +28,7 @@ import (
 	"strings"
 )
 
-const Version = "2.11.1"
+const Version = "2.13.0"
 
 var (
 	// Regular expression patterns for matching frame set strings.

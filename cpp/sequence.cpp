@@ -176,7 +176,7 @@ std::string FileSequence::string() const {
     ss << dirname()
        << basename()
        << frameRange()
-       << padding()
+       << (m_frameSet.isValid() ? padding() : "")
        << ext();
 
     return ss.str();

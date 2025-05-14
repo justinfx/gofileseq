@@ -335,6 +335,8 @@ public:
         fileseq::PadStyle padStyle;
         std::string input;
         std::string expected;
+        bool invalidSeq;
+        bool invalidFrameSet;
     };
 
 protected:
@@ -367,7 +369,7 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {PadStyleHash1, "testdata/seqA.@.jpg", ""};
+            Case t = {PadStyleHash1, "testdata/seqA.@.jpg", "", true, true};
             m_cases.push_back(t);
         }
         {
@@ -379,7 +381,7 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {PadStyleHash1, "testdata/_MISSING_.0010.tif", ""};
+            Case t = {PadStyleHash1, "testdata/_MISSING_.0010.tif", "", true, true};
             m_cases.push_back(t);
         }
         {
@@ -421,7 +423,7 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {PadStyleHash4, "testdata/seqA.@.jpg", ""};
+            Case t = {PadStyleHash4, "testdata/seqA.@.jpg", "", true, true};
             m_cases.push_back(t);
         }
         {
@@ -452,6 +454,12 @@ protected:
             Case t = {PadStyleHash4, "testdata/complex_ext/@@@.1.ext", "testdata/complex_ext/100-102@@@.1.ext"};
             m_cases.push_back(t);
         }
+
+        // https://github.com/justinfx/gofileseq/issues/28
+        {
+            Case t = {PadStyleHash4, "testdata/aFile.ext", "testdata/aFile.ext", false, true};
+            m_cases.push_back(t);
+        }
     }
 
     std::vector<Case> m_cases;
@@ -462,11 +470,17 @@ TEST_F( TestFindSequenceOnDisk, FindSeq ) {
     using namespace fileseq;
 
     Status stat;
+    bool actualInvalid;
     for (size_t i=0; i < m_cases.size(); ++i) {
         Case t = m_cases[i];
 
         FileSequence seq = findSequenceOnDisk(t.input, t.padStyle, &stat);
         ASSERT_TRUE(stat) << "#" << i << ": " << stat;
+
+        actualInvalid = !seq.isValid();
+        ASSERT_EQ(t.invalidSeq, actualInvalid) << "#" << i << ": " << t.input;
+        actualInvalid = !seq.frameSet().isValid();
+        ASSERT_EQ(t.invalidFrameSet, actualInvalid) << "#" << i << ": " << t.input;
 
         if ( !seq.isValid() && !t.expected.empty() ) {
             FAIL() << "Expected " << t.expected << "; got an invalid seq for input " << t.input;
