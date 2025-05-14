@@ -19,7 +19,7 @@ jobs:
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       matrix:
-        go: [ 1.18.x ]
+        go: [ 1.24.x ]
         os: [ ubuntu-latest, macOs-latest, windows-latest ]
     steps:
       - name: Checkout
@@ -42,13 +42,13 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.18
+          go-version: 1.24
       - name: Release 🚀
         uses: goreleaser/goreleaser-action@v2
         with:
@@ -71,7 +71,7 @@ jobs:
 
       - name: Setup waf
         env:
-          WAF_VERSION: waf-2.0.18
+          WAF_VERSION: waf-2.1.15
         run: test -x waf-light || {
           cd $HOME &&
           wget "https://gitlab.com/ita1024/waf/-/archive/${WAF_VERSION}/waf-${WAF_VERSION}.tar.gz" &&
