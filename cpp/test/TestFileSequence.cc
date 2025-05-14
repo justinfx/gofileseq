@@ -81,7 +81,7 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f.@@.ext", "/dir/f.@@.ext", 0, 0, 2, 1, ".ext"};
+            Case t = {"/dir/f.@@.ext", "/dir/f..ext", 0, 0, 2, 1, ".ext"};
             m_cases.push_back(t);
         }
         {
@@ -142,7 +142,7 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f10_20.v123.@@.tar.gz", "/dir/f10_20.v123.@@.tar.gz", 0, 0, 2, 1, ".tar.gz"};
+            Case t = {"/dir/f10_20.v123.@@.tar.gz", "/dir/f10_20.v123..tar.gz", 0, 0, 2, 1, ".tar.gz"};
             m_cases.push_back(t);
         }
         {

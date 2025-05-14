@@ -524,7 +524,12 @@ Status findSequencesOnDisk(FileSequences &seqs,
             return status;
         }
 
-        if (pad.empty()) {
+        if (pad.empty() || \
+            // https://github.com/justinfx/gofileseq/issues/28
+            // For single files where there is no frame, we also want to
+            // clear the FrameSet. There could still be a default padding character.
+            (seqInfo->minWidth == 0 && seqInfo->frames.size() <= 1)) {
+
             fs.setFrameSet(FrameSet());
         }
 
