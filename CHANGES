@@ -1,5 +1,14 @@
 Changes:
 
+2.14.0
+----------------
+
+This could be considered a semi-breaking change in the way single files are identified as being sequences.
+However, with the Go implementation expecting to match the original python fileseq, single files were being
+too aggressively identified as sequences and this fix restores the behavior to match python.
+
+* #30 go: Align single-file parsing rules with python fileseq, to make them less aggressive
+
 2.13.0
 ----------------
 

@@ -111,18 +111,24 @@ func NewFileSequencePad(sequence string, style PadStyle) (*FileSequence, error) 
 			// number, a la  .<frame>.ext
 			parts = singleFramePattern.FindStringSubmatch(sequence)
 			if len(parts) > 0 {
+				dir, basename = filepath.Split(parts[1])
 				frameStr := parts[2]
-				frameSet, err = NewFrameSet(frameStr)
-				if err != nil {
-					frameSet = nil
-				} else {
-					// Reparse the dir/basename to not include the trailing frame
-					dir, basename = filepath.Split(parts[1])
-
-					// Calculate the padding chars
-					pad = padder.PaddingChars(len(strings.TrimSpace(frameStr)))
-				}
 				ext = parts[3]
+				// Being selective about when we decide we have a single file
+				// with a valid frame number
+				if frameStr != "" && !strings.HasSuffix(parts[1], ".") {
+					// edge case: we've got a single versioned file, not a sequence
+					basename += frameStr
+				} else {
+					// we have a sequence with a single frame
+					frameSet, err = NewFrameSet(frameStr)
+					if err != nil {
+						frameSet = nil
+					} else {
+						// Calculate the padding chars
+						pad = padder.PaddingChars(len(strings.TrimSpace(frameStr)))
+					}
+				}
 			}
 		}
 
