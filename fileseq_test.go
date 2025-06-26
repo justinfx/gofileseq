@@ -969,6 +969,8 @@ func TestFindSequenceOnDisk(t *testing.T) {
 				"testdata/mixed/seq.@@.ext":    "testdata/mixed/seq.-1-5@@.ext",
 				"testdata/mixed/seq.@@@@@.ext": "testdata/mixed/seq.-1-5,1001@@@@@.ext",
 				"testdata/mixed/seq.@.ext":     "",
+
+				"testdata/single_files/file01_2025-05-13_1809-00.ext": "testdata/single_files/file01_2025-05-13_1809-00@.ext",
 			},
 		},
 	}

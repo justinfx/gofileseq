@@ -366,7 +366,6 @@ Status findSequencesOnDisk(FileSequences &seqs,
             }
 
         }
-
         if (useTemplate) {
 			// when a FileSequence template has been provided, we can
 			// directly set expected values from that, instead of having
@@ -390,6 +389,12 @@ Status findSequencesOnDisk(FileSequences &seqs,
             bool ok = getSingleFrameMatch(match, name, /*require_frame */ false);
 
             if (ok && (match.range.empty() || (match.base.empty() && match.ext.empty()))) {
+                ok = false;
+            }
+
+            if (ok && !match.range.empty() && !fileseq::strings::ends_with(match.base, ".")) {
+                match.base += match.range;
+                match.range.clear();
                 ok = false;
             }
 

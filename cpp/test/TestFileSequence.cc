@@ -85,11 +85,11 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f100.ext", "/dir/f100@@@.ext", 100, 100, 3, 1, ".ext"};
+            Case t = {"/dir/f100.ext", "/dir/f100.ext", 0, 0, 0, 1, ".ext"};
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f_100.ext", "/dir/f_100@@@.ext", 100, 100, 3, 1, ".ext"};
+            Case t = {"/dir/f_100.ext", "/dir/f_100.ext", 0, 0, 0, 1, ".ext"};
             m_cases.push_back(t);
         }
         {
@@ -146,11 +146,11 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f100.tar.gz", "/dir/f100@@@.tar.gz", 100, 100, 3, 1, ".tar.gz"};
+            Case t = {"/dir/f100.tar.gz", "/dir/f100.tar.gz", 0, 0, 0, 1, ".tar.gz"};
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f_100.tar.gz", "/dir/f_100@@@.tar.gz", 100, 100, 3, 1, ".tar.gz"};
+            Case t = {"/dir/f_100.tar.gz", "/dir/f_100.tar.gz", 0, 0, 0, 1, ".tar.gz"};
             m_cases.push_back(t);
         }
         {
@@ -166,7 +166,7 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/100.a.ext", "/dir/100@@@.a.ext", 100, 100, 3, 1, ".a.ext"};
+            Case t = {"/dir/100.a.ext", "/dir/100.a.ext", 0, 0, 0, 1, ".a.ext"};
             m_cases.push_back(t);
         }
         {

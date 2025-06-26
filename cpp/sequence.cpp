@@ -77,18 +77,22 @@ bool FileSequence::init(const std::string &path, PadStyle padStyle, Status* ok) 
             // number, a la  .<frame>.ext
             if ( internal::getSingleFrameMatch(match, path) ) {
 
+                fileseq::strings::path_split(dir, base, match.base);
                 frameSet = FrameSet(match.range);
-                if (frameSet.isValid()) {
+                ext = match.ext;
 
-                    // Reparse the dir/base to not include the trailing frame
-                    fileseq::strings::path_split(dir, base, match.base);
+                if (!match.range.empty() && !fileseq::strings::ends_with(match.base, ".")) {
+                    // edge case: we've got a single versioned file, not a sequence
+					base += match.range;
+                    frameSet = FrameSet();
+                }
+                else if (frameSet.isValid()) {
 
                     // Calculate the padding chars
                     fileseq::strings::trim(match.range);
                     pad = padder.getPaddingChars(match.range.size()); // NOLINT(*-narrowing-conversions)
                 }
 
-                ext = match.ext;
             }
         }
 
