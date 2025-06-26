@@ -269,10 +269,11 @@ TEST( TestFindSequencesOnDisk, HandleSymlinksOnDisk ) {
 
 TEST( TestFindSequencesOnDisk, AmbiguousSingleFiles ) {
     std::map<std::string, bool> cases = {
-            {"123@@@",         false},
-            {"123@@@.ext",     false},
+            {"123",     false},
+            {"123.ext",     false},
             {"file.ext12345",  false},
             {"file.ext12345z", false},
+            {"file01_2025-05-13_1809-00.ext", false},
     };
 
     fileseq::FileSequences seqs;
@@ -280,11 +281,19 @@ TEST( TestFindSequencesOnDisk, AmbiguousSingleFiles ) {
     ASSERT_TRUE(stat) << "Failed to find seqs in location 'testdata/single_files': " << stat;
     ASSERT_EQ(cases.size(), seqs.size()) << "Did not find expected number of seqs";
 
+    std::stringstream expected;
+    int i;
+    for (auto const& x: cases) {
+        if (i > 0) { expected << ", "; }
+        expected << x.first;
+        i++;
+    }
+
     for (const auto &seq: seqs) {
         std::string name = basename(seq.string());
         auto mapIt = cases.find(name);
         if (mapIt == cases.end()) {
-            ADD_FAILURE() << "Found unexpected seq not in cases: " << name;
+            ADD_FAILURE() << "Found unexpected seq not in cases: got " << name << " (expected one of: " << expected.str() << ")";
             continue;
         }
         // Found
@@ -300,9 +309,7 @@ TEST( TestFindSequencesOnDisk, AmbiguousSingleFiles ) {
 }
 
 TEST( TestFindSequencesOnDisk, AmbiguousSingleFilesDisabled ) {
-    std::map<std::string, bool> cases = {
-        {"123@@@.ext", false},
-    };
+    std::map<std::string, bool> cases = {};
 
     fileseq::FileSequences seqs;
     auto stat = fileseq::findSequencesOnDisk(seqs, "testdata/single_files", fileseq::kNoOpt);
