@@ -829,7 +829,7 @@ func findSequencesInList(paths []*fileItem, opts *findSeqOptions) (FileSequences
 			seqCount++
 		}
 
-		if !ok || frameWidth < seq.MinWidth {
+		if (!ok || frameWidth < seq.MinWidth) && frameWidth > 0 {
 			seq.MinWidth = frameWidth
 			seq.Padding = padder.PaddingChars(frameWidth)
 		}
@@ -896,7 +896,7 @@ func findSequencesInList(paths []*fileItem, opts *findSeqOptions) (FileSequences
 				dig := string(baseName[len(baseName)-pos])
 				// If it is a number, clear the padding char
 				if _, err := strconv.ParseUint(dig, 10, 8); err == nil {
-					pad = ""
+					//pad = ""
 				}
 			}
 			// If there is no padding, use the full string format of the frame.
@@ -1040,7 +1040,9 @@ func FindSequenceOnDiskPad(pattern string, padStyle PadStyle, opts ...FileOption
 			continue
 		}
 
-		seq.SetPaddingStyle(padStyle)
+		if seq.FrameSet() != nil {
+			seq.SetPaddingStyle(padStyle)
+		}
 
 		// Strict padding check
 		if strictPadding && pad != "" && seq.ZFill() != fill {
