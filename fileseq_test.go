@@ -918,8 +918,8 @@ func TestFindSequencesInList30(t *testing.T) {
 	assert.Len(t, seqs, 1)
 
 	seq := seqs[0]
-	assert.Equal(t, "/path/name_2025-05-13_1809-3@@@.ext", seq.String(), "unexpected string format")
-	assert.Equal(t, "/path/", seq.Dirname(), "unexpected dirname")
+	assert.Equal(t, filepath.Clean("/path/name_2025-05-13_1809-3@@@.ext"), seq.String(), "unexpected string format")
+	assert.Equal(t, filepath.Clean("/path/"), filepath.Clean(seq.Dirname()), "unexpected dirname")
 	assert.Equal(t, "name_2025-05-13_1809", seq.Basename(), "unexpected basename")
 	assert.Equal(t, "-3", seq.FrameRange(), "unexpected frame range")
 	assert.Equal(t, "@@@", seq.Padding(), "unexpected padding")
