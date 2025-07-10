@@ -88,6 +88,12 @@ $(document).ready(function(){initNavTree('CHANGES.html',''); initResizable(); })
 <div class="contents">
 <div class="textblock"><pre class="fragment">Changes:
 
+2.14.1
+----------------
+
+* #30 go - Extra fixes to FindSequencesOnDisk / FindSequencesInList to ensure single file FileSequence objects don't
+incorrectly also have a padding character applied
+
 2.14.0
 ----------------
 
@@ -95,7 +101,7 @@ This could be considered a semi-breaking change in the way single files are iden
 However, with the Go/C++ implementations expecting to match the original python fileseq, single files were being
 too aggressively identified as sequences and this fix restores the behavior to match python.
 
-* #30 go/cpp: Align single-file parsing rules with python fileseq, to make them less aggressive
+* #30 go/cpp - Align single-file parsing rules with python fileseq, to make them less aggressive
 
 2.13.0
 ----------------
