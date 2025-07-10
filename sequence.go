@@ -829,7 +829,7 @@ func findSequencesInList(paths []*fileItem, opts *findSeqOptions) (FileSequences
 			seqCount++
 		}
 
-		if !ok || frameWidth < seq.MinWidth {
+		if (!ok || frameWidth < seq.MinWidth) && frameWidth > 0 {
 			seq.MinWidth = frameWidth
 			seq.Padding = padder.PaddingChars(frameWidth)
 		}
@@ -844,7 +844,7 @@ func findSequencesInList(paths []*fileItem, opts *findSeqOptions) (FileSequences
 
 	fseqs := make(FileSequences, 0, seqCount)
 
-	appendSeq := func() error {
+	appendSeq := func(singleFile bool) error {
 		buf.WriteString(dirName)
 		buf.WriteString(baseName)
 		buf.WriteString(frange)
@@ -862,11 +862,19 @@ func findSequencesInList(paths []*fileItem, opts *findSeqOptions) (FileSequences
 		if frange == "" {
 			fs.SetFrameSet(nil)
 			fs.SetPadding("")
+		} else if singleFile {
+			fs.basename += frange
+			fs.SetFrameSet(nil)
+			fs.SetPadding("")
 		} else {
 			fs.SetFrameRange(frange)
 		}
 
-		fseqs = append(fseqs, fs)
+		if singleFile {
+			files = append(files, fs)
+		} else {
+			fseqs = append(fseqs, fs)
+		}
 
 		buf.Reset()
 		return nil
@@ -884,7 +892,12 @@ func findSequencesInList(paths []*fileItem, opts *findSeqOptions) (FileSequences
 
 		// Handle single frame sequences
 		if len(seq.Frames) == 1 {
-			if baseName != "" {
+			// If there is no padding, use the full string format of the frame.
+			// Otherwise, use the numeric value and the padding char.
+			frange = seq.Frames[0].Frame
+
+			// Special handling for ambiguous single file paths
+			if singleFiles && baseName != "" {
 				// Make sure a non-sequence file doesn't accidentally
 				// get re-parsed as a range.
 				pos := 1
@@ -894,19 +907,23 @@ func findSequencesInList(paths []*fileItem, opts *findSeqOptions) (FileSequences
 					pos = 2
 				}
 				dig := string(baseName[len(baseName)-pos])
-				// If it is a number, clear the padding char
+
+				// https://github.com/justinfx/gofileseq/issues/30
+				// If it is a number, clear the padding char, and add it as a single file sequence
 				if _, err := strconv.ParseUint(dig, 10, 8); err == nil {
 					pad = ""
+					if appendErr := appendSeq(true); appendErr != nil {
+						return nil, appendErr
+					}
+					continue
 				}
 			}
-			// If there is no padding, use the full string format of the frame.
-			// Otherwise, use the numeric value and the padding char.
-			frange = seq.Frames[0].Frame
+
 			if pad != "" {
 				frange = strconv.Itoa(seq.Frames[0].FrameNum)
 			}
 
-			if appendErr := appendSeq(); appendErr != nil {
+			if appendErr := appendSeq(false); appendErr != nil {
 				return nil, appendErr
 			}
 			continue
@@ -932,7 +949,7 @@ func findSequencesInList(paths []*fileItem, opts *findSeqOptions) (FileSequences
 			if len(frameInfo.Frame) != currentWidth && frameInfo.MinWidth > currentWidth {
 				// Commit current frame range and start over
 				frange = FramesToFrameRange(frames, true, 0)
-				if appendErr := appendSeq(); appendErr != nil {
+				if appendErr := appendSeq(false); appendErr != nil {
 					return nil, appendErr
 				}
 
@@ -947,7 +964,7 @@ func findSequencesInList(paths []*fileItem, opts *findSeqOptions) (FileSequences
 		// Append a remaining sequence
 		if len(frames) > 0 {
 			frange = FramesToFrameRange(frames, true, 0)
-			if appendErr := appendSeq(); appendErr != nil {
+			if appendErr := appendSeq(false); appendErr != nil {
 				return nil, appendErr
 			}
 			frames = nil
@@ -1040,7 +1057,9 @@ func FindSequenceOnDiskPad(pattern string, padStyle PadStyle, opts ...FileOption
 			continue
 		}
 
-		seq.SetPaddingStyle(padStyle)
+		if seq.FrameSet() != nil {
+			seq.SetPaddingStyle(padStyle)
+		}
 
 		// Strict padding check
 		if strictPadding && pad != "" && seq.ZFill() != fill {

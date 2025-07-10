@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"sort"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // Test table for comparing string frame ranges
@@ -708,7 +710,7 @@ func TestFindSequencesOnDisk(t *testing.T) {
 		},
 		"testdata/single_files": {
 			"123@@@.ext",
-			"file01_2025-05-13_1809-00.ext",
+			"file01_2025-05-13_18090@@@.ext",
 		},
 	}
 
@@ -845,7 +847,7 @@ func TestFindSequencesInList(t *testing.T) {
 		{
 			Name: "ambiguous single files",
 			Paths: []string{
-				"/path/to/complex_name_15-14-56-14.ext",
+				"/path/to/complex_name_15-14-56-00.ext",
 				"/path/to/single/123",
 				"/path/to/single/123.ext",
 				"/path/to/single/file0001.ext",
@@ -854,7 +856,7 @@ func TestFindSequencesInList(t *testing.T) {
 			},
 			Opts: []FileOption{SingleFiles},
 			Expect: []string{
-				"/path/to/complex_name_15-14-56-14.ext",
+				"/path/to/complex_name_15-14-56-00.ext",
 				"/path/to/single/123",
 				"/path/to/single/123@@@.ext",
 				"/path/to/single/file1#.ext",
@@ -865,7 +867,7 @@ func TestFindSequencesInList(t *testing.T) {
 		{
 			Name: "ambiguous single files disabled",
 			Paths: []string{
-				"/path/to/complex_name_15-14-56-14.ext",
+				"/path/to/complex_name_15-14-56-00.ext",
 				"/path/to/single/123",
 				"/path/to/single/123.ext",
 				"/path/to/single/file0001.ext",
@@ -873,7 +875,7 @@ func TestFindSequencesInList(t *testing.T) {
 				"/path/to/single/file.ext12345z",
 			},
 			Expect: []string{
-				"/path/to/complex_name_15-14-56-14.ext",
+				"/path/to/complex_name_15-14-560@@@.ext",
 				"/path/to/single/123@@@.ext",
 				"/path/to/single/file1#.ext",
 			},
@@ -904,6 +906,30 @@ func TestFindSequencesInList(t *testing.T) {
 				t.Errorf("\nExpect %v\n   Got %v", tt.Expect, actual)
 			}
 		})
+	}
+}
+
+// https://github.com/justinfx/gofileseq/issues/30
+func TestFindSequencesInList30(t *testing.T) {
+	seqs, err := FindSequencesInList([]string{"/path/name_2025-05-13_1809-03.ext"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Len(t, seqs, 1)
+
+	seq := seqs[0]
+	assert.Equal(t, filepath.Clean("/path/name_2025-05-13_1809-3@@@.ext"), seq.String(), "unexpected string format")
+	assert.Equal(t, filepath.Clean("/path/"), filepath.Clean(seq.Dirname()), "unexpected dirname")
+	assert.Equal(t, "name_2025-05-13_1809", seq.Basename(), "unexpected basename")
+	assert.Equal(t, "-3", seq.FrameRange(), "unexpected frame range")
+	assert.Equal(t, "@@@", seq.Padding(), "unexpected padding")
+	assert.Equal(t, ".ext", seq.Ext(), "unexpected ext")
+	assert.Equal(t, 1, seq.Len(), "unexpected length")
+	assert.Equal(t, -3, seq.Start(), "unexpected start")
+	assert.Equal(t, -3, seq.End(), "unexpected end")
+	actual, err := seq.Format("{{base}}{{frange}}{{pad}}{{ext}}")
+	if assert.NoError(t, err) {
+		assert.Equal(t, "name_2025-05-13_1809-3@@@.ext", actual, "unexpected format")
 	}
 }
 
@@ -941,6 +967,9 @@ func TestFindSequenceOnDisk(t *testing.T) {
 				"testdata/mixed/seq.@@.ext":    "testdata/mixed/seq.-1-5##.ext",
 				"testdata/mixed/seq.@@@@@.ext": "testdata/mixed/seq.-1-5,1001#####.ext",
 				"testdata/mixed/seq.@.ext":     "",
+
+				"testdata/single_files/file01_2025-05-13_1809-00.ext": "testdata/single_files/file01_2025-05-13_1809-00.ext",
+				"testdata/single_files/file01_2025-05-13_1809@@@.ext": "",
 			},
 		},
 
@@ -970,7 +999,8 @@ func TestFindSequenceOnDisk(t *testing.T) {
 				"testdata/mixed/seq.@@@@@.ext": "testdata/mixed/seq.-1-5,1001@@@@@.ext",
 				"testdata/mixed/seq.@.ext":     "",
 
-				"testdata/single_files/file01_2025-05-13_1809-00.ext": "testdata/single_files/file01_2025-05-13_1809-00@.ext",
+				"testdata/single_files/file01_2025-05-13_1809-00.ext": "testdata/single_files/file01_2025-05-13_1809-00.ext",
+				"testdata/single_files/file01_2025-05-13_1809@@@.ext": "",
 			},
 		},
 	}
