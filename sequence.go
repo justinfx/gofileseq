@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+
+	"github.com/justinfx/gofileseq/v2/internal/parser"
 )
 
 // A FileSequence represents a path to a sequence of files,
@@ -74,76 +76,46 @@ func NewFileSequence(sequence string) (*FileSequence, error) {
 //	/path/to/image_foo.1-10x2@.jpg => /path/to/image_foo.1.jpg ...
 //	/path/to/image_foo.1-10x2##.jpg => /path/to/image_foo.00000001.jpg ...
 func NewFileSequencePad(sequence string, style PadStyle) (*FileSequence, error) {
-	var dir, basename, pad, ext string
-	var frameSet *FrameSet
-	var err error
-
 	// Determine which style of padding to use
 	padder, ok := padders[style]
 	if !ok {
 		padder = defaultPadding
 	}
 
-	parts := splitPattern.FindStringSubmatch(sequence)
-
-	if len(parts) == 0 {
-		// If no match at this point, we are dealing with a possible
-		// path that contains no range. Maybe a single frame or no frame.
-
-		for _, pad := range defaultPadding.AllChars() {
-			if strings.Contains(sequence, pad) {
-				return nil, fmt.Errorf("Failed to parse sequence: %s", sequence)
-			}
-		}
-		// We assume the sequence is just a single file path, containing
-		// no frame patterns
-		dir, basename = filepath.Split(sequence)
-		idx := strings.LastIndex(basename, ".")
-		if idx > -1 {
-			basename, ext = basename[:idx], basename[idx:]
-		}
-
-		if dir == "" && basename == "" && ext != "" {
-			// Just assume all we have is a file extension
-
-		} else {
-			// Try to see if we can at least find a specific frame
-			// number, a la  .<frame>.ext
-			parts = singleFramePattern.FindStringSubmatch(sequence)
-			if len(parts) > 0 {
-				dir, basename = filepath.Split(parts[1])
-				frameStr := parts[2]
-				ext = parts[3]
-				// Being selective about when we decide we have a single file
-				// with a valid frame number
-				if frameStr != "" && !strings.HasSuffix(parts[1], ".") {
-					// edge case: we've got a single versioned file, not a sequence
-					basename += frameStr
-				} else {
-					// we have a sequence with a single frame
-					frameSet, err = NewFrameSet(frameStr)
-					if err != nil {
-						frameSet = nil
-					} else {
-						// Calculate the padding chars
-						pad = padder.PaddingChars(len(strings.TrimSpace(frameStr)))
-					}
-				}
-			}
-		}
-
-	} else {
-		// We are dealing with a pattern containing a frame range
-
-		frameSet, err = NewFrameSet(parts[2])
-		if err != nil {
-			frameSet = nil
-		}
-
-		dir, basename = filepath.Split(parts[1])
-		pad = parts[3]
-		ext = parts[4]
+	// Parse using ANTLR grammar-based parser
+	result, err := parser.ParseFileSequence(sequence)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to parse sequence: %s", sequence)
 	}
+
+	var dir, basename, pad, ext string
+	var frameSet *FrameSet
+
+	dir = result.Directory
+	basename = result.Basename
+	ext = result.Extension
+
+	if result.IsSequence {
+		// Full sequence with padding
+		pad = result.Padding
+		if result.FrameRange != "" {
+			frameSet, err = NewFrameSet(result.FrameRange)
+			if err != nil {
+				frameSet = nil
+			}
+		}
+	} else if result.IsSingleFile {
+		// Single frame file - calculate padding from frame number width
+		if result.FrameRange != "" {
+			frameSet, err = NewFrameSet(result.FrameRange)
+			if err != nil {
+				frameSet = nil
+			} else {
+				pad = padder.PaddingChars(len(strings.TrimSpace(result.FrameRange)))
+			}
+		}
+	}
+	// For plain files, frameSet and pad remain nil/empty
 
 	seq := &FileSequence{
 		basename:  basename,
