@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -157,30 +156,9 @@ func (v *fileSeqVisitor) VisitSingleFrame(ctx *SingleFrameContext) interface{} {
 	// Extract extensions (grammar already parsed them)
 	v.result.Extension = v.extractExtensions(ctx.AllExtension())
 
-	// SPECIAL CASE: Multiple DOT_NUM tokens (e.g., ".10000000000.123")
-	// If basename contains a DOT_NUM pattern and frameNum is also a DOT_NUM,
-	// and extension is empty, we should:
-	// - Treat the FIRST number (in basename) as the frame
-	// - Treat the LAST number (current frame) as a digit-only extension
-	if v.result.Extension == "" && v.result.FrameRange != "" && v.result.Basename != "" {
-		basename := v.result.Basename
-		// Remove trailing dot if present (we added it when processing frameNum)
-		if strings.HasSuffix(basename, ".") {
-			basename = basename[:len(basename)-1]
-		}
-
-		// Check if basename ends with a pattern like ".digits" or is just ".digits"
-		if dotIdx := strings.LastIndex(basename, "."); dotIdx >= 0 {
-			suffix := basename[dotIdx+1:]
-			if _, err := strconv.ParseInt(suffix, 10, 64); err == nil {
-				// Basename ends with .number and we have a frame that's also a number
-				// Swap them: first number becomes frame, second (current frame) becomes extension
-				v.result.Extension = "." + v.result.FrameRange
-				v.result.FrameRange = suffix
-				v.result.Basename = basename[:dotIdx+1] // Keep through the dot
-			}
-		}
-	}
+	// Post-process: handle special case of multiple DOT_NUM tokens
+	// (see parse_postprocess.go for detailed explanation)
+	handleMultipleDotNumTokens(&v.result)
 
 	return nil
 }
@@ -209,23 +187,9 @@ func (v *fileSeqVisitor) VisitPatternOnly(ctx *PatternOnlyContext) interface{} {
 	// Extract extensions
 	v.result.Extension = v.extractExtensions(ctx.AllExtension())
 
-	// SPECIAL CASE: Extension + digits + padding (e.g., "/dir/f.tmp12345@@@@@")
-	// If basename ends with digits and we have padding but no frame range,
-	// extract the trailing digits as the frame number.
-	// This handles the case where the lexer consumed ".tmp12345" as a single EXTENSION token.
-	if v.result.Padding != "" && v.result.FrameRange == "" && v.result.Basename != "" {
-		// Find trailing digits in basename
-		basename := v.result.Basename
-		i := len(basename) - 1
-		for i >= 0 && basename[i] >= '0' && basename[i] <= '9' {
-			i--
-		}
-		// If we found trailing digits, extract them as the frame
-		if i < len(basename)-1 && i >= 0 {
-			v.result.FrameRange = basename[i+1:]
-			v.result.Basename = basename[:i+1]
-		}
-	}
+	// Post-process: extract digits that were absorbed into extension token
+	// (see parse_postprocess.go for detailed explanation)
+	extractDigitsFromExtensionToken(&v.result)
 
 	return nil
 }
