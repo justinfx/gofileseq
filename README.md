@@ -89,6 +89,11 @@ JAVA=/path/to/java go generate ./...
 cd grammar && make JAVA=/path/to/java generate-go
 ```
 
+**Alternative:** Use Docker (no Java required):
+```bash
+cd grammar && make generate-go-docker
+```
+
 C++ Support
 ------------
 
