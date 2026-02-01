@@ -95,10 +95,12 @@ padding
 // Extension can be:
 // - EXTENSION tokens (.tar, .gz, .exr)
 // - DOT_NUM for digit-only extensions (.123, .10000000000)
+// - WORD for non-dot extensions after padding (_exr, _extra)
 // - Followed by optional DASH and NUM (for extensions like .tar.gz-1)
 extension
     : EXTENSION (DASH NUM)?
     | DOT_NUM
+    | WORD
     ;
 
 // ============================================================================

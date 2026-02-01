@@ -406,6 +406,110 @@ func TestFileSequenceSplit(t *testing.T) {
 	}
 }
 
+func TestParserEdgeCases(t *testing.T) {
+	var table = []struct {
+		path      string
+		outPath   string
+		start     int
+		end       int
+		zfill     int
+		wantDir   string
+		wantBase  string
+		wantPad   string
+		wantExt   string
+	}{
+		// Windows path separators
+		{"Z:\\Shows\\test.1-100#.exr",
+			"Z:\\Shows\\test.1-100#.exr", 1, 100, 4,
+			"Z:\\Shows\\", "test.", "#", ".exr"},
+
+		// Mixed separators (pattern-only defaults to zfill=4)
+		{"/mnt/Shows\\mixed/file.#.exr",
+			"/mnt/Shows\\mixed/file.#.exr", 0, 0, 4,
+			"/mnt/Shows\\mixed/", "file.", "#", ".exr"},
+
+		// Resolution patterns in basename
+		{"/path/file.1920x1080.0001-0100#.exr",
+			"/path/file.1920x1080.0001-0100#.exr", 1, 100, 4,
+			"/path/", "file.1920x1080.", "#", ".exr"},
+
+		// Negative zero frames
+		{"file.-0000#.exr",
+			"file.-0000#.exr", 0, 0, 4,
+			"", "file.", "#", ".exr"},
+
+		// Missing periods (underscores instead)
+		{"/path/something_1-10#_exr",
+			"/path/something_1-10#_exr", 1, 10, 4,
+			"/path/", "something_", "#", "_exr"},
+
+		// Hidden files with frame sequences
+		{"/path/.hidden.0001-0100#.ext",
+			"/path/.hidden.0001-0100#.ext", 1, 100, 4,
+			"/path/", ".hidden.", "#", ".ext"},
+
+		// Complex multi-part extensions
+		{"/path/file.1-10#.bgeo.sc",
+			"/path/file.1-10#.bgeo.sc", 1, 10, 4,
+			"/path/", "file.", "#", ".bgeo.sc"},
+
+		{"/path/file.1-10#.tar.gz.bak",
+			"/path/file.1-10#.tar.gz.bak", 1, 10, 4,
+			"/path/", "file.", "#", ".tar.gz.bak"},
+
+		// Hidden file plain (no frames) - treated as extension only
+		{"/path/.hidden",
+			"/path/.hidden", 0, 0, 0,
+			"/path/", "", "", ".hidden"},
+
+		// Hidden file with single frame (leading zero uses single #)
+		{"/path/.config.0050",
+			"/path/.config.0050#", 50, 50, 4,
+			"/path/", ".config.", "#", ""},
+	}
+
+	for _, tt := range table {
+		t.Run(tt.path, func(t *testing.T) {
+			seq, err := NewFileSequence(tt.path)
+			if err != nil {
+				t.Fatalf("Parse error: %v", err)
+			}
+
+			if actual := seq.String(); actual != tt.outPath {
+				t.Errorf("String(): expected %q, got %q", tt.outPath, actual)
+			}
+
+			if actual := seq.Start(); actual != tt.start {
+				t.Errorf("Start(): expected %d, got %d", tt.start, actual)
+			}
+
+			if actual := seq.End(); actual != tt.end {
+				t.Errorf("End(): expected %d, got %d", tt.end, actual)
+			}
+
+			if actual := seq.ZFill(); actual != tt.zfill {
+				t.Errorf("ZFill(): expected %d, got %d", tt.zfill, actual)
+			}
+
+			if actual := seq.Dirname(); actual != tt.wantDir {
+				t.Errorf("Dirname(): expected %q, got %q", tt.wantDir, actual)
+			}
+
+			if actual := seq.Basename(); actual != tt.wantBase {
+				t.Errorf("Basename(): expected %q, got %q", tt.wantBase, actual)
+			}
+
+			if actual := seq.Padding(); actual != tt.wantPad {
+				t.Errorf("Padding(): expected %q, got %q", tt.wantPad, actual)
+			}
+
+			if actual := seq.Ext(); actual != tt.wantExt {
+				t.Errorf("Ext(): expected %q, got %q", tt.wantExt, actual)
+			}
+		})
+	}
+}
+
 func TestFileSequenceFrameIndex(t *testing.T) {
 	var table = []struct {
 		path     string
