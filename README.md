@@ -63,6 +63,32 @@ seql some/images
 # some/images/file_foo.1-100@@@.tif
 ```
 
+Development
+-----------
+
+The file sequence parser is built using an [ANTLR4](https://www.antlr.org/) grammar defined in `grammar/fileseq.g4`.
+
+When the grammar file is modified, the parser must be regenerated and committed:
+
+```bash
+# Regenerate parser from grammar
+go generate ./...
+
+# Or directly via make
+cd grammar && make generate-go
+```
+
+**Requirements:** Java runtime (for ANTLR code generation)
+
+If Java is not in a default system location, specify the path:
+```bash
+# Using go generate
+JAVA=/path/to/java go generate ./...
+
+# Using make directly
+cd grammar && make JAVA=/path/to/java generate-go
+```
+
 C++ Support
 ------------
 

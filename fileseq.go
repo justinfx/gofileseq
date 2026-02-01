@@ -19,6 +19,8 @@ Support for:
 */
 package fileseq
 
+//go:generate make -C grammar generate-go
+
 import (
 	"errors"
 	"fmt"
