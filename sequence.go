@@ -195,13 +195,12 @@ func (s *FileSequence) Split() FileSequences {
 
 	var buf strings.Builder
 
-	// Write the dir and base components once
-	buf.WriteString(s.dir)
-	buf.WriteString(s.basename)
-
 	list := make(FileSequences, len(franges))
 	var seq *FileSequence
 	for i, frange := range franges {
+		// Write the dir and base components for each iteration
+		buf.WriteString(s.dir)
+		buf.WriteString(s.basename)
 		buf.WriteString(frange)
 		buf.WriteString(s.padChar)
 		buf.WriteString(s.ext)

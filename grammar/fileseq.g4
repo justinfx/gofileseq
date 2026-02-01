@@ -13,13 +13,15 @@ input
 
 // Sequence with padding: /path/file.1-100#.exr or /path/file1-100#.exr
 // Also handles hidden files: /path/.hidden5.1-10#.7zip
+// Extension is optional (can have padding with no extension)
 sequence
-    : directory sequenceBasename frameRange padding extension+
+    : directory sequenceBasename frameRange padding extension*
     ;
 
 // Pattern-only sequence (padding without frame range): /path/file.@@.ext
+// Extension is optional (Python allows padding with no extension)
 patternOnly
-    : directory patternBasename padding extension+
+    : directory patternBasename padding extension*
     ;
 
 // Single frame: /path/file.100.exr or /path/file.100 (extension optional)
@@ -58,9 +60,11 @@ singleFrameBasename
     : (WORD | NUM | DOT_NUM | DASH | SPECIAL_CHAR | EXTENSION)+
     ;
 
-// Basename for plain files: does NOT include EXTENSION (so extensions aren't consumed)
+// Basename for plain files: does NOT include EXTENSION or DOT_NUM
+// (so both regular and digit-only extensions can be consumed by extension rule)
+// But DOES include FRAME_RANGE tokens (for filenames like "name_2025-05-13.ext")
 plainBasename
-    : (WORD | NUM | DOT_NUM | DASH | SPECIAL_CHAR)+
+    : (WORD | NUM | DASH | SPECIAL_CHAR | FRAME_RANGE | DOT_FRAME_RANGE)+
     ;
 
 // Frame range: may or may not have leading dot
@@ -86,8 +90,13 @@ padding
     | AT+
     ;
 
+// Extension can be:
+// - EXTENSION tokens (.tar, .gz, .exr)
+// - DOT_NUM for digit-only extensions (.123, .10000000000)
+// - Followed by optional DASH and NUM (for extensions like .tar.gz-1)
 extension
-    : EXTENSION
+    : EXTENSION (DASH NUM)?
+    | DOT_NUM
     ;
 
 // ============================================================================
