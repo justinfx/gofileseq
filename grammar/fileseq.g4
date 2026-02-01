@@ -13,15 +13,15 @@ input
 
 // Sequence with padding: /path/file.1-100#.exr or /path/file1-100#.exr
 // Also handles hidden files: /path/.hidden5.1-10#.7zip
-// Extension is optional (can have padding with no extension)
+// Basename and extension are optional (allows patterns like /path/1-100#.ext)
 sequence
-    : directory sequenceBasename frameRange padding extension*
+    : directory sequenceBasename? frameRange padding extension*
     ;
 
 // Pattern-only sequence (padding without frame range): /path/file.@@.ext
-// Extension is optional (Python allows padding with no extension)
+// Basename and extension are optional (allows patterns like /path/@@@.ext)
 patternOnly
-    : directory patternBasename padding extension*
+    : directory patternBasename? padding extension*
     ;
 
 // Single frame: /path/file.100.exr or /path/file.100 (extension optional)
@@ -45,19 +45,21 @@ dirSegment
     : (WORD | NUM | DASH | SPECIAL_CHAR | FRAME_RANGE | DOT_FRAME_RANGE | DOT_NUM)+
     ;
 
-// Basename for sequences: can include EXTENSION (for hidden files), but not FRAME_RANGE
+// Basename for sequences: can include EXTENSION (for hidden files)
+// Also includes FRAME_RANGE tokens for date-like patterns (e.g., "name_2025-05-13_")
 sequenceBasename
-    : (WORD | NUM | DOT_NUM | DASH | SPECIAL_CHAR | EXTENSION)+
+    : (WORD | NUM | DOT_NUM | DASH | SPECIAL_CHAR | EXTENSION | FRAME_RANGE | DOT_FRAME_RANGE)+
     ;
 
 // Basename for pattern-only: same as sequence
 patternBasename
-    : (WORD | NUM | DOT_NUM | DASH | SPECIAL_CHAR | EXTENSION)+
+    : (WORD | NUM | DOT_NUM | DASH | SPECIAL_CHAR | EXTENSION | FRAME_RANGE | DOT_FRAME_RANGE)+
     ;
 
 // Basename for single frames: can include EXTENSION (for hidden files like .hidden.100)
+// Also includes FRAME_RANGE for date-like patterns
 singleFrameBasename
-    : (WORD | NUM | DOT_NUM | DASH | SPECIAL_CHAR | EXTENSION)+
+    : (WORD | NUM | DOT_NUM | DASH | SPECIAL_CHAR | EXTENSION | FRAME_RANGE | DOT_FRAME_RANGE)+
     ;
 
 // Basename for plain files: does NOT include EXTENSION or DOT_NUM

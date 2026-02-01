@@ -47,70 +47,72 @@ func fileseqParserInit() {
 	}
 	staticData.PredictionContextCache = antlr.NewPredictionContextCache()
 	staticData.serializedATN = []int32{
-		4, 1, 16, 147, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
+		4, 1, 16, 151, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
 		4, 2, 5, 7, 5, 2, 6, 7, 6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7,
 		10, 2, 11, 7, 11, 2, 12, 7, 12, 2, 13, 7, 13, 2, 14, 7, 14, 1, 0, 1, 0,
 		1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 3, 0, 43, 8,
-		0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 50, 8, 1, 10, 1, 12, 1, 53, 9, 1,
-		1, 2, 1, 2, 1, 2, 1, 2, 5, 2, 59, 8, 2, 10, 2, 12, 2, 62, 9, 2, 1, 3, 1,
-		3, 1, 3, 1, 3, 5, 3, 68, 8, 3, 10, 3, 12, 3, 71, 9, 3, 1, 4, 1, 4, 3, 4,
-		75, 8, 4, 1, 4, 5, 4, 78, 8, 4, 10, 4, 12, 4, 81, 9, 4, 1, 5, 3, 5, 84,
-		8, 5, 1, 5, 1, 5, 1, 5, 5, 5, 89, 8, 5, 10, 5, 12, 5, 92, 9, 5, 1, 6, 4,
-		6, 95, 8, 6, 11, 6, 12, 6, 96, 1, 7, 4, 7, 100, 8, 7, 11, 7, 12, 7, 101,
-		1, 8, 4, 8, 105, 8, 8, 11, 8, 12, 8, 106, 1, 9, 4, 9, 110, 8, 9, 11, 9,
-		12, 9, 111, 1, 10, 4, 10, 115, 8, 10, 11, 10, 12, 10, 116, 1, 11, 1, 11,
-		1, 12, 1, 12, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 4, 13, 128, 8, 13, 11,
-		13, 12, 13, 129, 1, 13, 4, 13, 133, 8, 13, 11, 13, 12, 13, 134, 3, 13,
-		137, 8, 13, 1, 14, 1, 14, 1, 14, 3, 14, 142, 8, 14, 1, 14, 3, 14, 145,
-		8, 14, 1, 14, 0, 0, 15, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24,
-		26, 28, 0, 4, 2, 0, 8, 10, 12, 15, 3, 0, 7, 7, 10, 10, 12, 15, 2, 0, 8,
-		9, 12, 15, 2, 0, 8, 10, 13, 13, 155, 0, 42, 1, 0, 0, 0, 2, 44, 1, 0, 0,
-		0, 4, 54, 1, 0, 0, 0, 6, 63, 1, 0, 0, 0, 8, 72, 1, 0, 0, 0, 10, 83, 1,
-		0, 0, 0, 12, 94, 1, 0, 0, 0, 14, 99, 1, 0, 0, 0, 16, 104, 1, 0, 0, 0, 18,
-		109, 1, 0, 0, 0, 20, 114, 1, 0, 0, 0, 22, 118, 1, 0, 0, 0, 24, 120, 1,
-		0, 0, 0, 26, 136, 1, 0, 0, 0, 28, 144, 1, 0, 0, 0, 30, 31, 3, 2, 1, 0,
-		31, 32, 5, 0, 0, 1, 32, 43, 1, 0, 0, 0, 33, 34, 3, 4, 2, 0, 34, 35, 5,
-		0, 0, 1, 35, 43, 1, 0, 0, 0, 36, 37, 3, 6, 3, 0, 37, 38, 5, 0, 0, 1, 38,
-		43, 1, 0, 0, 0, 39, 40, 3, 8, 4, 0, 40, 41, 5, 0, 0, 1, 41, 43, 1, 0, 0,
-		0, 42, 30, 1, 0, 0, 0, 42, 33, 1, 0, 0, 0, 42, 36, 1, 0, 0, 0, 42, 39,
-		1, 0, 0, 0, 43, 1, 1, 0, 0, 0, 44, 45, 3, 10, 5, 0, 45, 46, 3, 14, 7, 0,
-		46, 47, 3, 22, 11, 0, 47, 51, 3, 26, 13, 0, 48, 50, 3, 28, 14, 0, 49, 48,
-		1, 0, 0, 0, 50, 53, 1, 0, 0, 0, 51, 49, 1, 0, 0, 0, 51, 52, 1, 0, 0, 0,
-		52, 3, 1, 0, 0, 0, 53, 51, 1, 0, 0, 0, 54, 55, 3, 10, 5, 0, 55, 56, 3,
-		16, 8, 0, 56, 60, 3, 26, 13, 0, 57, 59, 3, 28, 14, 0, 58, 57, 1, 0, 0,
-		0, 59, 62, 1, 0, 0, 0, 60, 58, 1, 0, 0, 0, 60, 61, 1, 0, 0, 0, 61, 5, 1,
-		0, 0, 0, 62, 60, 1, 0, 0, 0, 63, 64, 3, 10, 5, 0, 64, 65, 3, 18, 9, 0,
-		65, 69, 3, 24, 12, 0, 66, 68, 3, 28, 14, 0, 67, 66, 1, 0, 0, 0, 68, 71,
-		1, 0, 0, 0, 69, 67, 1, 0, 0, 0, 69, 70, 1, 0, 0, 0, 70, 7, 1, 0, 0, 0,
-		71, 69, 1, 0, 0, 0, 72, 74, 3, 10, 5, 0, 73, 75, 3, 20, 10, 0, 74, 73,
-		1, 0, 0, 0, 74, 75, 1, 0, 0, 0, 75, 79, 1, 0, 0, 0, 76, 78, 3, 28, 14,
-		0, 77, 76, 1, 0, 0, 0, 78, 81, 1, 0, 0, 0, 79, 77, 1, 0, 0, 0, 79, 80,
-		1, 0, 0, 0, 80, 9, 1, 0, 0, 0, 81, 79, 1, 0, 0, 0, 82, 84, 5, 11, 0, 0,
-		83, 82, 1, 0, 0, 0, 83, 84, 1, 0, 0, 0, 84, 90, 1, 0, 0, 0, 85, 86, 3,
-		12, 6, 0, 86, 87, 5, 11, 0, 0, 87, 89, 1, 0, 0, 0, 88, 85, 1, 0, 0, 0,
-		89, 92, 1, 0, 0, 0, 90, 88, 1, 0, 0, 0, 90, 91, 1, 0, 0, 0, 91, 11, 1,
-		0, 0, 0, 92, 90, 1, 0, 0, 0, 93, 95, 7, 0, 0, 0, 94, 93, 1, 0, 0, 0, 95,
-		96, 1, 0, 0, 0, 96, 94, 1, 0, 0, 0, 96, 97, 1, 0, 0, 0, 97, 13, 1, 0, 0,
-		0, 98, 100, 7, 1, 0, 0, 99, 98, 1, 0, 0, 0, 100, 101, 1, 0, 0, 0, 101,
-		99, 1, 0, 0, 0, 101, 102, 1, 0, 0, 0, 102, 15, 1, 0, 0, 0, 103, 105, 7,
-		1, 0, 0, 104, 103, 1, 0, 0, 0, 105, 106, 1, 0, 0, 0, 106, 104, 1, 0, 0,
-		0, 106, 107, 1, 0, 0, 0, 107, 17, 1, 0, 0, 0, 108, 110, 7, 1, 0, 0, 109,
-		108, 1, 0, 0, 0, 110, 111, 1, 0, 0, 0, 111, 109, 1, 0, 0, 0, 111, 112,
-		1, 0, 0, 0, 112, 19, 1, 0, 0, 0, 113, 115, 7, 2, 0, 0, 114, 113, 1, 0,
-		0, 0, 115, 116, 1, 0, 0, 0, 116, 114, 1, 0, 0, 0, 116, 117, 1, 0, 0, 0,
-		117, 21, 1, 0, 0, 0, 118, 119, 7, 3, 0, 0, 119, 23, 1, 0, 0, 0, 120, 121,
-		5, 10, 0, 0, 121, 25, 1, 0, 0, 0, 122, 137, 5, 1, 0, 0, 123, 137, 5, 2,
-		0, 0, 124, 137, 5, 3, 0, 0, 125, 137, 5, 4, 0, 0, 126, 128, 5, 5, 0, 0,
-		127, 126, 1, 0, 0, 0, 128, 129, 1, 0, 0, 0, 129, 127, 1, 0, 0, 0, 129,
-		130, 1, 0, 0, 0, 130, 137, 1, 0, 0, 0, 131, 133, 5, 6, 0, 0, 132, 131,
-		1, 0, 0, 0, 133, 134, 1, 0, 0, 0, 134, 132, 1, 0, 0, 0, 134, 135, 1, 0,
-		0, 0, 135, 137, 1, 0, 0, 0, 136, 122, 1, 0, 0, 0, 136, 123, 1, 0, 0, 0,
-		136, 124, 1, 0, 0, 0, 136, 125, 1, 0, 0, 0, 136, 127, 1, 0, 0, 0, 136,
-		132, 1, 0, 0, 0, 137, 27, 1, 0, 0, 0, 138, 141, 5, 7, 0, 0, 139, 140, 5,
-		15, 0, 0, 140, 142, 5, 13, 0, 0, 141, 139, 1, 0, 0, 0, 141, 142, 1, 0,
-		0, 0, 142, 145, 1, 0, 0, 0, 143, 145, 5, 10, 0, 0, 144, 138, 1, 0, 0, 0,
-		144, 143, 1, 0, 0, 0, 145, 29, 1, 0, 0, 0, 18, 42, 51, 60, 69, 74, 79,
-		83, 90, 96, 101, 106, 111, 116, 129, 134, 136, 141, 144,
+		0, 1, 1, 1, 1, 3, 1, 47, 8, 1, 1, 1, 1, 1, 1, 1, 5, 1, 52, 8, 1, 10, 1,
+		12, 1, 55, 9, 1, 1, 2, 1, 2, 3, 2, 59, 8, 2, 1, 2, 1, 2, 5, 2, 63, 8, 2,
+		10, 2, 12, 2, 66, 9, 2, 1, 3, 1, 3, 1, 3, 1, 3, 5, 3, 72, 8, 3, 10, 3,
+		12, 3, 75, 9, 3, 1, 4, 1, 4, 3, 4, 79, 8, 4, 1, 4, 5, 4, 82, 8, 4, 10,
+		4, 12, 4, 85, 9, 4, 1, 5, 3, 5, 88, 8, 5, 1, 5, 1, 5, 1, 5, 5, 5, 93, 8,
+		5, 10, 5, 12, 5, 96, 9, 5, 1, 6, 4, 6, 99, 8, 6, 11, 6, 12, 6, 100, 1,
+		7, 4, 7, 104, 8, 7, 11, 7, 12, 7, 105, 1, 8, 4, 8, 109, 8, 8, 11, 8, 12,
+		8, 110, 1, 9, 4, 9, 114, 8, 9, 11, 9, 12, 9, 115, 1, 10, 4, 10, 119, 8,
+		10, 11, 10, 12, 10, 120, 1, 11, 1, 11, 1, 12, 1, 12, 1, 13, 1, 13, 1, 13,
+		1, 13, 1, 13, 4, 13, 132, 8, 13, 11, 13, 12, 13, 133, 1, 13, 4, 13, 137,
+		8, 13, 11, 13, 12, 13, 138, 3, 13, 141, 8, 13, 1, 14, 1, 14, 1, 14, 3,
+		14, 146, 8, 14, 1, 14, 3, 14, 149, 8, 14, 1, 14, 0, 0, 15, 0, 2, 4, 6,
+		8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 0, 4, 2, 0, 8, 10, 12, 15, 2,
+		0, 7, 10, 12, 15, 2, 0, 8, 9, 12, 15, 2, 0, 8, 10, 13, 13, 161, 0, 42,
+		1, 0, 0, 0, 2, 44, 1, 0, 0, 0, 4, 56, 1, 0, 0, 0, 6, 67, 1, 0, 0, 0, 8,
+		76, 1, 0, 0, 0, 10, 87, 1, 0, 0, 0, 12, 98, 1, 0, 0, 0, 14, 103, 1, 0,
+		0, 0, 16, 108, 1, 0, 0, 0, 18, 113, 1, 0, 0, 0, 20, 118, 1, 0, 0, 0, 22,
+		122, 1, 0, 0, 0, 24, 124, 1, 0, 0, 0, 26, 140, 1, 0, 0, 0, 28, 148, 1,
+		0, 0, 0, 30, 31, 3, 2, 1, 0, 31, 32, 5, 0, 0, 1, 32, 43, 1, 0, 0, 0, 33,
+		34, 3, 4, 2, 0, 34, 35, 5, 0, 0, 1, 35, 43, 1, 0, 0, 0, 36, 37, 3, 6, 3,
+		0, 37, 38, 5, 0, 0, 1, 38, 43, 1, 0, 0, 0, 39, 40, 3, 8, 4, 0, 40, 41,
+		5, 0, 0, 1, 41, 43, 1, 0, 0, 0, 42, 30, 1, 0, 0, 0, 42, 33, 1, 0, 0, 0,
+		42, 36, 1, 0, 0, 0, 42, 39, 1, 0, 0, 0, 43, 1, 1, 0, 0, 0, 44, 46, 3, 10,
+		5, 0, 45, 47, 3, 14, 7, 0, 46, 45, 1, 0, 0, 0, 46, 47, 1, 0, 0, 0, 47,
+		48, 1, 0, 0, 0, 48, 49, 3, 22, 11, 0, 49, 53, 3, 26, 13, 0, 50, 52, 3,
+		28, 14, 0, 51, 50, 1, 0, 0, 0, 52, 55, 1, 0, 0, 0, 53, 51, 1, 0, 0, 0,
+		53, 54, 1, 0, 0, 0, 54, 3, 1, 0, 0, 0, 55, 53, 1, 0, 0, 0, 56, 58, 3, 10,
+		5, 0, 57, 59, 3, 16, 8, 0, 58, 57, 1, 0, 0, 0, 58, 59, 1, 0, 0, 0, 59,
+		60, 1, 0, 0, 0, 60, 64, 3, 26, 13, 0, 61, 63, 3, 28, 14, 0, 62, 61, 1,
+		0, 0, 0, 63, 66, 1, 0, 0, 0, 64, 62, 1, 0, 0, 0, 64, 65, 1, 0, 0, 0, 65,
+		5, 1, 0, 0, 0, 66, 64, 1, 0, 0, 0, 67, 68, 3, 10, 5, 0, 68, 69, 3, 18,
+		9, 0, 69, 73, 3, 24, 12, 0, 70, 72, 3, 28, 14, 0, 71, 70, 1, 0, 0, 0, 72,
+		75, 1, 0, 0, 0, 73, 71, 1, 0, 0, 0, 73, 74, 1, 0, 0, 0, 74, 7, 1, 0, 0,
+		0, 75, 73, 1, 0, 0, 0, 76, 78, 3, 10, 5, 0, 77, 79, 3, 20, 10, 0, 78, 77,
+		1, 0, 0, 0, 78, 79, 1, 0, 0, 0, 79, 83, 1, 0, 0, 0, 80, 82, 3, 28, 14,
+		0, 81, 80, 1, 0, 0, 0, 82, 85, 1, 0, 0, 0, 83, 81, 1, 0, 0, 0, 83, 84,
+		1, 0, 0, 0, 84, 9, 1, 0, 0, 0, 85, 83, 1, 0, 0, 0, 86, 88, 5, 11, 0, 0,
+		87, 86, 1, 0, 0, 0, 87, 88, 1, 0, 0, 0, 88, 94, 1, 0, 0, 0, 89, 90, 3,
+		12, 6, 0, 90, 91, 5, 11, 0, 0, 91, 93, 1, 0, 0, 0, 92, 89, 1, 0, 0, 0,
+		93, 96, 1, 0, 0, 0, 94, 92, 1, 0, 0, 0, 94, 95, 1, 0, 0, 0, 95, 11, 1,
+		0, 0, 0, 96, 94, 1, 0, 0, 0, 97, 99, 7, 0, 0, 0, 98, 97, 1, 0, 0, 0, 99,
+		100, 1, 0, 0, 0, 100, 98, 1, 0, 0, 0, 100, 101, 1, 0, 0, 0, 101, 13, 1,
+		0, 0, 0, 102, 104, 7, 1, 0, 0, 103, 102, 1, 0, 0, 0, 104, 105, 1, 0, 0,
+		0, 105, 103, 1, 0, 0, 0, 105, 106, 1, 0, 0, 0, 106, 15, 1, 0, 0, 0, 107,
+		109, 7, 1, 0, 0, 108, 107, 1, 0, 0, 0, 109, 110, 1, 0, 0, 0, 110, 108,
+		1, 0, 0, 0, 110, 111, 1, 0, 0, 0, 111, 17, 1, 0, 0, 0, 112, 114, 7, 1,
+		0, 0, 113, 112, 1, 0, 0, 0, 114, 115, 1, 0, 0, 0, 115, 113, 1, 0, 0, 0,
+		115, 116, 1, 0, 0, 0, 116, 19, 1, 0, 0, 0, 117, 119, 7, 2, 0, 0, 118, 117,
+		1, 0, 0, 0, 119, 120, 1, 0, 0, 0, 120, 118, 1, 0, 0, 0, 120, 121, 1, 0,
+		0, 0, 121, 21, 1, 0, 0, 0, 122, 123, 7, 3, 0, 0, 123, 23, 1, 0, 0, 0, 124,
+		125, 5, 10, 0, 0, 125, 25, 1, 0, 0, 0, 126, 141, 5, 1, 0, 0, 127, 141,
+		5, 2, 0, 0, 128, 141, 5, 3, 0, 0, 129, 141, 5, 4, 0, 0, 130, 132, 5, 5,
+		0, 0, 131, 130, 1, 0, 0, 0, 132, 133, 1, 0, 0, 0, 133, 131, 1, 0, 0, 0,
+		133, 134, 1, 0, 0, 0, 134, 141, 1, 0, 0, 0, 135, 137, 5, 6, 0, 0, 136,
+		135, 1, 0, 0, 0, 137, 138, 1, 0, 0, 0, 138, 136, 1, 0, 0, 0, 138, 139,
+		1, 0, 0, 0, 139, 141, 1, 0, 0, 0, 140, 126, 1, 0, 0, 0, 140, 127, 1, 0,
+		0, 0, 140, 128, 1, 0, 0, 0, 140, 129, 1, 0, 0, 0, 140, 131, 1, 0, 0, 0,
+		140, 136, 1, 0, 0, 0, 141, 27, 1, 0, 0, 0, 142, 145, 5, 7, 0, 0, 143, 144,
+		5, 15, 0, 0, 144, 146, 5, 13, 0, 0, 145, 143, 1, 0, 0, 0, 145, 146, 1,
+		0, 0, 0, 146, 149, 1, 0, 0, 0, 147, 149, 5, 10, 0, 0, 148, 142, 1, 0, 0,
+		0, 148, 147, 1, 0, 0, 0, 149, 29, 1, 0, 0, 0, 20, 42, 46, 53, 58, 64, 73,
+		78, 83, 87, 94, 100, 105, 110, 115, 120, 133, 138, 140, 145, 148,
 	}
 	deserializer := antlr.NewATNDeserializer(nil)
 	staticData.atn = deserializer.Deserialize(staticData.serializedATN)
@@ -418,9 +420,9 @@ type ISequenceContext interface {
 
 	// Getter signatures
 	Directory() IDirectoryContext
-	SequenceBasename() ISequenceBasenameContext
 	FrameRange() IFrameRangeContext
 	Padding() IPaddingContext
+	SequenceBasename() ISequenceBasenameContext
 	AllExtension() []IExtensionContext
 	Extension(i int) IExtensionContext
 
@@ -476,22 +478,6 @@ func (s *SequenceContext) Directory() IDirectoryContext {
 	return t.(IDirectoryContext)
 }
 
-func (s *SequenceContext) SequenceBasename() ISequenceBasenameContext {
-	var t antlr.RuleContext
-	for _, ctx := range s.GetChildren() {
-		if _, ok := ctx.(ISequenceBasenameContext); ok {
-			t = ctx.(antlr.RuleContext)
-			break
-		}
-	}
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(ISequenceBasenameContext)
-}
-
 func (s *SequenceContext) FrameRange() IFrameRangeContext {
 	var t antlr.RuleContext
 	for _, ctx := range s.GetChildren() {
@@ -522,6 +508,22 @@ func (s *SequenceContext) Padding() IPaddingContext {
 	}
 
 	return t.(IPaddingContext)
+}
+
+func (s *SequenceContext) SequenceBasename() ISequenceBasenameContext {
+	var t antlr.RuleContext
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(ISequenceBasenameContext); ok {
+			t = ctx.(antlr.RuleContext)
+			break
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(ISequenceBasenameContext)
 }
 
 func (s *SequenceContext) AllExtension() []IExtensionContext {
@@ -593,19 +595,27 @@ func (p *fileseqParser) Sequence() (localctx ISequenceContext) {
 		p.SetState(44)
 		p.Directory()
 	}
-	{
-		p.SetState(45)
-		p.SequenceBasename()
+	p.SetState(46)
+	p.GetErrorHandler().Sync(p)
+
+	if p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 1, p.GetParserRuleContext()) == 1 {
+		{
+			p.SetState(45)
+			p.SequenceBasename()
+		}
+
+	} else if p.HasError() { // JIM
+		goto errorExit
 	}
 	{
-		p.SetState(46)
+		p.SetState(48)
 		p.FrameRange()
 	}
 	{
-		p.SetState(47)
+		p.SetState(49)
 		p.Padding()
 	}
-	p.SetState(51)
+	p.SetState(53)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -614,11 +624,11 @@ func (p *fileseqParser) Sequence() (localctx ISequenceContext) {
 
 	for _la == fileseqParserEXTENSION || _la == fileseqParserDOT_NUM {
 		{
-			p.SetState(48)
+			p.SetState(50)
 			p.Extension()
 		}
 
-		p.SetState(53)
+		p.SetState(55)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -648,8 +658,8 @@ type IPatternOnlyContext interface {
 
 	// Getter signatures
 	Directory() IDirectoryContext
-	PatternBasename() IPatternBasenameContext
 	Padding() IPaddingContext
+	PatternBasename() IPatternBasenameContext
 	AllExtension() []IExtensionContext
 	Extension(i int) IExtensionContext
 
@@ -705,22 +715,6 @@ func (s *PatternOnlyContext) Directory() IDirectoryContext {
 	return t.(IDirectoryContext)
 }
 
-func (s *PatternOnlyContext) PatternBasename() IPatternBasenameContext {
-	var t antlr.RuleContext
-	for _, ctx := range s.GetChildren() {
-		if _, ok := ctx.(IPatternBasenameContext); ok {
-			t = ctx.(antlr.RuleContext)
-			break
-		}
-	}
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(IPatternBasenameContext)
-}
-
 func (s *PatternOnlyContext) Padding() IPaddingContext {
 	var t antlr.RuleContext
 	for _, ctx := range s.GetChildren() {
@@ -735,6 +729,22 @@ func (s *PatternOnlyContext) Padding() IPaddingContext {
 	}
 
 	return t.(IPaddingContext)
+}
+
+func (s *PatternOnlyContext) PatternBasename() IPatternBasenameContext {
+	var t antlr.RuleContext
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(IPatternBasenameContext); ok {
+			t = ctx.(antlr.RuleContext)
+			break
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IPatternBasenameContext)
 }
 
 func (s *PatternOnlyContext) AllExtension() []IExtensionContext {
@@ -803,18 +813,28 @@ func (p *fileseqParser) PatternOnly() (localctx IPatternOnlyContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(54)
+		p.SetState(56)
 		p.Directory()
 	}
-	{
-		p.SetState(55)
-		p.PatternBasename()
+	p.SetState(58)
+	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
+	_la = p.GetTokenStream().LA(1)
+
+	if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&63360) != 0 {
+		{
+			p.SetState(57)
+			p.PatternBasename()
+		}
+
 	}
 	{
-		p.SetState(56)
+		p.SetState(60)
 		p.Padding()
 	}
-	p.SetState(60)
+	p.SetState(64)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -823,11 +843,11 @@ func (p *fileseqParser) PatternOnly() (localctx IPatternOnlyContext) {
 
 	for _la == fileseqParserEXTENSION || _la == fileseqParserDOT_NUM {
 		{
-			p.SetState(57)
+			p.SetState(61)
 			p.Extension()
 		}
 
-		p.SetState(62)
+		p.SetState(66)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -1012,18 +1032,18 @@ func (p *fileseqParser) SingleFrame() (localctx ISingleFrameContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(63)
+		p.SetState(67)
 		p.Directory()
 	}
 	{
-		p.SetState(64)
+		p.SetState(68)
 		p.SingleFrameBasename()
 	}
 	{
-		p.SetState(65)
+		p.SetState(69)
 		p.FrameNum()
 	}
-	p.SetState(69)
+	p.SetState(73)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -1032,11 +1052,11 @@ func (p *fileseqParser) SingleFrame() (localctx ISingleFrameContext) {
 
 	for _la == fileseqParserEXTENSION || _la == fileseqParserDOT_NUM {
 		{
-			p.SetState(66)
+			p.SetState(70)
 			p.Extension()
 		}
 
-		p.SetState(71)
+		p.SetState(75)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -1204,10 +1224,10 @@ func (p *fileseqParser) PlainFile() (localctx IPlainFileContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(72)
+		p.SetState(76)
 		p.Directory()
 	}
-	p.SetState(74)
+	p.SetState(78)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -1216,12 +1236,12 @@ func (p *fileseqParser) PlainFile() (localctx IPlainFileContext) {
 
 	if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&62208) != 0 {
 		{
-			p.SetState(73)
+			p.SetState(77)
 			p.PlainBasename()
 		}
 
 	}
-	p.SetState(79)
+	p.SetState(83)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -1230,11 +1250,11 @@ func (p *fileseqParser) PlainFile() (localctx IPlainFileContext) {
 
 	for _la == fileseqParserEXTENSION || _la == fileseqParserDOT_NUM {
 		{
-			p.SetState(76)
+			p.SetState(80)
 			p.Extension()
 		}
 
-		p.SetState(81)
+		p.SetState(85)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -1379,7 +1399,7 @@ func (p *fileseqParser) Directory() (localctx IDirectoryContext) {
 	var _alt int
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(83)
+	p.SetState(87)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -1388,7 +1408,7 @@ func (p *fileseqParser) Directory() (localctx IDirectoryContext) {
 
 	if _la == fileseqParserSLASH {
 		{
-			p.SetState(82)
+			p.SetState(86)
 			p.Match(fileseqParserSLASH)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -1397,23 +1417,23 @@ func (p *fileseqParser) Directory() (localctx IDirectoryContext) {
 		}
 
 	}
-	p.SetState(90)
+	p.SetState(94)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
 	}
-	_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 7, p.GetParserRuleContext())
+	_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 9, p.GetParserRuleContext())
 	if p.HasError() {
 		goto errorExit
 	}
 	for _alt != 2 && _alt != antlr.ATNInvalidAltNumber {
 		if _alt == 1 {
 			{
-				p.SetState(85)
+				p.SetState(89)
 				p.DirSegment()
 			}
 			{
-				p.SetState(86)
+				p.SetState(90)
 				p.Match(fileseqParserSLASH)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -1422,12 +1442,12 @@ func (p *fileseqParser) Directory() (localctx IDirectoryContext) {
 			}
 
 		}
-		p.SetState(92)
+		p.SetState(96)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
 		}
-		_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 7, p.GetParserRuleContext())
+		_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 9, p.GetParserRuleContext())
 		if p.HasError() {
 			goto errorExit
 		}
@@ -1585,7 +1605,7 @@ func (p *fileseqParser) DirSegment() (localctx IDirSegmentContext) {
 	var _la int
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(94)
+	p.SetState(98)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -1594,7 +1614,7 @@ func (p *fileseqParser) DirSegment() (localctx IDirSegmentContext) {
 
 	for ok := true; ok; ok = ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&63232) != 0) {
 		{
-			p.SetState(93)
+			p.SetState(97)
 			_la = p.GetTokenStream().LA(1)
 
 			if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&63232) != 0) {
@@ -1605,7 +1625,7 @@ func (p *fileseqParser) DirSegment() (localctx IDirSegmentContext) {
 			}
 		}
 
-		p.SetState(96)
+		p.SetState(100)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -1646,6 +1666,10 @@ type ISequenceBasenameContext interface {
 	SPECIAL_CHAR(i int) antlr.TerminalNode
 	AllEXTENSION() []antlr.TerminalNode
 	EXTENSION(i int) antlr.TerminalNode
+	AllFRAME_RANGE() []antlr.TerminalNode
+	FRAME_RANGE(i int) antlr.TerminalNode
+	AllDOT_FRAME_RANGE() []antlr.TerminalNode
+	DOT_FRAME_RANGE(i int) antlr.TerminalNode
 
 	// IsSequenceBasenameContext differentiates from other interfaces.
 	IsSequenceBasenameContext()
@@ -1731,6 +1755,22 @@ func (s *SequenceBasenameContext) EXTENSION(i int) antlr.TerminalNode {
 	return s.GetToken(fileseqParserEXTENSION, i)
 }
 
+func (s *SequenceBasenameContext) AllFRAME_RANGE() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserFRAME_RANGE)
+}
+
+func (s *SequenceBasenameContext) FRAME_RANGE(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserFRAME_RANGE, i)
+}
+
+func (s *SequenceBasenameContext) AllDOT_FRAME_RANGE() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserDOT_FRAME_RANGE)
+}
+
+func (s *SequenceBasenameContext) DOT_FRAME_RANGE(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserDOT_FRAME_RANGE, i)
+}
+
 func (s *SequenceBasenameContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
@@ -1757,7 +1797,7 @@ func (p *fileseqParser) SequenceBasename() (localctx ISequenceBasenameContext) {
 	var _alt int
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(99)
+	p.SetState(103)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -1767,10 +1807,10 @@ func (p *fileseqParser) SequenceBasename() (localctx ISequenceBasenameContext) {
 		switch _alt {
 		case 1:
 			{
-				p.SetState(98)
+				p.SetState(102)
 				_la = p.GetTokenStream().LA(1)
 
-				if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&62592) != 0) {
+				if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&63360) != 0) {
 					p.GetErrorHandler().RecoverInline(p)
 				} else {
 					p.GetErrorHandler().ReportMatch(p)
@@ -1783,9 +1823,9 @@ func (p *fileseqParser) SequenceBasename() (localctx ISequenceBasenameContext) {
 			goto errorExit
 		}
 
-		p.SetState(101)
+		p.SetState(105)
 		p.GetErrorHandler().Sync(p)
-		_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 9, p.GetParserRuleContext())
+		_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 11, p.GetParserRuleContext())
 		if p.HasError() {
 			goto errorExit
 		}
@@ -1824,6 +1864,10 @@ type IPatternBasenameContext interface {
 	SPECIAL_CHAR(i int) antlr.TerminalNode
 	AllEXTENSION() []antlr.TerminalNode
 	EXTENSION(i int) antlr.TerminalNode
+	AllFRAME_RANGE() []antlr.TerminalNode
+	FRAME_RANGE(i int) antlr.TerminalNode
+	AllDOT_FRAME_RANGE() []antlr.TerminalNode
+	DOT_FRAME_RANGE(i int) antlr.TerminalNode
 
 	// IsPatternBasenameContext differentiates from other interfaces.
 	IsPatternBasenameContext()
@@ -1909,6 +1953,22 @@ func (s *PatternBasenameContext) EXTENSION(i int) antlr.TerminalNode {
 	return s.GetToken(fileseqParserEXTENSION, i)
 }
 
+func (s *PatternBasenameContext) AllFRAME_RANGE() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserFRAME_RANGE)
+}
+
+func (s *PatternBasenameContext) FRAME_RANGE(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserFRAME_RANGE, i)
+}
+
+func (s *PatternBasenameContext) AllDOT_FRAME_RANGE() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserDOT_FRAME_RANGE)
+}
+
+func (s *PatternBasenameContext) DOT_FRAME_RANGE(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserDOT_FRAME_RANGE, i)
+}
+
 func (s *PatternBasenameContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
@@ -1933,19 +1993,19 @@ func (p *fileseqParser) PatternBasename() (localctx IPatternBasenameContext) {
 	var _la int
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(104)
+	p.SetState(108)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
 	}
 	_la = p.GetTokenStream().LA(1)
 
-	for ok := true; ok; ok = ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&62592) != 0) {
+	for ok := true; ok; ok = ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&63360) != 0) {
 		{
-			p.SetState(103)
+			p.SetState(107)
 			_la = p.GetTokenStream().LA(1)
 
-			if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&62592) != 0) {
+			if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&63360) != 0) {
 				p.GetErrorHandler().RecoverInline(p)
 			} else {
 				p.GetErrorHandler().ReportMatch(p)
@@ -1953,7 +2013,7 @@ func (p *fileseqParser) PatternBasename() (localctx IPatternBasenameContext) {
 			}
 		}
 
-		p.SetState(106)
+		p.SetState(110)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -1994,6 +2054,10 @@ type ISingleFrameBasenameContext interface {
 	SPECIAL_CHAR(i int) antlr.TerminalNode
 	AllEXTENSION() []antlr.TerminalNode
 	EXTENSION(i int) antlr.TerminalNode
+	AllFRAME_RANGE() []antlr.TerminalNode
+	FRAME_RANGE(i int) antlr.TerminalNode
+	AllDOT_FRAME_RANGE() []antlr.TerminalNode
+	DOT_FRAME_RANGE(i int) antlr.TerminalNode
 
 	// IsSingleFrameBasenameContext differentiates from other interfaces.
 	IsSingleFrameBasenameContext()
@@ -2079,6 +2143,22 @@ func (s *SingleFrameBasenameContext) EXTENSION(i int) antlr.TerminalNode {
 	return s.GetToken(fileseqParserEXTENSION, i)
 }
 
+func (s *SingleFrameBasenameContext) AllFRAME_RANGE() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserFRAME_RANGE)
+}
+
+func (s *SingleFrameBasenameContext) FRAME_RANGE(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserFRAME_RANGE, i)
+}
+
+func (s *SingleFrameBasenameContext) AllDOT_FRAME_RANGE() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserDOT_FRAME_RANGE)
+}
+
+func (s *SingleFrameBasenameContext) DOT_FRAME_RANGE(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserDOT_FRAME_RANGE, i)
+}
+
 func (s *SingleFrameBasenameContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
@@ -2105,7 +2185,7 @@ func (p *fileseqParser) SingleFrameBasename() (localctx ISingleFrameBasenameCont
 	var _alt int
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(109)
+	p.SetState(113)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -2115,10 +2195,10 @@ func (p *fileseqParser) SingleFrameBasename() (localctx ISingleFrameBasenameCont
 		switch _alt {
 		case 1:
 			{
-				p.SetState(108)
+				p.SetState(112)
 				_la = p.GetTokenStream().LA(1)
 
-				if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&62592) != 0) {
+				if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&63360) != 0) {
 					p.GetErrorHandler().RecoverInline(p)
 				} else {
 					p.GetErrorHandler().ReportMatch(p)
@@ -2131,9 +2211,9 @@ func (p *fileseqParser) SingleFrameBasename() (localctx ISingleFrameBasenameCont
 			goto errorExit
 		}
 
-		p.SetState(111)
+		p.SetState(115)
 		p.GetErrorHandler().Sync(p)
-		_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 11, p.GetParserRuleContext())
+		_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 13, p.GetParserRuleContext())
 		if p.HasError() {
 			goto errorExit
 		}
@@ -2281,7 +2361,7 @@ func (p *fileseqParser) PlainBasename() (localctx IPlainBasenameContext) {
 	var _la int
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(114)
+	p.SetState(118)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -2290,7 +2370,7 @@ func (p *fileseqParser) PlainBasename() (localctx IPlainBasenameContext) {
 
 	for ok := true; ok; ok = ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&62208) != 0) {
 		{
-			p.SetState(113)
+			p.SetState(117)
 			_la = p.GetTokenStream().LA(1)
 
 			if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&62208) != 0) {
@@ -2301,7 +2381,7 @@ func (p *fileseqParser) PlainBasename() (localctx IPlainBasenameContext) {
 			}
 		}
 
-		p.SetState(116)
+		p.SetState(120)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -2412,7 +2492,7 @@ func (p *fileseqParser) FrameRange() (localctx IFrameRangeContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(118)
+		p.SetState(122)
 		_la = p.GetTokenStream().LA(1)
 
 		if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&9984) != 0) {
@@ -2509,7 +2589,7 @@ func (p *fileseqParser) FrameNum() (localctx IFrameNumContext) {
 	p.EnterRule(localctx, 24, fileseqParserRULE_frameNum)
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(120)
+		p.SetState(124)
 		p.Match(fileseqParserDOT_NUM)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -2638,7 +2718,7 @@ func (p *fileseqParser) Padding() (localctx IPaddingContext) {
 	p.EnterRule(localctx, 26, fileseqParserRULE_padding)
 	var _la int
 
-	p.SetState(136)
+	p.SetState(140)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -2648,7 +2728,7 @@ func (p *fileseqParser) Padding() (localctx IPaddingContext) {
 	case fileseqParserUDIM_ANGLE:
 		p.EnterOuterAlt(localctx, 1)
 		{
-			p.SetState(122)
+			p.SetState(126)
 			p.Match(fileseqParserUDIM_ANGLE)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -2659,7 +2739,7 @@ func (p *fileseqParser) Padding() (localctx IPaddingContext) {
 	case fileseqParserUDIM_PAREN:
 		p.EnterOuterAlt(localctx, 2)
 		{
-			p.SetState(123)
+			p.SetState(127)
 			p.Match(fileseqParserUDIM_PAREN)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -2670,7 +2750,7 @@ func (p *fileseqParser) Padding() (localctx IPaddingContext) {
 	case fileseqParserPRINTF_PAD:
 		p.EnterOuterAlt(localctx, 3)
 		{
-			p.SetState(124)
+			p.SetState(128)
 			p.Match(fileseqParserPRINTF_PAD)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -2681,7 +2761,7 @@ func (p *fileseqParser) Padding() (localctx IPaddingContext) {
 	case fileseqParserHOUDINI_PAD:
 		p.EnterOuterAlt(localctx, 4)
 		{
-			p.SetState(125)
+			p.SetState(129)
 			p.Match(fileseqParserHOUDINI_PAD)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -2691,7 +2771,7 @@ func (p *fileseqParser) Padding() (localctx IPaddingContext) {
 
 	case fileseqParserHASH:
 		p.EnterOuterAlt(localctx, 5)
-		p.SetState(127)
+		p.SetState(131)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -2700,7 +2780,7 @@ func (p *fileseqParser) Padding() (localctx IPaddingContext) {
 
 		for ok := true; ok; ok = _la == fileseqParserHASH {
 			{
-				p.SetState(126)
+				p.SetState(130)
 				p.Match(fileseqParserHASH)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -2708,7 +2788,7 @@ func (p *fileseqParser) Padding() (localctx IPaddingContext) {
 				}
 			}
 
-			p.SetState(129)
+			p.SetState(133)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
@@ -2718,7 +2798,7 @@ func (p *fileseqParser) Padding() (localctx IPaddingContext) {
 
 	case fileseqParserAT:
 		p.EnterOuterAlt(localctx, 6)
-		p.SetState(132)
+		p.SetState(136)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -2727,7 +2807,7 @@ func (p *fileseqParser) Padding() (localctx IPaddingContext) {
 
 		for ok := true; ok; ok = _la == fileseqParserAT {
 			{
-				p.SetState(131)
+				p.SetState(135)
 				p.Match(fileseqParserAT)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -2735,7 +2815,7 @@ func (p *fileseqParser) Padding() (localctx IPaddingContext) {
 				}
 			}
 
-			p.SetState(134)
+			p.SetState(138)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
@@ -2849,7 +2929,7 @@ func (p *fileseqParser) Extension() (localctx IExtensionContext) {
 	p.EnterRule(localctx, 28, fileseqParserRULE_extension)
 	var _la int
 
-	p.SetState(144)
+	p.SetState(148)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -2859,14 +2939,14 @@ func (p *fileseqParser) Extension() (localctx IExtensionContext) {
 	case fileseqParserEXTENSION:
 		p.EnterOuterAlt(localctx, 1)
 		{
-			p.SetState(138)
+			p.SetState(142)
 			p.Match(fileseqParserEXTENSION)
 			if p.HasError() {
 				// Recognition error - abort rule
 				goto errorExit
 			}
 		}
-		p.SetState(141)
+		p.SetState(145)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -2875,7 +2955,7 @@ func (p *fileseqParser) Extension() (localctx IExtensionContext) {
 
 		if _la == fileseqParserDASH {
 			{
-				p.SetState(139)
+				p.SetState(143)
 				p.Match(fileseqParserDASH)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -2883,7 +2963,7 @@ func (p *fileseqParser) Extension() (localctx IExtensionContext) {
 				}
 			}
 			{
-				p.SetState(140)
+				p.SetState(144)
 				p.Match(fileseqParserNUM)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -2896,7 +2976,7 @@ func (p *fileseqParser) Extension() (localctx IExtensionContext) {
 	case fileseqParserDOT_NUM:
 		p.EnterOuterAlt(localctx, 2)
 		{
-			p.SetState(143)
+			p.SetState(147)
 			p.Match(fileseqParserDOT_NUM)
 			if p.HasError() {
 				// Recognition error - abort rule

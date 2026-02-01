@@ -11,11 +11,11 @@ import (
 // ParseResult holds the components extracted from parsing a file sequence
 type ParseResult struct {
 	// Full path components
-	Directory    string
-	Basename     string
-	FrameRange   string
-	Padding      string
-	Extension    string
+	Directory  string
+	Basename   string
+	FrameRange string
+	Padding    string
+	Extension  string
 
 	// Parse type flags
 	IsSequence   bool
@@ -29,7 +29,9 @@ type errorListener struct {
 	errors []error
 }
 
-func (l *errorListener) SyntaxError(recognizer antlr.Recognizer, offendingSymbol interface{}, line, column int, msg string, e antlr.RecognitionException) {
+func (l *errorListener) SyntaxError(recognizer antlr.Recognizer, offendingSymbol interface{},
+	line, column int, msg string, e antlr.RecognitionException) {
+
 	l.errors = append(l.errors, fmt.Errorf("parse error at %d:%d: %s", line, column, msg))
 }
 
