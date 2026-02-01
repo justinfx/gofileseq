@@ -12,8 +12,8 @@ import (
 	"sync/atomic"
 	"text/tabwriter"
 
-	fileseq "github.com/justinfx/gofileseq/v2"
-	"github.com/justinfx/gofileseq/v2/cmd/seqls/internal/fastwalk"
+	fileseq "github.com/justinfx/gofileseq/v3"
+	"github.com/justinfx/gofileseq/v3/cmd/seqls/internal/fastwalk"
 )
 
 // number of goroutines to spawn for processing directories

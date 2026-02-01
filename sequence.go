@@ -10,7 +10,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/justinfx/gofileseq/v2/internal/parser"
+	"github.com/justinfx/gofileseq/v3/internal/parser"
 )
 
 // A FileSequence represents a path to a sequence of files,

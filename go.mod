@@ -1,4 +1,4 @@
-module github.com/justinfx/gofileseq/v2
+module github.com/justinfx/gofileseq/v3
 
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect

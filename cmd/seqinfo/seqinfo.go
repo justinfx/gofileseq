@@ -1,4 +1,4 @@
-package main // import "github.com/justinfx/gofileseq/v2/cmd/seqinfo"
+package main // import "github.com/justinfx/gofileseq/v3/cmd/seqinfo"
 
 import (
 	"bufio"
@@ -11,7 +11,7 @@ import (
 	"strconv"
 
 	"github.com/jessevdk/go-flags"
-	"github.com/justinfx/gofileseq/v2"
+	"github.com/justinfx/gofileseq/v3"
 )
 
 var Version = fileseq.Version

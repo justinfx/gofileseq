@@ -3,7 +3,7 @@ package fileseq
 import (
 	"fmt"
 
-	"github.com/justinfx/gofileseq/v2/ranges"
+	"github.com/justinfx/gofileseq/v3/ranges"
 )
 
 // FrameSet wraps a sequence of frames in container that
