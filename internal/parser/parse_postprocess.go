@@ -5,11 +5,16 @@ import (
 	"strings"
 )
 
-// This file contains post-processing logic for 2 special cases that CANNOT be solved
-// in the ANTLR grammar alone. These cases require semantic decision-making beyond what
-// context-free grammars can express.
+// This file contains post-processing logic for 3 special cases that CANNOT be solved
+// in the ANTLR grammar alone. These cases require semantic decision-making or lexer
+// limitations that cannot be expressed in pure context-free grammar rules.
 //
-// IMPORTANT: When porting to C++, these same post-processing steps will be needed.
+// IMPORTANT: When porting to C++, these same 3 post-processing steps will be needed.
+//
+// Summary of Special Cases:
+//   1. Multiple DOT_NUM tokens - requires semantic choice of which number is the frame
+//   2. Extension with trailing digits - lexer maximal munch embeds digits in token
+//   3. Leading dot in frame range - lexer atomicity includes dot in token text
 
 // ============================================================================
 // SPECIAL CASE 1: Multiple DOT_NUM Tokens
@@ -106,5 +111,55 @@ func extractDigitsFromExtensionToken(result *ParseResult) {
 			result.FrameRange = basename[i+1:]
 			result.Basename = basename[:i+1]
 		}
+	}
+}
+
+// ============================================================================
+// SPECIAL CASE 3: Leading Dot in Frame Range Token
+// ============================================================================
+//
+// Problem: Lexer tokens DOT_FRAME_RANGE (".1-100") and DOT_NUM (".100") include the
+//          leading dot as part of the token text, but semantically the dot belongs
+//          to the basename as a separator.
+//
+// Lexer design:
+//   Having separate DOT_FRAME_RANGE and DOT_NUM tokens provides semantic clarity and
+//   avoids token ambiguity (vs having DOT as separate token which conflicts with EXTENSION).
+//
+//   However, this means the dot is part of the token text: ".1-100" not "." + "1-100"
+//
+// Why can't this be in grammar:
+//   Lexer tokens are atomic - the parser cannot split ".1-100" into "." and "1-100".
+//   We would need to:
+//     - Remove DOT_FRAME_RANGE/DOT_NUM tokens entirely
+//     - Make DOT a separate token (conflicts with EXTENSION: '.' [a-zA-Z]...)
+//     - Carefully manage token priority to avoid ".123" ambiguity (DOT+NUM vs DOT_NUM vs extension)
+//
+//   The current lexer design is cleaner; this simple post-processing is more maintainable.
+//
+// Solution:
+//   When frame range starts with ".", move the dot from frame range to basename.
+//   This makes "file" + ".1-100" → "file." + "1-100" for proper reconstruction.
+//
+// Examples:
+//   Input: "/path/file.1-100#.exr"
+//     Grammar: basename="file", frameRange=".1-100"
+//     After:   basename="file.", frameRange="1-100"
+//     String(): "/path/" + "file." + "1-100" + "#" + ".exr" = "/path/file.1-100#.exr" ✓
+//
+//   Input: "/path/file.100.exr"
+//     Grammar: basename="file", frameRange=".100"
+//     After:   basename="file.", frameRange="100"
+//     String(): "/path/" + "file." + "100" + ".exr" = "/path/file.100.exr" ✓
+
+// moveLeadingDotFromFrameRange moves a leading dot from the frame range to the basename.
+//
+// This handles the semantic meaning of the dot as a separator between basename and frame
+// number, even though the lexer captured it as part of the frame range token for clarity.
+func moveLeadingDotFromFrameRange(result *ParseResult) {
+	if result.FrameRange != "" && strings.HasPrefix(result.FrameRange, ".") {
+		// Move the dot from frame range to basename
+		result.Basename += "."
+		result.FrameRange = result.FrameRange[1:] // Remove leading dot
 	}
 }

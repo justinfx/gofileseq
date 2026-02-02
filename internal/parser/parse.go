@@ -106,15 +106,12 @@ func (v *fileSeqVisitor) VisitSequence(ctx *SequenceContext) interface{} {
 
 	// Extract frame range (grammar already parsed it)
 	if frameRangeCtx := ctx.FrameRange(); frameRangeCtx != nil {
-		text := frameRangeCtx.GetText()
-		if strings.HasPrefix(text, ".") {
-			// Frame range had a leading dot - move it to basename
-			v.result.Basename += "."
-			v.result.FrameRange = text[1:]
-		} else {
-			v.result.FrameRange = text
-		}
+		v.result.FrameRange = frameRangeCtx.GetText()
 	}
+
+	// Post-process: move leading dot from frame range to basename
+	// (see parse_postprocess.go Special Case 3 for detailed explanation)
+	moveLeadingDotFromFrameRange(&v.result)
 
 	// Extract padding (grammar already parsed it)
 	if padCtx := ctx.Padding(); padCtx != nil {
@@ -143,21 +140,18 @@ func (v *fileSeqVisitor) VisitSingleFrame(ctx *SingleFrameContext) interface{} {
 
 	// Extract frame number (grammar already parsed it)
 	if frameNumCtx := ctx.FrameNum(); frameNumCtx != nil {
-		text := frameNumCtx.GetText()
-		if strings.HasPrefix(text, ".") {
-			// Frame number had a leading dot - move it to basename
-			v.result.Basename += "."
-			v.result.FrameRange = text[1:]
-		} else {
-			v.result.FrameRange = text
-		}
+		v.result.FrameRange = frameNumCtx.GetText()
 	}
+
+	// Post-process: move leading dot from frame range to basename
+	// (see parse_postprocess.go Special Case 3 for detailed explanation)
+	moveLeadingDotFromFrameRange(&v.result)
 
 	// Extract extensions (grammar already parsed them)
 	v.result.Extension = v.extractExtensions(ctx.AllExtension())
 
 	// Post-process: handle special case of multiple DOT_NUM tokens
-	// (see parse_postprocess.go for detailed explanation)
+	// (see parse_postprocess.go Special Case 3 for detailed explanation)
 	handleMultipleDotNumTokens(&v.result)
 
 	return nil
