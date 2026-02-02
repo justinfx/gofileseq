@@ -347,6 +347,26 @@ func TestNewFileSequence(t *testing.T) {
 		{"/dir/name_2025-05-13_1809-00.ext",
 			"/dir/name_2025-05-13_1809-00.ext", 0, 0, 0,
 			1, ".ext"},
+		// Whitespace preservation tests (from fuzzing)
+		{"file with spaces.1-100#.exr",
+			"file with spaces.1-100#.exr", 1, 100, 4,
+			100, ".exr"},
+		{"/path/file name.100.exr",
+			"/path/file name.100@@@.exr", 100, 100, 3,
+			1, ".exr"},
+		{"/path with spaces/file.#.ext",
+			"/path with spaces/file.#.ext", 0, 0, 4,
+			1, ".ext"},
+		// Special characters (POSIX-valid filename characters)
+		{"file!name.1-10#.exr",
+			"file!name.1-10#.exr", 1, 10, 4,
+			10, ".exr"},
+		{"/path/with!char/file.#.exr",
+			"/path/with!char/file.#.exr", 0, 0, 4,
+			1, ".exr"},
+		{"file$(var).100.exr",
+			"file$(var).100@@@.exr", 100, 100, 3,
+			1, ".exr"},
 	}
 	for _, tt := range table {
 		seq, err := NewFileSequence(tt.path)

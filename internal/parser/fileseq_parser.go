@@ -38,7 +38,7 @@ func fileseqParserInit() {
 	staticData.SymbolicNames = []string{
 		"", "UDIM_ANGLE", "UDIM_PAREN", "PRINTF_PAD", "HOUDINI_PAD", "HASH",
 		"AT", "EXTENSION", "DOT_FRAME_RANGE", "FRAME_RANGE", "DOT_NUM", "SLASH",
-		"SPECIAL_CHAR", "NUM", "WORD", "DASH", "WS",
+		"SPECIAL_CHAR", "NUM", "WORD", "DASH", "WS", "OTHER_CHAR",
 	}
 	staticData.RuleNames = []string{
 		"input", "sequence", "patternOnly", "singleFrame", "plainFile", "directory",
@@ -47,7 +47,7 @@ func fileseqParserInit() {
 	}
 	staticData.PredictionContextCache = antlr.NewPredictionContextCache()
 	staticData.serializedATN = []int32{
-		4, 1, 16, 152, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
+		4, 1, 17, 152, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
 		4, 2, 5, 7, 5, 2, 6, 7, 6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7,
 		10, 2, 11, 7, 11, 2, 12, 7, 12, 2, 13, 7, 13, 2, 14, 7, 14, 1, 0, 1, 0,
 		1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 3, 0, 43, 8,
@@ -64,7 +64,7 @@ func fileseqParserInit() {
 		8, 13, 11, 13, 12, 13, 138, 3, 13, 141, 8, 13, 1, 14, 1, 14, 1, 14, 3,
 		14, 146, 8, 14, 1, 14, 1, 14, 3, 14, 150, 8, 14, 1, 14, 0, 0, 15, 0, 2,
 		4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 0, 4, 2, 0, 8, 10, 12,
-		15, 2, 0, 7, 10, 12, 15, 2, 0, 8, 9, 12, 15, 2, 0, 8, 10, 13, 13, 163,
+		17, 2, 0, 7, 10, 12, 17, 2, 0, 8, 9, 12, 17, 2, 0, 8, 10, 13, 13, 163,
 		0, 42, 1, 0, 0, 0, 2, 44, 1, 0, 0, 0, 4, 56, 1, 0, 0, 0, 6, 67, 1, 0, 0,
 		0, 8, 76, 1, 0, 0, 0, 10, 87, 1, 0, 0, 0, 12, 98, 1, 0, 0, 0, 14, 103,
 		1, 0, 0, 0, 16, 108, 1, 0, 0, 0, 18, 113, 1, 0, 0, 0, 20, 118, 1, 0, 0,
@@ -168,6 +168,7 @@ const (
 	fileseqParserWORD            = 14
 	fileseqParserDASH            = 15
 	fileseqParserWS              = 16
+	fileseqParserOTHER_CHAR      = 17
 )
 
 // fileseqParser rules.
@@ -824,7 +825,7 @@ func (p *fileseqParser) PatternOnly() (localctx IPatternOnlyContext) {
 	}
 	_la = p.GetTokenStream().LA(1)
 
-	if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&63360) != 0 {
+	if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&259968) != 0 {
 		{
 			p.SetState(57)
 			p.PatternBasename()
@@ -1487,6 +1488,10 @@ type IDirSegmentContext interface {
 	DOT_FRAME_RANGE(i int) antlr.TerminalNode
 	AllDOT_NUM() []antlr.TerminalNode
 	DOT_NUM(i int) antlr.TerminalNode
+	AllWS() []antlr.TerminalNode
+	WS(i int) antlr.TerminalNode
+	AllOTHER_CHAR() []antlr.TerminalNode
+	OTHER_CHAR(i int) antlr.TerminalNode
 
 	// IsDirSegmentContext differentiates from other interfaces.
 	IsDirSegmentContext()
@@ -1580,6 +1585,22 @@ func (s *DirSegmentContext) DOT_NUM(i int) antlr.TerminalNode {
 	return s.GetToken(fileseqParserDOT_NUM, i)
 }
 
+func (s *DirSegmentContext) AllWS() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserWS)
+}
+
+func (s *DirSegmentContext) WS(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserWS, i)
+}
+
+func (s *DirSegmentContext) AllOTHER_CHAR() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserOTHER_CHAR)
+}
+
+func (s *DirSegmentContext) OTHER_CHAR(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserOTHER_CHAR, i)
+}
+
 func (s *DirSegmentContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
@@ -1611,12 +1632,12 @@ func (p *fileseqParser) DirSegment() (localctx IDirSegmentContext) {
 	}
 	_la = p.GetTokenStream().LA(1)
 
-	for ok := true; ok; ok = ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&63232) != 0) {
+	for ok := true; ok; ok = ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&259840) != 0) {
 		{
 			p.SetState(97)
 			_la = p.GetTokenStream().LA(1)
 
-			if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&63232) != 0) {
+			if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&259840) != 0) {
 				p.GetErrorHandler().RecoverInline(p)
 			} else {
 				p.GetErrorHandler().ReportMatch(p)
@@ -1669,6 +1690,10 @@ type ISequenceBasenameContext interface {
 	FRAME_RANGE(i int) antlr.TerminalNode
 	AllDOT_FRAME_RANGE() []antlr.TerminalNode
 	DOT_FRAME_RANGE(i int) antlr.TerminalNode
+	AllWS() []antlr.TerminalNode
+	WS(i int) antlr.TerminalNode
+	AllOTHER_CHAR() []antlr.TerminalNode
+	OTHER_CHAR(i int) antlr.TerminalNode
 
 	// IsSequenceBasenameContext differentiates from other interfaces.
 	IsSequenceBasenameContext()
@@ -1770,6 +1795,22 @@ func (s *SequenceBasenameContext) DOT_FRAME_RANGE(i int) antlr.TerminalNode {
 	return s.GetToken(fileseqParserDOT_FRAME_RANGE, i)
 }
 
+func (s *SequenceBasenameContext) AllWS() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserWS)
+}
+
+func (s *SequenceBasenameContext) WS(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserWS, i)
+}
+
+func (s *SequenceBasenameContext) AllOTHER_CHAR() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserOTHER_CHAR)
+}
+
+func (s *SequenceBasenameContext) OTHER_CHAR(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserOTHER_CHAR, i)
+}
+
 func (s *SequenceBasenameContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
@@ -1809,7 +1850,7 @@ func (p *fileseqParser) SequenceBasename() (localctx ISequenceBasenameContext) {
 				p.SetState(102)
 				_la = p.GetTokenStream().LA(1)
 
-				if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&63360) != 0) {
+				if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&259968) != 0) {
 					p.GetErrorHandler().RecoverInline(p)
 				} else {
 					p.GetErrorHandler().ReportMatch(p)
@@ -1867,6 +1908,10 @@ type IPatternBasenameContext interface {
 	FRAME_RANGE(i int) antlr.TerminalNode
 	AllDOT_FRAME_RANGE() []antlr.TerminalNode
 	DOT_FRAME_RANGE(i int) antlr.TerminalNode
+	AllWS() []antlr.TerminalNode
+	WS(i int) antlr.TerminalNode
+	AllOTHER_CHAR() []antlr.TerminalNode
+	OTHER_CHAR(i int) antlr.TerminalNode
 
 	// IsPatternBasenameContext differentiates from other interfaces.
 	IsPatternBasenameContext()
@@ -1968,6 +2013,22 @@ func (s *PatternBasenameContext) DOT_FRAME_RANGE(i int) antlr.TerminalNode {
 	return s.GetToken(fileseqParserDOT_FRAME_RANGE, i)
 }
 
+func (s *PatternBasenameContext) AllWS() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserWS)
+}
+
+func (s *PatternBasenameContext) WS(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserWS, i)
+}
+
+func (s *PatternBasenameContext) AllOTHER_CHAR() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserOTHER_CHAR)
+}
+
+func (s *PatternBasenameContext) OTHER_CHAR(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserOTHER_CHAR, i)
+}
+
 func (s *PatternBasenameContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
@@ -1999,12 +2060,12 @@ func (p *fileseqParser) PatternBasename() (localctx IPatternBasenameContext) {
 	}
 	_la = p.GetTokenStream().LA(1)
 
-	for ok := true; ok; ok = ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&63360) != 0) {
+	for ok := true; ok; ok = ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&259968) != 0) {
 		{
 			p.SetState(107)
 			_la = p.GetTokenStream().LA(1)
 
-			if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&63360) != 0) {
+			if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&259968) != 0) {
 				p.GetErrorHandler().RecoverInline(p)
 			} else {
 				p.GetErrorHandler().ReportMatch(p)
@@ -2057,6 +2118,10 @@ type ISingleFrameBasenameContext interface {
 	FRAME_RANGE(i int) antlr.TerminalNode
 	AllDOT_FRAME_RANGE() []antlr.TerminalNode
 	DOT_FRAME_RANGE(i int) antlr.TerminalNode
+	AllWS() []antlr.TerminalNode
+	WS(i int) antlr.TerminalNode
+	AllOTHER_CHAR() []antlr.TerminalNode
+	OTHER_CHAR(i int) antlr.TerminalNode
 
 	// IsSingleFrameBasenameContext differentiates from other interfaces.
 	IsSingleFrameBasenameContext()
@@ -2158,6 +2223,22 @@ func (s *SingleFrameBasenameContext) DOT_FRAME_RANGE(i int) antlr.TerminalNode {
 	return s.GetToken(fileseqParserDOT_FRAME_RANGE, i)
 }
 
+func (s *SingleFrameBasenameContext) AllWS() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserWS)
+}
+
+func (s *SingleFrameBasenameContext) WS(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserWS, i)
+}
+
+func (s *SingleFrameBasenameContext) AllOTHER_CHAR() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserOTHER_CHAR)
+}
+
+func (s *SingleFrameBasenameContext) OTHER_CHAR(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserOTHER_CHAR, i)
+}
+
 func (s *SingleFrameBasenameContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
@@ -2197,7 +2278,7 @@ func (p *fileseqParser) SingleFrameBasename() (localctx ISingleFrameBasenameCont
 				p.SetState(112)
 				_la = p.GetTokenStream().LA(1)
 
-				if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&63360) != 0) {
+				if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&259968) != 0) {
 					p.GetErrorHandler().RecoverInline(p)
 				} else {
 					p.GetErrorHandler().ReportMatch(p)
@@ -2251,6 +2332,10 @@ type IPlainBasenameContext interface {
 	FRAME_RANGE(i int) antlr.TerminalNode
 	AllDOT_FRAME_RANGE() []antlr.TerminalNode
 	DOT_FRAME_RANGE(i int) antlr.TerminalNode
+	AllWS() []antlr.TerminalNode
+	WS(i int) antlr.TerminalNode
+	AllOTHER_CHAR() []antlr.TerminalNode
+	OTHER_CHAR(i int) antlr.TerminalNode
 
 	// IsPlainBasenameContext differentiates from other interfaces.
 	IsPlainBasenameContext()
@@ -2336,6 +2421,22 @@ func (s *PlainBasenameContext) DOT_FRAME_RANGE(i int) antlr.TerminalNode {
 	return s.GetToken(fileseqParserDOT_FRAME_RANGE, i)
 }
 
+func (s *PlainBasenameContext) AllWS() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserWS)
+}
+
+func (s *PlainBasenameContext) WS(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserWS, i)
+}
+
+func (s *PlainBasenameContext) AllOTHER_CHAR() []antlr.TerminalNode {
+	return s.GetTokens(fileseqParserOTHER_CHAR)
+}
+
+func (s *PlainBasenameContext) OTHER_CHAR(i int) antlr.TerminalNode {
+	return s.GetToken(fileseqParserOTHER_CHAR, i)
+}
+
 func (s *PlainBasenameContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
@@ -2375,7 +2476,7 @@ func (p *fileseqParser) PlainBasename() (localctx IPlainBasenameContext) {
 				p.SetState(117)
 				_la = p.GetTokenStream().LA(1)
 
-				if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&62208) != 0) {
+				if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&258816) != 0) {
 					p.GetErrorHandler().RecoverInline(p)
 				} else {
 					p.GetErrorHandler().ReportMatch(p)

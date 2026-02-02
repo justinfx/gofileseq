@@ -41,32 +41,37 @@ directory
     ;
 
 // Directory segments can contain anything including frame-range-like patterns
+// Includes WS to preserve whitespace in directory names
+// Includes OTHER_CHAR for special characters like ! $ % ( ) etc.
 dirSegment
-    : (WORD | NUM | DASH | SPECIAL_CHAR | FRAME_RANGE | DOT_FRAME_RANGE | DOT_NUM)+
+    : (WORD | NUM | DASH | SPECIAL_CHAR | FRAME_RANGE | DOT_FRAME_RANGE | DOT_NUM | WS | OTHER_CHAR)+
     ;
 
 // Basename for sequences: can include EXTENSION (for hidden files)
 // Also includes FRAME_RANGE tokens for date-like patterns (e.g., "name_2025-05-13_")
+// Includes WS and OTHER_CHAR for whitespace and special characters
 sequenceBasename
-    : (WORD | NUM | DOT_NUM | DASH | SPECIAL_CHAR | EXTENSION | FRAME_RANGE | DOT_FRAME_RANGE)+
+    : (WORD | NUM | DOT_NUM | DASH | SPECIAL_CHAR | EXTENSION | FRAME_RANGE | DOT_FRAME_RANGE | WS | OTHER_CHAR)+
     ;
 
 // Basename for pattern-only: same as sequence
 patternBasename
-    : (WORD | NUM | DOT_NUM | DASH | SPECIAL_CHAR | EXTENSION | FRAME_RANGE | DOT_FRAME_RANGE)+
+    : (WORD | NUM | DOT_NUM | DASH | SPECIAL_CHAR | EXTENSION | FRAME_RANGE | DOT_FRAME_RANGE | WS | OTHER_CHAR)+
     ;
 
 // Basename for single frames: can include EXTENSION (for hidden files like .hidden.100)
 // Also includes FRAME_RANGE for date-like patterns
+// Includes WS and OTHER_CHAR for whitespace and special characters
 singleFrameBasename
-    : (WORD | NUM | DOT_NUM | DASH | SPECIAL_CHAR | EXTENSION | FRAME_RANGE | DOT_FRAME_RANGE)+
+    : (WORD | NUM | DOT_NUM | DASH | SPECIAL_CHAR | EXTENSION | FRAME_RANGE | DOT_FRAME_RANGE | WS | OTHER_CHAR)+
     ;
 
 // Basename for plain files: does NOT include EXTENSION or DOT_NUM
 // (so both regular and digit-only extensions can be consumed by extension rule)
 // But DOES include FRAME_RANGE tokens (for filenames like "name_2025-05-13.ext")
+// Includes WS and OTHER_CHAR for whitespace and special characters
 plainBasename
-    : (WORD | NUM | DASH | SPECIAL_CHAR | FRAME_RANGE | DOT_FRAME_RANGE)+
+    : (WORD | NUM | DASH | SPECIAL_CHAR | FRAME_RANGE | DOT_FRAME_RANGE | WS | OTHER_CHAR)+
     ;
 
 // Frame range: may or may not have leading dot
@@ -108,6 +113,7 @@ extension
 // ============================================================================
 
 // Padding markers - HIGHEST PRIORITY
+// Note: These must come before OTHER_CHAR to match padding first
 UDIM_ANGLE: '<UDIM>';
 UDIM_PAREN: '%(UDIM)d';
 PRINTF_PAD: '%' [0-9]* 'd';
@@ -132,7 +138,7 @@ DOT_NUM: '.' '-'? [0-9]+;
 // Slash separator
 SLASH: '/' | '\\';
 
-// Special characters allowed in basenames
+// Special characters commonly used in basenames
 SPECIAL_CHAR: [:,.];
 
 // Number sequence (for basenames containing numbers)
@@ -144,5 +150,12 @@ WORD: [a-zA-Z_]+;
 // Dash as separate token
 DASH: '-';
 
-// Skip whitespace
-WS: [ \t\r\n]+ -> skip;
+// Whitespace as token (don't skip - it's part of filenames)
+WS: [ \t\r\n]+;
+
+// Other valid filename characters (catch-all for POSIX/Windows filenames)
+// Excludes: / \ (path separators), whitespace, and core tokens
+// Includes: ! $ % & ' ( ) + ; = [ ] { } ~ and other printable ASCII
+// Note: $ and % may conflict with padding tokens (HOUDINI_PAD, PRINTF_PAD) in edge cases
+// This is acceptable - such patterns are rare in VFX workflows
+OTHER_CHAR: ~[/\\\r\n\t .,:a-zA-Z0-9_#@<>-]+;
