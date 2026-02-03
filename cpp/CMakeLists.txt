@@ -1,101 +1,136 @@
-cmake_minimum_required (VERSION 3.1)
-project (fileseq)
+cmake_minimum_required(VERSION 3.15)
+project(fileseq VERSION 3.0.0 LANGUAGES CXX)
 
-set ( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake )
+# ANTLR4 4.13.1 requires C++17 (for std::optional, std::any, etc.)
+# This is still widely supported: GCC 7+, Clang 5+, MSVC 2017+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+# Compiler warnings
+add_compile_options(-Wall -Wextra -Wpedantic)
 
-if("$ENV{HAVE_REGEX}" STREQUAL "0")
-    message("Disabling <regex> compiler support (HAVE_REGEX=0)")
-    find_package(PCRECPP)
-    add_definitions(-DHAVE_REGEX=0)
-    include_directories(${PCRECPP_INCLUDE_DIRS})
+# ANTLR4 parser generation (optional - only if Java is available)
+find_program(JAVA_EXECUTABLE java)
+if(JAVA_EXECUTABLE)
+    set(ANTLR_JAR "${CMAKE_SOURCE_DIR}/../tools/antlr-4.13.1-complete.jar")
+    set(GRAMMAR_FILE "${CMAKE_SOURCE_DIR}/../grammar/fileseq.g4")
+    set(PARSER_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/private/parser")
 
+    add_custom_target(generate_parser
+        COMMAND ${JAVA_EXECUTABLE} -jar ${ANTLR_JAR}
+            -Dlanguage=Cpp
+            -package fileseq
+            -o ${PARSER_OUTPUT_DIR}
+            -visitor
+            -no-listener
+            ${GRAMMAR_FILE}
+        COMMENT "Generating ANTLR C++ parser from grammar"
+        VERBATIM
+    )
+    message(STATUS "Java found - ANTLR parser can be regenerated with: make generate_parser")
 else()
-    message("Enabling <regex> compiler support (HAVE_REGEX=1)")
-    add_definitions(-DHAVE_REGEX=1)
-
+    message(STATUS "Java not found - using pre-generated ANTLR parser files")
 endif()
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "-fPIC -std=c++11")
+# Build vendored ANTLR4 C++ runtime
+set(ANTLR4_INSTALL OFF CACHE BOOL "Don't install ANTLR4 runtime" FORCE)
+set(WITH_DEMO OFF CACHE BOOL "Don't build ANTLR4 demos" FORCE)
+set(WITH_LIBCXX OFF CACHE BOOL "Don't use libc++" FORCE)
+set(ANTLR_BUILD_CPP_TESTS OFF CACHE BOOL "Don't build ANTLR4 tests" FORCE)
+add_subdirectory(ext/antlr4 EXCLUDE_FROM_ALL)
 
-set(fileseq_SOURCES
-        error.cpp
-        fileseq.cpp
-        frameset.cpp
-        pad.cpp
-        private/frameset_p.cpp
-        private/sequence_p.cpp
-        private/strings.cpp
-        ranges/ranges.cpp
-        sequence.cpp
-        )
+# ANTLR4 include directories (from vendored runtime)
+set(ANTLR4_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/ext/antlr4/runtime/src)
 
-set(fileseq_INCLUDES
-        .
-        ranges
-        private
-        )
+# Include directories
+include_directories(
+    ${CMAKE_SOURCE_DIR}
+    ${ANTLR4_INCLUDE_DIRS}
+)
 
-add_subdirectory(test)
+# Library sources
+set(LIB_SOURCES
+    sequence.cpp
+    fileseq.cpp
+    frameset.cpp
+    pad.cpp
+    error.cpp
+    ranges/ranges.cpp
+    private/strings.cpp
+    private/frameset_p.cpp
+    private/sequence_p.cpp
+    private/parser/parse.cpp
+    private/parser/parse_postprocess.cpp
+)
 
-include_directories(${fileseq_INCLUDES})
+# Generated parser sources
+file(GLOB PARSER_SOURCES "private/parser/fileseq*.cpp")
 
-add_library(fileseq_obj OBJECT ${fileseq_SOURCES})
-set_property(TARGET fileseq_obj PROPERTY
-        POSITION_INDEPENDENT_CODE 1
-        )
+# Create library
+add_library(fileseq STATIC ${LIB_SOURCES} ${PARSER_SOURCES})
+target_compile_features(fileseq PUBLIC cxx_std_14)
 
-add_library(fileseq_shared SHARED $<TARGET_OBJECTS:fileseq_obj>)
-SET_TARGET_PROPERTIES(fileseq_shared PROPERTIES
-        OUTPUT_NAME fileseq
-        CLEAN_DIRECT_OUTPUT 1
-        )
+# Link against vendored ANTLR4 runtime (static)
+target_link_libraries(fileseq antlr4_static)
 
-add_library(fileseq_static STATIC $<TARGET_OBJECTS:fileseq_obj>)
-SET_TARGET_PROPERTIES(fileseq_static PROPERTIES
-        OUTPUT_NAME fileseq
-        CLEAN_DIRECT_OUTPUT 1
-        )
+# Testing
+enable_testing()
 
-if("${PCRECPP_FOUND}")
-    target_link_libraries(fileseq_shared ${PCRECPP_LIBRARIES})
-    target_link_libraries(fileseq_static ${PCRECPP_LIBRARIES})
+# Try to find GTest
+find_package(GTest QUIET)
+if(NOT GTest_FOUND)
+    # Use bundled gtest
+    message(STATUS "Using bundled Google Test")
+    add_subdirectory(ext/gtest EXCLUDE_FROM_ALL)
+    set(GTEST_LIBRARIES gtest)
+    set(GTEST_MAIN_LIBRARIES gtest_main)
+    set(GTEST_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/ext/gtest/include)
+else()
+    message(STATUS "Using system Google Test")
+    set(GTEST_LIBRARIES GTest::GTest)
+    set(GTEST_MAIN_LIBRARIES GTest::Main)
 endif()
 
-# For providing standard install location vars.
-include(GNUInstallDirs)
+# Test sources (following Test*.cc pattern)
+file(GLOB TEST_SOURCES "test/Test*.cc")
 
-# Install public headers.
-file(GLOB PUBLIC_HEADERS *.h)
-install(
-    FILES ${PUBLIC_HEADERS}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/fileseq
+# Main test runner
+add_executable(fileseq_tests
+    test/main.cc
+    ${TEST_SOURCES}
 )
 
-# Install libraries.
-install(
-    TARGETS fileseq_shared fileseq_static
-    DESTINATION
-    EXPORT ${CMAKE_PROJECT_NAME}-targets
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+target_include_directories(fileseq_tests PRIVATE ${GTEST_INCLUDE_DIRS})
+target_link_libraries(fileseq_tests
+    fileseq
+    ${GTEST_LIBRARIES}
+    ${GTEST_MAIN_LIBRARIES}
+    pthread
 )
 
-# Produce a target import script for ease of importing into other CMake projects.
-install(
-    EXPORT ${CMAKE_PROJECT_NAME}-targets
-    FILE ${CMAKE_PROJECT_NAME}Targets.cmake
-    NAMESPACE ${CMAKE_PROJECT_NAME}::
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake
+add_test(NAME fileseq_tests COMMAND fileseq_tests)
+
+# Install targets
+install(TARGETS fileseq
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
 )
 
-# Configure & install <Project>Config.cmake (which includes fileseqTargets.cmake)
-set(OUTPUT_CONFIG ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake)
-configure_file(cmake/Config.cmake.in ${OUTPUT_CONFIG} @ONLY)
-install(
-    FILES ${OUTPUT_CONFIG}
-    DESTINATION ${CMAKE_INSTALL_PREFIX}
+install(FILES
+    sequence.h
+    fileseq.h
+    frameset.h
+    pad.h
+    error.h
+    DESTINATION include/fileseq
 )
+
+# Print configuration summary
+message(STATUS "")
+message(STATUS "FileSeq Configuration:")
+message(STATUS "  C++ Standard:     C++${CMAKE_CXX_STANDARD}")
+message(STATUS "  Compiler:         ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "  ANTLR4 runtime:   Vendored (static)")
+message(STATUS "  Build type:       ${CMAKE_BUILD_TYPE}")
+message(STATUS "")

@@ -2,6 +2,8 @@
 ANTLR_JAR := ../tools/antlr-4.13.1-complete.jar
 OUTPUT_DIR := ../internal/parser
 GO_PACKAGE := parser
+CPP_OUTPUT_DIR := ../cpp/private/parser
+CPP_NAMESPACE := fileseq
 
 # Java runtime detection (override with: make JAVA=/path/to/java)
 # Tries in order: env var, homebrew (macOS), system java, PATH
@@ -16,7 +18,7 @@ ANTLR := $(JAVA) -jar $(ANTLR_JAR)
 JAVA_IMAGE := eclipse-temurin:21-jdk
 WORKDIR := /work
 
-.PHONY: generate-go generate-go-docker clean test-grammar check-java check-docker
+.PHONY: generate-go generate-go-docker generate-cpp generate-cpp-docker generate-all clean test-grammar check-java check-docker
 
 generate-go:
 	@echo "Generating Go parser from ANTLR grammar..."
@@ -44,9 +46,39 @@ generate-go-docker:
 	    fileseq.g4
 	@echo "Parser generated successfully in $(OUTPUT_DIR)"
 
+generate-cpp:
+	@echo "Generating C++ parser from ANTLR grammar..."
+	$(ANTLR) -Dlanguage=Cpp \
+	         -package $(CPP_NAMESPACE) \
+	         -o $(CPP_OUTPUT_DIR) \
+	         -visitor \
+	         -no-listener \
+	         fileseq.g4
+	@echo "C++ parser generated successfully in $(CPP_OUTPUT_DIR)"
+
+generate-cpp-docker:
+	@echo "Generating C++ parser from ANTLR grammar using Docker..."
+	@docker run --rm --platform linux/amd64 \
+	  -v $(realpath ../tools):/tools \
+	  -v $(PWD):$(WORKDIR) \
+	  -w $(WORKDIR) \
+	  $(JAVA_IMAGE) \
+	  java -jar $(ANTLR_JAR) \
+	    -Dlanguage=Cpp \
+	    -package $(CPP_NAMESPACE) \
+	    -o $(CPP_OUTPUT_DIR) \
+	    -visitor \
+	    -no-listener \
+	    fileseq.g4
+	@echo "C++ parser generated successfully in $(CPP_OUTPUT_DIR)"
+
+generate-all: generate-go generate-cpp
+	@echo "Generated parsers for all languages"
+
 clean:
 	@echo "Cleaning generated parser files..."
 	rm -rf $(OUTPUT_DIR)/*
+	rm -rf $(CPP_OUTPUT_DIR)/*
 	@echo "Clean complete"
 
 test-grammar:
