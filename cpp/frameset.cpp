@@ -10,6 +10,36 @@
 
 namespace fileseq {
 
+// Defensive limits to prevent hangs and excessive memory usage
+namespace {
+    const int64_t MAX_RANGE_SIZE = 100000000;        // 100 million frames
+    const int64_t MAX_Y_MODIFIER_RANGE = 1000000;    // 1 million (O(n²) performance)
+    const int MAX_STAGGER_ITERATIONS = 10000;
+    const int64_t MAX_CHUNK_VALUE = 1000000000;      // 1 billion
+
+    // Check if a range size exceeds the given maximum
+    // Returns false if range is too large (and sets error on ok)
+    bool checkRangeSize(Frame start, Frame end, long step,
+                       int64_t maxSize, const std::string& context, Status* ok) {
+        if (step == 0) {
+            step = 1;
+        }
+
+        double diff = std::abs(static_cast<double>(end - start));
+        int64_t size = static_cast<int64_t>(std::ceil(diff / std::abs(static_cast<double>(step))));
+
+        if (size > maxSize) {
+            std::stringstream ss;
+            ss << context << ": range " << start << "-" << end
+               << " (step " << step << ") would create " << size
+               << " frames, max allowed is " << maxSize;
+            ok->setError(ss.str());
+            return false;
+        }
+        return true;
+    }
+}
+
 
 FrameSet::FrameSet() : m_frameData(new internal::FrameSetData) {
 
@@ -101,6 +131,11 @@ void FrameSet::handleMatch(const internal::RangePatternMatch* match, Status* ok)
         // Handle descending frame ranges, like 10-1
         step = (start > end) ? -1 : 1;
 
+        // Check range size before appending
+        if (!checkRangeSize(start, end, step, MAX_RANGE_SIZE, "frame range too large", ok)) {
+            return;
+        }
+
         m_frameData->ranges.appendUnique(start, end, step);
         return;
 
@@ -126,10 +161,28 @@ void FrameSet::handleMatch(const internal::RangePatternMatch* match, Status* ok)
         switch (mod) {
 
         case 'x':
+            // Check range size before appending
+            if (!checkRangeSize(start, end, step, MAX_RANGE_SIZE, "frame range too large", ok)) {
+                return;
+            }
             m_frameData->ranges.appendUnique(start, end, step);
             break;
 
         case 'y': {
+            // Y modifier has O(n²) performance due to appendUnique contains checks
+            if (!checkRangeSize(start, end, 1, MAX_Y_MODIFIER_RANGE, "y modifier range too large", ok)) {
+                return;
+            }
+
+            // Limit chunk value to prevent integer overflow in skip calculation
+            if (step > MAX_CHUNK_VALUE || step < -MAX_CHUNK_VALUE) {
+                std::stringstream ss;
+                ss << "y modifier value too large: " << step
+                   << ", max allowed is " << MAX_CHUNK_VALUE;
+                ok->setError(ss.str());
+                return;
+            }
+
             // TODO: Add proper support for adding inverse of range.
             // This approach will add excessive amounts of singe
             // range elements. They could be compressed into chunks
@@ -149,6 +202,20 @@ void FrameSet::handleMatch(const internal::RangePatternMatch* match, Status* ok)
         }
 
         case ':':
+            // Check range size for stagger modifier
+            if (!checkRangeSize(start, end, 1, MAX_RANGE_SIZE, "stagger range too large", ok)) {
+                return;
+            }
+
+            // Limit stagger iterations to prevent excessive processing
+            if (step > MAX_STAGGER_ITERATIONS) {
+                std::stringstream ss;
+                ss << "stagger modifier value too large: " << step
+                   << ", max allowed is " << MAX_STAGGER_ITERATIONS;
+                ok->setError(ss.str());
+                return;
+            }
+
             while (step > 0) {
                 m_frameData->ranges.appendUnique(start, end, step);
                 step--;
