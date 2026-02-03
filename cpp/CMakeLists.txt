@@ -90,15 +90,24 @@ if(APPLE)
         COMMAND ${CMAKE_COMMAND} -E rename libfileseq_combined.a $<TARGET_FILE:fileseq_static>
         WORKING_DIRECTORY $<TARGET_FILE_DIR:fileseq_static>
         COMMENT "Combining fileseq and ANTLR4 static libraries"
+        VERBATIM
     )
 elseif(UNIX)
     # Linux: use ar/mri script to merge archives
+    # Write MRI script to temp file, then use it
     add_custom_command(TARGET fileseq_static POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E echo "Merging libantlr4_static.a into libfileseq.a..."
-        COMMAND echo "CREATE libfileseq_combined.a\nADDLIB $<TARGET_FILE:fileseq_static>\nADDLIB $<TARGET_FILE:antlr4_static>\nSAVE\nEND" | ar -M
+        COMMAND ${CMAKE_COMMAND} -E echo "CREATE libfileseq_combined.a" > merge.mri
+        COMMAND ${CMAKE_COMMAND} -E echo "ADDLIB $<TARGET_FILE:fileseq_static>" >> merge.mri
+        COMMAND ${CMAKE_COMMAND} -E echo "ADDLIB $<TARGET_FILE:antlr4_static>" >> merge.mri
+        COMMAND ${CMAKE_COMMAND} -E echo "SAVE" >> merge.mri
+        COMMAND ${CMAKE_COMMAND} -E echo "END" >> merge.mri
+        COMMAND ar -M < merge.mri
         COMMAND ${CMAKE_COMMAND} -E rename libfileseq_combined.a $<TARGET_FILE:fileseq_static>
+        COMMAND ${CMAKE_COMMAND} -E remove merge.mri
         WORKING_DIRECTORY $<TARGET_FILE_DIR:fileseq_static>
         COMMENT "Combining fileseq and ANTLR4 static libraries"
+        VERBATIM
     )
 endif()
 
