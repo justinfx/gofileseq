@@ -116,8 +116,8 @@ public:
     SingleFrameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     DirectoryContext *directory();
-    SingleFrameBasenameContext *singleFrameBasename();
     FrameNumContext *frameNum();
+    SingleFrameBasenameContext *singleFrameBasename();
     std::vector<ExtensionContext *> extension();
     ExtensionContext* extension(size_t i);
 

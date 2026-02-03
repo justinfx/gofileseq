@@ -150,20 +150,23 @@ bool parseFileSequence(ParseResult& result, const std::string& path) {
         // Create lexer
         fileseqLexer lexer(&input);
 
+        // Remove default error listeners from lexer
+        lexer.removeErrorListeners();
+
         // Create token stream
         antlr4::CommonTokenStream tokens(&lexer);
 
         // Create parser
         fileseqParser parser(&tokens);
 
-        // Disable error output (we'll handle errors via return value)
+        // Remove default error listeners from parser
         parser.removeErrorListeners();
 
         // Parse the input
         fileseqParser::InputContext* tree = parser.input();
 
-        // Check for parse errors
-        if (parser.getNumberOfSyntaxErrors() > 0) {
+        // Check for parse errors (from both lexer and parser)
+        if (lexer.getNumberOfSyntaxErrors() > 0 || parser.getNumberOfSyntaxErrors() > 0) {
             return false;
         }
 

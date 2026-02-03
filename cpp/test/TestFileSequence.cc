@@ -77,7 +77,7 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f.100", "/dir/f.100@@@", 100, 100, 3, 1, ""};
+            Case t = {"/dir/f.100", "/dir/f.100", 0, 0, 0, 1, ".100"};
             m_cases.push_back(t);
         }
         {
@@ -105,7 +105,7 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/.hidden.100", "/dir/.hidden.100@@@", 100, 100, 3, 1, ""};
+            Case t = {"/dir/.hidden.100", "/dir/.hidden.100", 0, 0, 0, 1, ".hidden.100"};
             m_cases.push_back(t);
         }
         {

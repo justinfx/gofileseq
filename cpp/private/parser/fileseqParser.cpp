@@ -68,55 +68,56 @@ void fileseqParserInitialize() {
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,17,152,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
+  	4,1,17,153,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
   	7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,2,14,7,
   	14,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,3,0,43,8,0,1,1,1,1,
   	3,1,47,8,1,1,1,1,1,1,1,5,1,52,8,1,10,1,12,1,55,9,1,1,2,1,2,3,2,59,8,2,
-  	1,2,1,2,5,2,63,8,2,10,2,12,2,66,9,2,1,3,1,3,1,3,1,3,5,3,72,8,3,10,3,12,
-  	3,75,9,3,1,4,1,4,3,4,79,8,4,1,4,5,4,82,8,4,10,4,12,4,85,9,4,1,5,3,5,88,
-  	8,5,1,5,1,5,1,5,5,5,93,8,5,10,5,12,5,96,9,5,1,6,4,6,99,8,6,11,6,12,6,
-  	100,1,7,4,7,104,8,7,11,7,12,7,105,1,8,4,8,109,8,8,11,8,12,8,110,1,9,4,
-  	9,114,8,9,11,9,12,9,115,1,10,4,10,119,8,10,11,10,12,10,120,1,11,1,11,
-  	1,12,1,12,1,13,1,13,1,13,1,13,1,13,4,13,132,8,13,11,13,12,13,133,1,13,
-  	4,13,137,8,13,11,13,12,13,138,3,13,141,8,13,1,14,1,14,1,14,3,14,146,8,
-  	14,1,14,1,14,3,14,150,8,14,1,14,0,0,15,0,2,4,6,8,10,12,14,16,18,20,22,
-  	24,26,28,0,4,2,0,8,10,12,17,2,0,7,10,12,17,2,0,8,9,12,17,2,0,8,10,13,
-  	13,163,0,42,1,0,0,0,2,44,1,0,0,0,4,56,1,0,0,0,6,67,1,0,0,0,8,76,1,0,0,
-  	0,10,87,1,0,0,0,12,98,1,0,0,0,14,103,1,0,0,0,16,108,1,0,0,0,18,113,1,
-  	0,0,0,20,118,1,0,0,0,22,122,1,0,0,0,24,124,1,0,0,0,26,140,1,0,0,0,28,
-  	149,1,0,0,0,30,31,3,2,1,0,31,32,5,0,0,1,32,43,1,0,0,0,33,34,3,4,2,0,34,
-  	35,5,0,0,1,35,43,1,0,0,0,36,37,3,6,3,0,37,38,5,0,0,1,38,43,1,0,0,0,39,
-  	40,3,8,4,0,40,41,5,0,0,1,41,43,1,0,0,0,42,30,1,0,0,0,42,33,1,0,0,0,42,
-  	36,1,0,0,0,42,39,1,0,0,0,43,1,1,0,0,0,44,46,3,10,5,0,45,47,3,14,7,0,46,
-  	45,1,0,0,0,46,47,1,0,0,0,47,48,1,0,0,0,48,49,3,22,11,0,49,53,3,26,13,
-  	0,50,52,3,28,14,0,51,50,1,0,0,0,52,55,1,0,0,0,53,51,1,0,0,0,53,54,1,0,
-  	0,0,54,3,1,0,0,0,55,53,1,0,0,0,56,58,3,10,5,0,57,59,3,16,8,0,58,57,1,
-  	0,0,0,58,59,1,0,0,0,59,60,1,0,0,0,60,64,3,26,13,0,61,63,3,28,14,0,62,
-  	61,1,0,0,0,63,66,1,0,0,0,64,62,1,0,0,0,64,65,1,0,0,0,65,5,1,0,0,0,66,
-  	64,1,0,0,0,67,68,3,10,5,0,68,69,3,18,9,0,69,73,3,24,12,0,70,72,3,28,14,
-  	0,71,70,1,0,0,0,72,75,1,0,0,0,73,71,1,0,0,0,73,74,1,0,0,0,74,7,1,0,0,
-  	0,75,73,1,0,0,0,76,78,3,10,5,0,77,79,3,20,10,0,78,77,1,0,0,0,78,79,1,
-  	0,0,0,79,83,1,0,0,0,80,82,3,28,14,0,81,80,1,0,0,0,82,85,1,0,0,0,83,81,
-  	1,0,0,0,83,84,1,0,0,0,84,9,1,0,0,0,85,83,1,0,0,0,86,88,5,11,0,0,87,86,
-  	1,0,0,0,87,88,1,0,0,0,88,94,1,0,0,0,89,90,3,12,6,0,90,91,5,11,0,0,91,
-  	93,1,0,0,0,92,89,1,0,0,0,93,96,1,0,0,0,94,92,1,0,0,0,94,95,1,0,0,0,95,
-  	11,1,0,0,0,96,94,1,0,0,0,97,99,7,0,0,0,98,97,1,0,0,0,99,100,1,0,0,0,100,
-  	98,1,0,0,0,100,101,1,0,0,0,101,13,1,0,0,0,102,104,7,1,0,0,103,102,1,0,
-  	0,0,104,105,1,0,0,0,105,103,1,0,0,0,105,106,1,0,0,0,106,15,1,0,0,0,107,
-  	109,7,1,0,0,108,107,1,0,0,0,109,110,1,0,0,0,110,108,1,0,0,0,110,111,1,
-  	0,0,0,111,17,1,0,0,0,112,114,7,1,0,0,113,112,1,0,0,0,114,115,1,0,0,0,
-  	115,113,1,0,0,0,115,116,1,0,0,0,116,19,1,0,0,0,117,119,7,2,0,0,118,117,
-  	1,0,0,0,119,120,1,0,0,0,120,118,1,0,0,0,120,121,1,0,0,0,121,21,1,0,0,
-  	0,122,123,7,3,0,0,123,23,1,0,0,0,124,125,5,10,0,0,125,25,1,0,0,0,126,
-  	141,5,1,0,0,127,141,5,2,0,0,128,141,5,3,0,0,129,141,5,4,0,0,130,132,5,
-  	5,0,0,131,130,1,0,0,0,132,133,1,0,0,0,133,131,1,0,0,0,133,134,1,0,0,0,
-  	134,141,1,0,0,0,135,137,5,6,0,0,136,135,1,0,0,0,137,138,1,0,0,0,138,136,
-  	1,0,0,0,138,139,1,0,0,0,139,141,1,0,0,0,140,126,1,0,0,0,140,127,1,0,0,
-  	0,140,128,1,0,0,0,140,129,1,0,0,0,140,131,1,0,0,0,140,136,1,0,0,0,141,
-  	27,1,0,0,0,142,145,5,7,0,0,143,144,5,15,0,0,144,146,5,13,0,0,145,143,
-  	1,0,0,0,145,146,1,0,0,0,146,150,1,0,0,0,147,150,5,10,0,0,148,150,5,14,
-  	0,0,149,142,1,0,0,0,149,147,1,0,0,0,149,148,1,0,0,0,150,29,1,0,0,0,20,
-  	42,46,53,58,64,73,78,83,87,94,100,105,110,115,120,133,138,140,145,149
+  	1,2,1,2,5,2,63,8,2,10,2,12,2,66,9,2,1,3,1,3,3,3,70,8,3,1,3,1,3,4,3,74,
+  	8,3,11,3,12,3,75,1,4,1,4,3,4,80,8,4,1,4,5,4,83,8,4,10,4,12,4,86,9,4,1,
+  	5,3,5,89,8,5,1,5,1,5,1,5,5,5,94,8,5,10,5,12,5,97,9,5,1,6,4,6,100,8,6,
+  	11,6,12,6,101,1,7,4,7,105,8,7,11,7,12,7,106,1,8,4,8,110,8,8,11,8,12,8,
+  	111,1,9,4,9,115,8,9,11,9,12,9,116,1,10,4,10,120,8,10,11,10,12,10,121,
+  	1,11,1,11,1,12,1,12,1,13,1,13,1,13,1,13,1,13,4,13,133,8,13,11,13,12,13,
+  	134,1,13,4,13,138,8,13,11,13,12,13,139,3,13,142,8,13,1,14,1,14,1,14,3,
+  	14,147,8,14,1,14,1,14,3,14,151,8,14,1,14,0,0,15,0,2,4,6,8,10,12,14,16,
+  	18,20,22,24,26,28,0,4,2,0,8,10,12,17,2,0,7,10,12,17,2,0,8,9,12,17,2,0,
+  	8,10,13,13,165,0,42,1,0,0,0,2,44,1,0,0,0,4,56,1,0,0,0,6,67,1,0,0,0,8,
+  	77,1,0,0,0,10,88,1,0,0,0,12,99,1,0,0,0,14,104,1,0,0,0,16,109,1,0,0,0,
+  	18,114,1,0,0,0,20,119,1,0,0,0,22,123,1,0,0,0,24,125,1,0,0,0,26,141,1,
+  	0,0,0,28,150,1,0,0,0,30,31,3,2,1,0,31,32,5,0,0,1,32,43,1,0,0,0,33,34,
+  	3,4,2,0,34,35,5,0,0,1,35,43,1,0,0,0,36,37,3,6,3,0,37,38,5,0,0,1,38,43,
+  	1,0,0,0,39,40,3,8,4,0,40,41,5,0,0,1,41,43,1,0,0,0,42,30,1,0,0,0,42,33,
+  	1,0,0,0,42,36,1,0,0,0,42,39,1,0,0,0,43,1,1,0,0,0,44,46,3,10,5,0,45,47,
+  	3,14,7,0,46,45,1,0,0,0,46,47,1,0,0,0,47,48,1,0,0,0,48,49,3,22,11,0,49,
+  	53,3,26,13,0,50,52,3,28,14,0,51,50,1,0,0,0,52,55,1,0,0,0,53,51,1,0,0,
+  	0,53,54,1,0,0,0,54,3,1,0,0,0,55,53,1,0,0,0,56,58,3,10,5,0,57,59,3,16,
+  	8,0,58,57,1,0,0,0,58,59,1,0,0,0,59,60,1,0,0,0,60,64,3,26,13,0,61,63,3,
+  	28,14,0,62,61,1,0,0,0,63,66,1,0,0,0,64,62,1,0,0,0,64,65,1,0,0,0,65,5,
+  	1,0,0,0,66,64,1,0,0,0,67,69,3,10,5,0,68,70,3,18,9,0,69,68,1,0,0,0,69,
+  	70,1,0,0,0,70,71,1,0,0,0,71,73,3,24,12,0,72,74,3,28,14,0,73,72,1,0,0,
+  	0,74,75,1,0,0,0,75,73,1,0,0,0,75,76,1,0,0,0,76,7,1,0,0,0,77,79,3,10,5,
+  	0,78,80,3,20,10,0,79,78,1,0,0,0,79,80,1,0,0,0,80,84,1,0,0,0,81,83,3,28,
+  	14,0,82,81,1,0,0,0,83,86,1,0,0,0,84,82,1,0,0,0,84,85,1,0,0,0,85,9,1,0,
+  	0,0,86,84,1,0,0,0,87,89,5,11,0,0,88,87,1,0,0,0,88,89,1,0,0,0,89,95,1,
+  	0,0,0,90,91,3,12,6,0,91,92,5,11,0,0,92,94,1,0,0,0,93,90,1,0,0,0,94,97,
+  	1,0,0,0,95,93,1,0,0,0,95,96,1,0,0,0,96,11,1,0,0,0,97,95,1,0,0,0,98,100,
+  	7,0,0,0,99,98,1,0,0,0,100,101,1,0,0,0,101,99,1,0,0,0,101,102,1,0,0,0,
+  	102,13,1,0,0,0,103,105,7,1,0,0,104,103,1,0,0,0,105,106,1,0,0,0,106,104,
+  	1,0,0,0,106,107,1,0,0,0,107,15,1,0,0,0,108,110,7,1,0,0,109,108,1,0,0,
+  	0,110,111,1,0,0,0,111,109,1,0,0,0,111,112,1,0,0,0,112,17,1,0,0,0,113,
+  	115,7,1,0,0,114,113,1,0,0,0,115,116,1,0,0,0,116,114,1,0,0,0,116,117,1,
+  	0,0,0,117,19,1,0,0,0,118,120,7,2,0,0,119,118,1,0,0,0,120,121,1,0,0,0,
+  	121,119,1,0,0,0,121,122,1,0,0,0,122,21,1,0,0,0,123,124,7,3,0,0,124,23,
+  	1,0,0,0,125,126,5,10,0,0,126,25,1,0,0,0,127,142,5,1,0,0,128,142,5,2,0,
+  	0,129,142,5,3,0,0,130,142,5,4,0,0,131,133,5,5,0,0,132,131,1,0,0,0,133,
+  	134,1,0,0,0,134,132,1,0,0,0,134,135,1,0,0,0,135,142,1,0,0,0,136,138,5,
+  	6,0,0,137,136,1,0,0,0,138,139,1,0,0,0,139,137,1,0,0,0,139,140,1,0,0,0,
+  	140,142,1,0,0,0,141,127,1,0,0,0,141,128,1,0,0,0,141,129,1,0,0,0,141,130,
+  	1,0,0,0,141,132,1,0,0,0,141,137,1,0,0,0,142,27,1,0,0,0,143,146,5,7,0,
+  	0,144,145,5,15,0,0,145,147,5,13,0,0,146,144,1,0,0,0,146,147,1,0,0,0,147,
+  	151,1,0,0,0,148,151,5,10,0,0,149,151,5,14,0,0,150,143,1,0,0,0,150,148,
+  	1,0,0,0,150,149,1,0,0,0,151,29,1,0,0,0,21,42,46,53,58,64,69,75,79,84,
+  	88,95,101,106,111,116,121,134,139,141,146,150
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -465,12 +466,12 @@ fileseqParser::DirectoryContext* fileseqParser::SingleFrameContext::directory() 
   return getRuleContext<fileseqParser::DirectoryContext>(0);
 }
 
-fileseqParser::SingleFrameBasenameContext* fileseqParser::SingleFrameContext::singleFrameBasename() {
-  return getRuleContext<fileseqParser::SingleFrameBasenameContext>(0);
-}
-
 fileseqParser::FrameNumContext* fileseqParser::SingleFrameContext::frameNum() {
   return getRuleContext<fileseqParser::FrameNumContext>(0);
+}
+
+fileseqParser::SingleFrameBasenameContext* fileseqParser::SingleFrameContext::singleFrameBasename() {
+  return getRuleContext<fileseqParser::SingleFrameBasenameContext>(0);
 }
 
 std::vector<fileseqParser::ExtensionContext *> fileseqParser::SingleFrameContext::extension() {
@@ -510,21 +511,32 @@ fileseqParser::SingleFrameContext* fileseqParser::singleFrame() {
     enterOuterAlt(_localctx, 1);
     setState(67);
     directory();
-    setState(68);
-    singleFrameBasename();
     setState(69);
+    _errHandler->sync(this);
+
+    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 5, _ctx)) {
+    case 1: {
+      setState(68);
+      singleFrameBasename();
+      break;
+    }
+
+    default:
+      break;
+    }
+    setState(71);
     frameNum();
-    setState(73);
+    setState(73); 
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 17536) != 0)) {
-      setState(70);
+    do {
+      setState(72);
       extension();
-      setState(75);
+      setState(75); 
       _errHandler->sync(this);
       _la = _input->LA(1);
-    }
+    } while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 17536) != 0));
    
   }
   catch (RecognitionException &e) {
@@ -585,14 +597,14 @@ fileseqParser::PlainFileContext* fileseqParser::plainFile() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(76);
+    setState(77);
     directory();
-    setState(78);
+    setState(79);
     _errHandler->sync(this);
 
-    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 6, _ctx)) {
+    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 7, _ctx)) {
     case 1: {
-      setState(77);
+      setState(78);
       plainBasename();
       break;
     }
@@ -600,14 +612,14 @@ fileseqParser::PlainFileContext* fileseqParser::plainFile() {
     default:
       break;
     }
-    setState(83);
+    setState(84);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while ((((_la & ~ 0x3fULL) == 0) &&
       ((1ULL << _la) & 17536) != 0)) {
-      setState(80);
+      setState(81);
       extension();
-      setState(85);
+      setState(86);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
@@ -672,27 +684,27 @@ fileseqParser::DirectoryContext* fileseqParser::directory() {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(87);
+    setState(88);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if (_la == fileseqParser::SLASH) {
-      setState(86);
+      setState(87);
       match(fileseqParser::SLASH);
     }
-    setState(94);
+    setState(95);
     _errHandler->sync(this);
-    alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 9, _ctx);
+    alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 10, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
       if (alt == 1) {
-        setState(89);
-        dirSegment();
         setState(90);
+        dirSegment();
+        setState(91);
         match(fileseqParser::SLASH); 
       }
-      setState(96);
+      setState(97);
       _errHandler->sync(this);
-      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 9, _ctx);
+      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 10, _ctx);
     }
    
   }
@@ -810,11 +822,11 @@ fileseqParser::DirSegmentContext* fileseqParser::dirSegment() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(98); 
+    setState(99); 
     _errHandler->sync(this);
     _la = _input->LA(1);
     do {
-      setState(97);
+      setState(98);
       _la = _input->LA(1);
       if (!((((_la & ~ 0x3fULL) == 0) &&
         ((1ULL << _la) & 259840) != 0))) {
@@ -824,7 +836,7 @@ fileseqParser::DirSegmentContext* fileseqParser::dirSegment() {
         _errHandler->reportMatch(this);
         consume();
       }
-      setState(100); 
+      setState(101); 
       _errHandler->sync(this);
       _la = _input->LA(1);
     } while ((((_la & ~ 0x3fULL) == 0) &&
@@ -954,13 +966,13 @@ fileseqParser::SequenceBasenameContext* fileseqParser::sequenceBasename() {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(103); 
+    setState(104); 
     _errHandler->sync(this);
     alt = 1;
     do {
       switch (alt) {
         case 1: {
-              setState(102);
+              setState(103);
               _la = _input->LA(1);
               if (!((((_la & ~ 0x3fULL) == 0) &&
                 ((1ULL << _la) & 259968) != 0))) {
@@ -976,9 +988,9 @@ fileseqParser::SequenceBasenameContext* fileseqParser::sequenceBasename() {
       default:
         throw NoViableAltException(this);
       }
-      setState(105); 
+      setState(106); 
       _errHandler->sync(this);
-      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 11, _ctx);
+      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 12, _ctx);
     } while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER);
    
   }
@@ -1104,11 +1116,11 @@ fileseqParser::PatternBasenameContext* fileseqParser::patternBasename() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(108); 
+    setState(109); 
     _errHandler->sync(this);
     _la = _input->LA(1);
     do {
-      setState(107);
+      setState(108);
       _la = _input->LA(1);
       if (!((((_la & ~ 0x3fULL) == 0) &&
         ((1ULL << _la) & 259968) != 0))) {
@@ -1118,7 +1130,7 @@ fileseqParser::PatternBasenameContext* fileseqParser::patternBasename() {
         _errHandler->reportMatch(this);
         consume();
       }
-      setState(110); 
+      setState(111); 
       _errHandler->sync(this);
       _la = _input->LA(1);
     } while ((((_la & ~ 0x3fULL) == 0) &&
@@ -1248,13 +1260,13 @@ fileseqParser::SingleFrameBasenameContext* fileseqParser::singleFrameBasename() 
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(113); 
+    setState(114); 
     _errHandler->sync(this);
     alt = 1;
     do {
       switch (alt) {
         case 1: {
-              setState(112);
+              setState(113);
               _la = _input->LA(1);
               if (!((((_la & ~ 0x3fULL) == 0) &&
                 ((1ULL << _la) & 259968) != 0))) {
@@ -1270,9 +1282,9 @@ fileseqParser::SingleFrameBasenameContext* fileseqParser::singleFrameBasename() 
       default:
         throw NoViableAltException(this);
       }
-      setState(115); 
+      setState(116); 
       _errHandler->sync(this);
-      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 13, _ctx);
+      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 14, _ctx);
     } while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER);
    
   }
@@ -1383,13 +1395,13 @@ fileseqParser::PlainBasenameContext* fileseqParser::plainBasename() {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(118); 
+    setState(119); 
     _errHandler->sync(this);
     alt = 1;
     do {
       switch (alt) {
         case 1: {
-              setState(117);
+              setState(118);
               _la = _input->LA(1);
               if (!((((_la & ~ 0x3fULL) == 0) &&
                 ((1ULL << _la) & 258816) != 0))) {
@@ -1405,9 +1417,9 @@ fileseqParser::PlainBasenameContext* fileseqParser::plainBasename() {
       default:
         throw NoViableAltException(this);
       }
-      setState(120); 
+      setState(121); 
       _errHandler->sync(this);
-      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 14, _ctx);
+      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 15, _ctx);
     } while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER);
    
   }
@@ -1469,7 +1481,7 @@ fileseqParser::FrameRangeContext* fileseqParser::frameRange() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(122);
+    setState(123);
     _la = _input->LA(1);
     if (!((((_la & ~ 0x3fULL) == 0) &&
       ((1ULL << _la) & 9984) != 0))) {
@@ -1526,7 +1538,7 @@ fileseqParser::FrameNumContext* fileseqParser::frameNum() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(124);
+    setState(125);
     match(fileseqParser::DOT_NUM);
    
   }
@@ -1603,46 +1615,46 @@ fileseqParser::PaddingContext* fileseqParser::padding() {
     exitRule();
   });
   try {
-    setState(140);
+    setState(141);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case fileseqParser::UDIM_ANGLE: {
         enterOuterAlt(_localctx, 1);
-        setState(126);
+        setState(127);
         match(fileseqParser::UDIM_ANGLE);
         break;
       }
 
       case fileseqParser::UDIM_PAREN: {
         enterOuterAlt(_localctx, 2);
-        setState(127);
+        setState(128);
         match(fileseqParser::UDIM_PAREN);
         break;
       }
 
       case fileseqParser::PRINTF_PAD: {
         enterOuterAlt(_localctx, 3);
-        setState(128);
+        setState(129);
         match(fileseqParser::PRINTF_PAD);
         break;
       }
 
       case fileseqParser::HOUDINI_PAD: {
         enterOuterAlt(_localctx, 4);
-        setState(129);
+        setState(130);
         match(fileseqParser::HOUDINI_PAD);
         break;
       }
 
       case fileseqParser::HASH: {
         enterOuterAlt(_localctx, 5);
-        setState(131); 
+        setState(132); 
         _errHandler->sync(this);
         _la = _input->LA(1);
         do {
-          setState(130);
+          setState(131);
           match(fileseqParser::HASH);
-          setState(133); 
+          setState(134); 
           _errHandler->sync(this);
           _la = _input->LA(1);
         } while (_la == fileseqParser::HASH);
@@ -1651,13 +1663,13 @@ fileseqParser::PaddingContext* fileseqParser::padding() {
 
       case fileseqParser::AT: {
         enterOuterAlt(_localctx, 6);
-        setState(136); 
+        setState(137); 
         _errHandler->sync(this);
         _la = _input->LA(1);
         do {
-          setState(135);
+          setState(136);
           match(fileseqParser::AT);
-          setState(138); 
+          setState(139); 
           _errHandler->sync(this);
           _la = _input->LA(1);
         } while (_la == fileseqParser::AT);
@@ -1730,21 +1742,21 @@ fileseqParser::ExtensionContext* fileseqParser::extension() {
     exitRule();
   });
   try {
-    setState(149);
+    setState(150);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case fileseqParser::EXTENSION: {
         enterOuterAlt(_localctx, 1);
-        setState(142);
+        setState(143);
         match(fileseqParser::EXTENSION);
-        setState(145);
+        setState(146);
         _errHandler->sync(this);
 
         _la = _input->LA(1);
         if (_la == fileseqParser::DASH) {
-          setState(143);
-          match(fileseqParser::DASH);
           setState(144);
+          match(fileseqParser::DASH);
+          setState(145);
           match(fileseqParser::NUM);
         }
         break;
@@ -1752,14 +1764,14 @@ fileseqParser::ExtensionContext* fileseqParser::extension() {
 
       case fileseqParser::DOT_NUM: {
         enterOuterAlt(_localctx, 2);
-        setState(147);
+        setState(148);
         match(fileseqParser::DOT_NUM);
         break;
       }
 
       case fileseqParser::WORD: {
         enterOuterAlt(_localctx, 3);
-        setState(148);
+        setState(149);
         match(fileseqParser::WORD);
         break;
       }
