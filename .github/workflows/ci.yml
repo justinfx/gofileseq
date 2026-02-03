@@ -141,7 +141,8 @@ jobs:
           mkdir build && cd build
           cmake ..
           make -j$(nproc)
-          ./fileseq_tests
+          cd ..
+          ./build/fileseq_tests
 
       - name: Build doxygen
         run: sudo apt-get update &&
