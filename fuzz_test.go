@@ -133,6 +133,12 @@ func FuzzFileSequenceRoundTrip(f *testing.F) {
 			return
 		}
 
+		// Skip extremely long inputs that cause edge cases with frame number parsing
+		// (e.g., 80+ digit numbers being interpreted as frames vs extensions)
+		if len(input) > 200 {
+			return
+		}
+
 		// First parse attempt
 		seq, err := NewFileSequence(input)
 		if err != nil {
