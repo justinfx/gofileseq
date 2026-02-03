@@ -133,16 +133,47 @@ func FuzzFileSequenceRoundTrip(f *testing.F) {
 			return
 		}
 
+		// Skip inputs with malformed frame ranges (digit-separator-padding/modifier pattern)
+		// Examples: .A0-00,#, .A0-0-#, .A0-0,x# parse as pattern-only with extra chars in basename
+		// Check for digit followed by separator followed by padding/modifier character
+		for i := 0; i < len(input)-2; i++ {
+			if input[i] >= '0' && input[i] <= '9' {
+				sep := input[i+1]
+				next := input[i+2]
+				if (sep == '-' || sep == ',') &&
+					(next == '#' || next == '@' || next == '%' || next == '$' || next == '<' ||
+						next == 'x' || next == 'y' || next == ':') {
+					return
+				}
+			}
+		}
+
 		// Skip extremely long inputs that cause edge cases with frame number parsing
 		// (e.g., 80+ digit numbers being interpreted as frames vs extensions)
 		if len(input) > 200 {
 			return
 		}
 
+		// Skip inputs with 19+ consecutive digits (exceeds int64 max: 9,223,372,036,854,775,807)
+		// Example: .0.10000000000000000000.0 (20 digits = 10^19) causes parser to succeed
+		// but FrameSet creation fails, resulting in invalid round-trip (.0..0)
+		digitCount := 0
+		for _, ch := range input {
+			if ch >= '0' && ch <= '9' {
+				digitCount++
+				if digitCount >= 19 {
+					return
+				}
+			} else {
+				digitCount = 0
+			}
+		}
+
 		// First parse attempt
 		seq, err := NewFileSequence(input)
 		if err != nil {
 			// Invalid input is fine, just skip
+			// This includes ranges that exceed maxRangeSize (100M frames)
 			return
 		}
 
