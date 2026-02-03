@@ -1,6 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "google-explicit-constructor"
-#pragma ide diagnostic ignored "modernize-use-equals-default"
 #ifndef FILESEQ_ERROR_H_
 #define FILESEQ_ERROR_H_
 
@@ -73,6 +70,3 @@ void setError(const std::string &msg, Status* stat);
 } // fileseq
 
 #endif // FILESEQ_ERROR_H_
-
-
-#pragma clang diagnostic pop

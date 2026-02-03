@@ -282,7 +282,7 @@ TEST( TestFindSequencesOnDisk, AmbiguousSingleFiles ) {
     ASSERT_EQ(cases.size(), seqs.size()) << "Did not find expected number of seqs";
 
     std::stringstream expected;
-    int i;
+    int i = 0;
     for (auto const& x: cases) {
         if (i > 0) { expected << ", "; }
         expected << x.first;
@@ -442,23 +442,23 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {PadStyleHash4, "testdata/2frame/foo.0001.ext", "testdata/2frame/foo.1,2#.ext"};
+            Case t = {PadStyleHash4, "testdata/2frame/foo.0001.ext", "testdata/2frame/foo.1,2#.ext", false, false};
             m_cases.push_back(t);
         }
         {
-            Case t = {PadStyleHash4, "testdata/2frame/foo.#.ext", "testdata/2frame/foo.1,2#.ext"};
+            Case t = {PadStyleHash4, "testdata/2frame/foo.#.ext", "testdata/2frame/foo.1,2#.ext", false, false};
             m_cases.push_back(t);
         }
         {
-            Case t = {PadStyleHash4, "testdata/complex.@.tar.gz", "testdata/complex.5-7#.tar.gz"};
+            Case t = {PadStyleHash4, "testdata/complex.@.tar.gz", "testdata/complex.5-7#.tar.gz", false, false};
             m_cases.push_back(t);
         }
         {
-            Case t = {PadStyleHash4, "testdata/complex_ext/@.a.jpg", "testdata/complex_ext/1-3@.a.jpg"};
+            Case t = {PadStyleHash4, "testdata/complex_ext/@.a.jpg", "testdata/complex_ext/1-3@.a.jpg", false, false};
             m_cases.push_back(t);
         }
         {
-            Case t = {PadStyleHash4, "testdata/complex_ext/@@@.1.ext", "testdata/complex_ext/100-102@@@.1.ext"};
+            Case t = {PadStyleHash4, "testdata/complex_ext/@@@.1.ext", "testdata/complex_ext/100-102@@@.1.ext", false, false};
             m_cases.push_back(t);
         }
 

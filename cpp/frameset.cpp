@@ -5,6 +5,7 @@
 #include "private/frameset_p.h"
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <sstream>
 
