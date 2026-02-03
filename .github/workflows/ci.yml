@@ -116,31 +116,32 @@ jobs:
           fetch-depth: 1
 
       - name: Setup dependencies
-        run: sudo apt-get install -y gcc libpcre++-dev
+        run: sudo apt-get update && sudo apt-get install -y gcc g++ cmake
 
-      - name: Setup waf
-        env:
-          WAF_VERSION: waf-2.1.5
-        run: test -x waf-light || {
-          cd $HOME &&
-          wget "https://gitlab.com/ita1024/waf/-/archive/${WAF_VERSION}/waf-${WAF_VERSION}.tar.gz" &&
-          tar -zxf "waf-${WAF_VERSION}.tar.gz" &&
-          cd "waf-${WAF_VERSION}" &&
-          ./waf-light configure build &&
-          cd ${HOME} &&
-          mv "waf-${WAF_VERSION}" waf &&
-          cd $GITHUB_WORKSPACE; }
+      - name: Setup Java (for ANTLR parser verification)
+        uses: actions/setup-java@v5.2.0
+        with:
+          distribution: 'temurin'
+          java-version: '21'
 
-      - name: Build and Test (waf)
-        run: cd ${GITHUB_WORKSPACE}/cpp &&
-          ${HOME}/waf/waf configure test
+      - name: Verify Generated C++ Parser
+        run: |
+          cd grammar
+          make generate-cpp
+          git diff --exit-code ../cpp/private/parser/ || {
+            echo "ERROR: Generated C++ parser files don't match grammar!"
+            echo "Run 'make generate-cpp' in the grammar/ directory and commit the changes."
+            exit 1
+          }
+        shell: bash
 
-      - name: Build and Test (cmake)
-        run: cd ${GITHUB_WORKSPACE}/cpp &&
-          mkdir build_cmake && cd build_cmake &&
-          cmake .. &&
-          make &&
-          ./test/fileseq_test
+      - name: Build and Test (CMake)
+        run: |
+          cd cpp
+          mkdir build && cd build
+          cmake ..
+          make -j$(nproc)
+          ./fileseq_tests
 
       - name: Build doxygen
         run: sudo apt-get update &&
