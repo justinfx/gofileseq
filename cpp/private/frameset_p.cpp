@@ -9,12 +9,7 @@
 #include <string>
 #include <vector>
 
-// Conditional support for C++11 compilers that support std::regex
-#if HAVE_REGEX == 1
 #include <regex>
-#else
-#include <pcrecpp.h>
-#endif
 
 namespace fileseq {
 
@@ -31,7 +26,6 @@ bool getRangePatternMatch(RangePatternMatch &match, const std::string &range) {
     match.stepMod.clear();
     match.step = 1;
 
-#if HAVE_REGEX == 1
     static const auto flags = std::regex_constants::optimize|std::regex_constants::ECMAScript;
     static const std::regex s_rxRange1(s_pattern1, flags);
     static const std::regex s_rxRange2(s_pattern2, flags);
@@ -61,30 +55,6 @@ bool getRangePatternMatch(RangePatternMatch &match, const std::string &range) {
         match.step = std::stol(submatch[4].str(), nullptr);
         return true;
     }
-#else
-    static const pcrecpp::RE* s_rxRange1 = new pcrecpp::RE(s_pattern1);
-    static const pcrecpp::RE* s_rxRange2 = new pcrecpp::RE(s_pattern2);
-    static const pcrecpp::RE* s_rxRange3 = new pcrecpp::RE(s_pattern3);
-
-    if ( s_rxRange1->FullMatch(range, &(match.start), &(match.end)) ) {
-        match.matches = 2;
-        return true;
-    }
-
-    if ( s_rxRange2->FullMatch(range, &(match.start)) ) {
-        match.matches = 1;
-        return true;
-    }
-
-    if ( s_rxRange3->FullMatch(
-            range,
-            &(match.start), &(match.end),
-            &(match.stepMod), &(match.step)) ) {
-
-        match.matches = 4;
-        return true;
-    }
-#endif
 
     match.matches = 0;
     return false;
