@@ -1,10 +1,34 @@
-*.pro.user
+# Build artifacts
+build/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+*.cmake
+!ext/*/CMakeLists.txt
+!ext/*/cmake/*.cmake
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+# Temp parser files
+private/parser/*.tokens
+private/parser/*.interp
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Compiled output
 *.o
 *.a
-*.so*
-libgo*
+*.so
 *.dylib
-Makefile
-build*
-.lock-waf*
-cmake-build-*
+*.dll
+*.exe
+
+# Test output
+Testing/
+CTestTestfile.cmake

@@ -267,8 +267,8 @@ func TestNewFileSequence(t *testing.T) {
 			"/dir/f.exr", 0, 0, 0,
 			1, ".exr"},
 		{"/dir/f.100",
-			"/dir/f.100@@@", 100, 100, 3,
-			1, ""},
+			"/dir/f.100", 0, 0, 0,
+			1, ".100"},
 		{"/dir/f.@@.ext",
 			"/dir/f.@@.ext", 0, 0, 2,
 			1, ".ext"},
@@ -288,8 +288,8 @@ func TestNewFileSequence(t *testing.T) {
 			"/dir/.hidden", 0, 0, 0,
 			1, ".hidden"},
 		{"/dir/.hidden.100",
-			"/dir/.hidden.100@@@", 100, 100, 3,
-			1, ""},
+			"/dir/.hidden.100", 0, 0, 0,
+			1, ".hidden.100"},
 		{"/dir/.hidden.100.ext",
 			"/dir/.hidden.100@@@.ext", 100, 100, 3,
 			1, ".ext"},
@@ -304,7 +304,7 @@ func TestNewFileSequence(t *testing.T) {
 			27, ".tar.gz"},
 		{"/dir/f.tar.gz",
 			"/dir/f.tar.gz", 0, 0, 0,
-			1, ".gz"},
+			1, ".tar.gz"},
 		{"/dir/f.@@.tar.gz",
 			"/dir/f.@@.tar.gz", 0, 0, 2,
 			1, ".tar.gz"},
@@ -319,7 +319,7 @@ func TestNewFileSequence(t *testing.T) {
 			1, ".tar.gz"},
 		{"/dir/no_frames.tar.gz",
 			"/dir/no_frames.tar.gz", 0, 0, 0,
-			1, ".gz"},
+			1, ".tar.gz"},
 		{".10000000000",
 			".10000000000", 0, 0, 0,
 			1, ".10000000000"},
@@ -347,6 +347,26 @@ func TestNewFileSequence(t *testing.T) {
 		{"/dir/name_2025-05-13_1809-00.ext",
 			"/dir/name_2025-05-13_1809-00.ext", 0, 0, 0,
 			1, ".ext"},
+		// Whitespace preservation tests (from fuzzing)
+		{"file with spaces.1-100#.exr",
+			"file with spaces.1-100#.exr", 1, 100, 4,
+			100, ".exr"},
+		{"/path/file name.100.exr",
+			"/path/file name.100@@@.exr", 100, 100, 3,
+			1, ".exr"},
+		{"/path with spaces/file.#.ext",
+			"/path with spaces/file.#.ext", 0, 0, 4,
+			1, ".ext"},
+		// Special characters (POSIX-valid filename characters)
+		{"file!name.1-10#.exr",
+			"file!name.1-10#.exr", 1, 10, 4,
+			10, ".exr"},
+		{"/path/with!char/file.#.exr",
+			"/path/with!char/file.#.exr", 0, 0, 4,
+			1, ".exr"},
+		{"file$(var).100.exr",
+			"file$(var).100@@@.exr", 100, 100, 3,
+			1, ".exr"},
 	}
 	for _, tt := range table {
 		seq, err := NewFileSequence(tt.path)
@@ -403,6 +423,110 @@ func TestFileSequenceSplit(t *testing.T) {
 		if !reflect.DeepEqual(tt.franges, actual) {
 			t.Errorf("Expected ranges %v ; Got %v", tt.franges, actual)
 		}
+	}
+}
+
+func TestParserEdgeCases(t *testing.T) {
+	var table = []struct {
+		path      string
+		outPath   string
+		start     int
+		end       int
+		zfill     int
+		wantDir   string
+		wantBase  string
+		wantPad   string
+		wantExt   string
+	}{
+		// Windows path separators
+		{"Z:\\Shows\\test.1-100#.exr",
+			"Z:\\Shows\\test.1-100#.exr", 1, 100, 4,
+			"Z:\\Shows\\", "test.", "#", ".exr"},
+
+		// Mixed separators (pattern-only defaults to zfill=4)
+		{"/mnt/Shows\\mixed/file.#.exr",
+			"/mnt/Shows\\mixed/file.#.exr", 0, 0, 4,
+			"/mnt/Shows\\mixed/", "file.", "#", ".exr"},
+
+		// Resolution patterns in basename
+		{"/path/file.1920x1080.0001-0100#.exr",
+			"/path/file.1920x1080.0001-0100#.exr", 1, 100, 4,
+			"/path/", "file.1920x1080.", "#", ".exr"},
+
+		// Negative zero frames
+		{"file.-0000#.exr",
+			"file.-0000#.exr", 0, 0, 4,
+			"", "file.", "#", ".exr"},
+
+		// Missing periods (underscores instead)
+		{"/path/something_1-10#_exr",
+			"/path/something_1-10#_exr", 1, 10, 4,
+			"/path/", "something_", "#", "_exr"},
+
+		// Hidden files with frame sequences
+		{"/path/.hidden.0001-0100#.ext",
+			"/path/.hidden.0001-0100#.ext", 1, 100, 4,
+			"/path/", ".hidden.", "#", ".ext"},
+
+		// Complex multi-part extensions
+		{"/path/file.1-10#.bgeo.sc",
+			"/path/file.1-10#.bgeo.sc", 1, 10, 4,
+			"/path/", "file.", "#", ".bgeo.sc"},
+
+		{"/path/file.1-10#.tar.gz.bak",
+			"/path/file.1-10#.tar.gz.bak", 1, 10, 4,
+			"/path/", "file.", "#", ".tar.gz.bak"},
+
+		// Hidden file plain (no frames) - treated as extension only
+		{"/path/.hidden",
+			"/path/.hidden", 0, 0, 0,
+			"/path/", "", "", ".hidden"},
+
+		// Hidden file with number but no extension after - treated as plain file
+		{"/path/.config.0050",
+			"/path/.config.0050", 0, 0, 0,
+			"/path/", "", "", ".config.0050"},
+	}
+
+	for _, tt := range table {
+		t.Run(tt.path, func(t *testing.T) {
+			seq, err := NewFileSequence(tt.path)
+			if err != nil {
+				t.Fatalf("Parse error: %v", err)
+			}
+
+			if actual := seq.String(); actual != tt.outPath {
+				t.Errorf("String(): expected %q, got %q", tt.outPath, actual)
+			}
+
+			if actual := seq.Start(); actual != tt.start {
+				t.Errorf("Start(): expected %d, got %d", tt.start, actual)
+			}
+
+			if actual := seq.End(); actual != tt.end {
+				t.Errorf("End(): expected %d, got %d", tt.end, actual)
+			}
+
+			if actual := seq.ZFill(); actual != tt.zfill {
+				t.Errorf("ZFill(): expected %d, got %d", tt.zfill, actual)
+			}
+
+			if actual := seq.Dirname(); actual != tt.wantDir {
+				t.Errorf("Dirname(): expected %q, got %q", tt.wantDir, actual)
+			}
+
+			if actual := seq.Basename(); actual != tt.wantBase {
+				t.Errorf("Basename(): expected %q, got %q", tt.wantBase, actual)
+			}
+
+			if actual := seq.Padding(); actual != tt.wantPad {
+				t.Errorf("Padding(): expected %q, got %q", tt.wantPad, actual)
+			}
+
+			if actual := seq.Ext(); actual != tt.wantExt {
+				t.Errorf("Ext(): expected %q, got %q", tt.wantExt, actual)
+			}
+		})
 	}
 }
 

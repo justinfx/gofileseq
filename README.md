@@ -47,7 +47,7 @@ Install
 -------
 
 ```bash
-go get github.com/justinfx/gofileseq/v2
+go get github.com/justinfx/gofileseq/v3
 ```
 
 Also included is a [`seqls`](https://github.com/justinfx/gofileseq/tree/master/cmd/seqls) tool, which uses `gofileseq` to produce an executable, used for listing sequences on the filesystem:
@@ -58,9 +58,40 @@ Download the latest [binary release](https://github.com/justinfx/gofileseq/relea
 
 Or install from source:
 ```bash
-go get github.com/justinfx/gofileseq/v2/cmd/seqls
+go get github.com/justinfx/gofileseq/v3/cmd/seqls
 seql some/images
 # some/images/file_foo.1-100@@@.tif
+```
+
+Development
+-----------
+
+The file sequence parser is built using an [ANTLR4](https://www.antlr.org/) grammar defined in `grammar/fileseq.g4`.
+
+When the grammar file is modified, the parser must be regenerated and committed:
+
+```bash
+# Regenerate parser from grammar
+go generate ./...
+
+# Or directly via make
+cd grammar && make generate-go
+```
+
+**Requirements:** Java runtime (for ANTLR code generation)
+
+If Java is not in a default system location, specify the path:
+```bash
+# Using go generate
+JAVA=/path/to/java go generate ./...
+
+# Using make directly
+cd grammar && make JAVA=/path/to/java generate-go
+```
+
+**Alternative:** Use Docker (no Java required):
+```bash
+cd grammar && make generate-go-docker
 ```
 
 C++ Support

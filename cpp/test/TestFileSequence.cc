@@ -77,7 +77,7 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f.100", "/dir/f.100@@@", 100, 100, 3, 1, ""};
+            Case t = {"/dir/f.100", "/dir/f.100", 0, 0, 0, 1, ".100"};
             m_cases.push_back(t);
         }
         {
@@ -105,7 +105,7 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/.hidden.100", "/dir/.hidden.100@@@", 100, 100, 3, 1, ""};
+            Case t = {"/dir/.hidden.100", "/dir/.hidden.100", 0, 0, 0, 1, ".hidden.100"};
             m_cases.push_back(t);
         }
         {
@@ -138,7 +138,7 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/f.tar.gz", "/dir/f.tar.gz", 0, 0, 0, 1, ".gz"};
+            Case t = {"/dir/f.tar.gz", "/dir/f.tar.gz", 0, 0, 0, 1, ".tar.gz"};
             m_cases.push_back(t);
         }
         {
@@ -154,7 +154,7 @@ protected:
             m_cases.push_back(t);
         }
         {
-            Case t = {"/dir/no_frames.tar.gz", "/dir/no_frames.tar.gz", 0, 0, 0, 1, ".gz"};
+            Case t = {"/dir/no_frames.tar.gz", "/dir/no_frames.tar.gz", 0, 0, 0, 1, ".tar.gz"};
             m_cases.push_back(t);
         }
         {
@@ -175,6 +175,71 @@ protected:
         }
         {
             Case t = {"/dir/100@.1.ext", "/dir/100@.1.ext", 100, 100, 1, 1, ".1.ext"};
+            m_cases.push_back(t);
+        }
+
+        // Edge cases from ANTLR migration
+        // Whitespace preservation
+        {
+            Case t = {"file with spaces.1-100#.exr", "file with spaces.1-100#.exr", 1, 100, 4, 100, ".exr"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"/path/file name.100.exr", "/path/file name.100@@@.exr", 100, 100, 3, 1, ".exr"};
+            m_cases.push_back(t);
+        }
+        // Resolution patterns in basename
+        {
+            Case t = {"/path/file.1920x1080.0001-0100#.exr", "/path/file.1920x1080.0001-0100#.exr", 1, 100, 4, 100, ".exr"};
+            m_cases.push_back(t);
+        }
+        // Negative zero frames
+        {
+            Case t = {"file.-0000#.exr", "file.-0000#.exr", 0, 0, 4, 1, ".exr"};
+            m_cases.push_back(t);
+        }
+        // Non-dot extensions after padding
+        {
+            Case t = {"/path/something_1-10#_exr", "/path/something_1-10#_exr", 1, 10, 4, 10, "_exr"};
+            m_cases.push_back(t);
+        }
+        // Date patterns in basename
+        {
+            Case t = {"/path/name_2025-05-13_1809.1-100#.exr", "/path/name_2025-05-13_1809.1-100#.exr", 1, 100, 4, 100, ".exr"};
+            m_cases.push_back(t);
+        }
+        // Multi-part extensions with sequences
+        {
+            Case t = {"/dir/file.1-100#.tar.gz", "/dir/file.1-100#.tar.gz", 1, 100, 4, 100, ".tar.gz"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"/dir/file.1-100#.bgeo.sc", "/dir/file.1-100#.bgeo.sc", 1, 100, 4, 100, ".bgeo.sc"};
+            m_cases.push_back(t);
+        }
+        // Complex multi-part extensions (plain files)
+        {
+            Case t = {"/dir/file.tar.gz.bak", "/dir/file.tar.gz.bak", 0, 0, 0, 1, ".tar.gz.bak"};
+            m_cases.push_back(t);
+        }
+        // Hidden files with sequences
+        {
+            Case t = {"/path/.hidden.0001-0100#.ext", "/path/.hidden.0001-0100#.ext", 1, 100, 4, 100, ".ext"};
+            m_cases.push_back(t);
+        }
+        // Special characters in basename
+        {
+            Case t = {"file!name.1-10#.exr", "file!name.1-10#.exr", 1, 10, 4, 10, ".exr"};
+            m_cases.push_back(t);
+        }
+        // Comma-separated ranges (1,2,3 + 5-10 + 20-30 = 3+6+11 = 20 frames)
+        {
+            Case t = {"/file.1,2,3,5-10,20-30#.exr", "/file.1,2,3,5-10,20-30#.exr", 1, 30, 4, 20, ".exr"};
+            m_cases.push_back(t);
+        }
+        // Negative frame ranges
+        {
+            Case t = {"/path/file.-100--1#.exr", "/path/file.-100--1#.exr", -100, -1, 4, 100, ".exr"};
             m_cases.push_back(t);
         }
     }

@@ -31,7 +31,7 @@ public:
 
 // Data structure holding information about
 // the parsed data from a range string
-struct RangePatternMatch { ;
+struct RangePatternMatch {
 
     int matches;
     Frame start;

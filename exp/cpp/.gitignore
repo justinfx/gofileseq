@@ -1,9 +1,0 @@
-*.pro.user
-*.o
-*.a
-*.so*
-libgo*
-*.dylib
-Makefile
-build*
-.lock-waf*

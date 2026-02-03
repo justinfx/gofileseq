@@ -1,7 +1,7 @@
 /*
 seqls - list directory contents, rolled up into file sequences
 */
-package main // import "github.com/justinfx/gofileseq/v2/cmd/seqls"
+package main // import "github.com/justinfx/gofileseq/v3/cmd/seqls"
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"runtime"
 
 	"github.com/jessevdk/go-flags"
-	fileseq "github.com/justinfx/gofileseq/v2"
+	fileseq "github.com/justinfx/gofileseq/v3"
 )
 
 var Options struct {

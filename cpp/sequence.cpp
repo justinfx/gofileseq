@@ -2,6 +2,7 @@
 #include "private/sequence_p.h"
 #include "private/frameset_p.h"
 #include "private/strings.h"
+#include "private/parser/parse.h"
 #include "error.h"
 #include "pad.h"
 
@@ -32,78 +33,44 @@ FileSequence::FileSequence(const std::string &path, PadStyle padStyle, Status* o
 }
 
 bool FileSequence::init(const std::string &path, PadStyle padStyle, Status* ok) {
-    std::string dir, base, pad, ext;
-    FrameSet frameSet;
-
     using namespace internal;
 
     // Determine which style of padding to use
     const PaddingMapper &padder = getPadMapperForStyle(padStyle);
 
-    internal::SeqPatternMatch match;
-    bool didMatch = internal::getSplitPatternMatch(match, path);
+    // Parse using ANTLR grammar-based parser (single call)
+    ParseResult result;
+    if (!parseFileSequence(result, path)) {
+        internal::setError("Failed to parse sequence: " + path, ok);
+        return false;
+    }
 
-    if (!didMatch) {
-        // If no match at this point, we are dealing with a possible
-        // path that contains no range. Maybe a single frame or no frame.
+    std::string dir, base, pad, ext;
+    FrameSet frameSet;
 
-        if (path.find_first_of(padder.getAllChars()) != std::string::npos) {
-            // String contains padding characters, but we simply could
-            // not parse it as a sequence
-            internal::setError("Failed to parse sequence: " + path, ok);
-            return false;
+    // Use parser results directly - already split and processed
+    dir = result.directory;
+    base = result.basename;
+    ext = result.extension;
+
+    if (result.isSequence) {
+        // Full sequence with padding
+        pad = result.padding;
+        if (!result.frameRange.empty()) {
+            frameSet = FrameSet(result.frameRange);
         }
-
-        // We assume the sequence is just a single file path, containing
-        // no frame patterns
-        fileseq::strings::path_split(dir, base, path);
-
-        // See if we can find the file ext
-        size_t found = base.find_last_of('.');
-        if (found != std::string::npos) {
-
-            const std::string t_base(base);
-            base = t_base.substr(0, found);
-
-            // including the leading "."
-            ext = t_base.substr(found);
-        }
-
-        if (dir.empty() && base.empty() && !ext.empty()) {
-            // Just assume all we have is a file extension
-
-        } else {
-            // Try to see if we can at least find a specific frame
-            // number, a la  .<frame>.ext
-            if ( internal::getSingleFrameMatch(match, path) ) {
-
-                fileseq::strings::path_split(dir, base, match.base);
-                frameSet = FrameSet(match.range);
-                ext = match.ext;
-
-                if (!match.range.empty() && !fileseq::strings::ends_with(match.base, ".")) {
-                    // edge case: we've got a single versioned file, not a sequence
-					base += match.range;
-                    frameSet = FrameSet();
-                }
-                else if (frameSet.isValid()) {
-
-                    // Calculate the padding chars
-                    fileseq::strings::trim(match.range);
-                    pad = padder.getPaddingChars(match.range.size()); // NOLINT(*-narrowing-conversions)
-                }
-
+    } else if (result.isSingleFile) {
+        // Single frame file - auto-generate padding from frame number width
+        if (!result.frameRange.empty()) {
+            frameSet = FrameSet(result.frameRange);
+            if (frameSet.isValid()) {
+                std::string trimmed = result.frameRange;
+                fileseq::strings::trim(trimmed);
+                pad = padder.getPaddingChars(trimmed.size()); // NOLINT(*-narrowing-conversions)
             }
         }
-
-    } else {
-        // We are dealing with a pattern containing a frame range
-
-        frameSet = FrameSet(match.range);
-        fileseq::strings::path_split(dir, base, match.base);
-        pad = match.padChars;
-        ext = match.ext;
     }
+    // For plain files (result.isPlainFile), frameSet and pad remain empty
 
     m_seqData->str.assign(path);
     m_seqData->base.assign(base);

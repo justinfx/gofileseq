@@ -23,34 +23,81 @@ jobs:
         os: [ ubuntu-latest, macOs-latest, windows-latest ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v6.0.1
         with:
           fetch-depth: 5
 
+      - name: Setup Java (for ANTLR grammar validation)
+        uses: actions/setup-java@v5.2.0
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Validate ANTLR Grammar
+        run: |
+          cd grammar
+          make test-grammar
+        shell: bash
+
+      - name: Verify Generated Parser (optional check)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd grammar
+          make generate-go
+          git diff --exit-code ../internal/parser/ || {
+            echo "ERROR: Generated parser files don't match grammar!"
+            echo "Run 'make generate-go' in the grammar/ directory and commit the changes."
+            exit 1
+          }
+        shell: bash
+
       - name: Setup go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v6.2.0
         with:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -v . ./ranges
+        run: go test -v ./...
+
+  fuzz_go:
+    name: Fuzz go-${{ matrix.go }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true  # Don't block releases on fuzz test failures
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    strategy:
+      matrix:
+        go: [ 1.24.x ]
+        os: [ ubuntu-latest ]  # Fuzz only on Linux for speed
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.1
+        with:
+          fetch-depth: 5
+
+      - name: Setup go
+        uses: actions/setup-go@v6.2.0
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: Run Fuzz Tests
+        run: make fuzz FUZZ_TIME=5s
 
   release:
     name: Release
     runs-on: "ubuntu-latest"
-    needs: test_go
+    needs: [test_go]  # Fuzz tests are optional, don't block releases
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.1
         with:
           fetch-depth: 0
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6.2.0
         with:
           go-version: 1.24
       - name: Release 🚀
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v6.4.0
         with:
           version: latest
           args: release --clean
@@ -65,36 +112,38 @@ jobs:
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v6.0.1
         with:
           fetch-depth: 1
 
       - name: Setup dependencies
-        run: sudo apt-get install -y gcc libpcre++-dev
+        run: sudo apt-get update && sudo apt-get install -y gcc g++ cmake
 
-      - name: Setup waf
-        env:
-          WAF_VERSION: waf-2.1.5
-        run: test -x waf-light || {
-          cd $HOME &&
-          wget "https://gitlab.com/ita1024/waf/-/archive/${WAF_VERSION}/waf-${WAF_VERSION}.tar.gz" &&
-          tar -zxf "waf-${WAF_VERSION}.tar.gz" &&
-          cd "waf-${WAF_VERSION}" &&
-          ./waf-light configure build &&
-          cd ${HOME} &&
-          mv "waf-${WAF_VERSION}" waf &&
-          cd $GITHUB_WORKSPACE; }
+      - name: Setup Java (for ANTLR parser verification)
+        uses: actions/setup-java@v5.2.0
+        with:
+          distribution: 'temurin'
+          java-version: '21'
 
-      - name: Build and Test (waf)
-        run: cd ${GITHUB_WORKSPACE}/cpp &&
-          ${HOME}/waf/waf configure test
+      - name: Verify Generated C++ Parser
+        run: |
+          cd grammar
+          make generate-cpp
+          git diff --exit-code ../cpp/private/parser/ || {
+            echo "ERROR: Generated C++ parser files don't match grammar!"
+            echo "Run 'make generate-cpp' in the grammar/ directory and commit the changes."
+            exit 1
+          }
+        shell: bash
 
-      - name: Build and Test (cmake)
-        run: cd ${GITHUB_WORKSPACE}/cpp &&
-          mkdir build_cmake && cd build_cmake &&
-          cmake .. &&
-          make &&
-          ./test/fileseq_test
+      - name: Build and Test (CMake)
+        run: |
+          cd cpp
+          mkdir build && cd build
+          cmake ..
+          make -j$(nproc)
+          cd ..
+          ./build/fileseq_tests
 
       - name: Build doxygen
         run: sudo apt-get update &&
@@ -103,10 +152,10 @@ jobs:
           doxygen
 
       - name: Deploy doc 🚀
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+        uses: JamesIves/github-pages-deploy-action@v4.8.0
         if: github.ref == 'refs/heads/master'
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages # The branch the action should deploy to.
-          FOLDER: cpp/docs/build # The folder the action should deploy.
-          CLEAN: true # Automatically remove deleted files from the deploy branch
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages # The branch the action should deploy to.
+          folder: cpp/docs/build # The folder the action should deploy.
+          clean: true # Automatically remove deleted files from the deploy branch

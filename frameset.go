@@ -2,9 +2,41 @@ package fileseq
 
 import (
 	"fmt"
+	"math"
 
-	"github.com/justinfx/gofileseq/v2/ranges"
+	"github.com/justinfx/gofileseq/v3/ranges"
 )
+
+const (
+	// Maximum frames for general ranges (simple, x modifier, : stagger modifier)
+	maxRangeSize = 100000000 // 100 million
+
+	// Y modifier has O(n²) performance (AppendUnique with Contains checks)
+	// so it needs a much lower limit
+	maxYModifierRange = 1000000 // 1 million
+
+	// Maximum iterations for : (stagger) modifier
+	maxStaggerIterations = 10000
+
+	// Maximum chunk value for y modifier (prevents overflow in skip calculation)
+	maxChunkValue = 1000000000 // 1 billion
+)
+
+// checkRangeSize validates that a range size doesn't exceed the given maximum
+func checkRangeSize(start, end, step int, maxSize int64, context string) error {
+	if step == 0 {
+		step = 1
+	}
+
+	diff := math.Abs(float64(end - start))
+	size := int64(math.Ceil(diff / math.Abs(float64(step))))
+
+	if size > maxSize {
+		return fmt.Errorf("%s: range %d-%d (step %d) would create %d frames, max allowed is %d",
+			context, start, end, step, size, maxSize)
+	}
+	return nil
+}
 
 // FrameSet wraps a sequence of frames in container that
 // exposes array-like operations and queries, after parsing
@@ -14,7 +46,7 @@ type FrameSet struct {
 	rangePtr *ranges.InclusiveRanges
 }
 
-// Create a new FrameSet from a given frame range string
+// NewFrameSet creates a new FrameSet from a given frame range string
 // Returns an error if the frame range could not be parsed.
 func NewFrameSet(frange string) (*FrameSet, error) {
 	// Process the frame range and get a slice of match slices
@@ -66,6 +98,11 @@ func (s *FrameSet) handleMatch(match []string) error {
 			inc = 1
 		}
 
+		// Check range size before appending
+		if err := checkRangeSize(start, end, inc, maxRangeSize, "frame range too large"); err != nil {
+			return err
+		}
+
 		s.rangePtr.AppendUnique(start, end, inc)
 
 	// Complex frame range
@@ -95,11 +132,25 @@ func (s *FrameSet) handleMatch(match []string) error {
 
 		switch mod {
 		case `x`:
+			// Check range size before appending
+			if err := checkRangeSize(start, end, chunk, maxRangeSize, "frame range too large"); err != nil {
+				return err
+			}
 			s.rangePtr.AppendUnique(start, end, chunk)
 
 		case `y`:
+			// Y modifier has O(n²) performance due to AppendUnique Contains checks
+			if err := checkRangeSize(start, end, 1, maxYModifierRange, "y modifier range too large"); err != nil {
+				return err
+			}
+
+			// Limit chunk value to prevent integer overflow in skip calculation
+			if chunk > maxChunkValue || chunk < -maxChunkValue {
+				return fmt.Errorf("y modifier value too large: %d, max allowed is %d", chunk, maxChunkValue)
+			}
+
 			// TODO: Add proper support for adding inverse of range.
-			// This approach will add excessive amounts of singe
+			// This approach will add excessive amounts of single
 			// range elements. They could be compressed into chunks
 			skip := start
 			aRange := ranges.NewInclusiveRange(start, end, 1)
@@ -114,6 +165,18 @@ func (s *FrameSet) handleMatch(match []string) error {
 			}
 
 		case `:`:
+			// Check range size for stagger modifier
+			if err := checkRangeSize(start, end, 1, maxRangeSize, "stagger range too large"); err != nil {
+				return err
+			}
+
+			// Limit stagger iterations to prevent excessive processing
+			// Each iteration appends the full range with a different step
+			if chunk > maxStaggerIterations {
+				return fmt.Errorf("stagger modifier value too large: %d, max allowed is %d",
+					chunk, maxStaggerIterations)
+			}
+
 			for ; chunk > 0; chunk-- {
 				s.rangePtr.AppendUnique(start, end, chunk)
 			}

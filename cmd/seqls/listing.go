@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/justinfx/gofileseq/v2"
+	"github.com/justinfx/gofileseq/v3"
 )
 
 func printShortListing(w io.Writer, fs *fileseq.FileSequence) {
