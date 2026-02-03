@@ -67,12 +67,50 @@ set(LIB_SOURCES
 # Generated parser sources
 file(GLOB PARSER_SOURCES "private/parser/fileseq*.cpp")
 
-# Create library
-add_library(fileseq STATIC ${LIB_SOURCES} ${PARSER_SOURCES})
-target_compile_features(fileseq PUBLIC cxx_std_14)
+# Create static library
+add_library(fileseq_static STATIC ${LIB_SOURCES} ${PARSER_SOURCES})
+target_compile_features(fileseq_static PUBLIC cxx_std_14)
+set_target_properties(fileseq_static PROPERTIES OUTPUT_NAME fileseq)
 
-# Link against vendored ANTLR4 runtime (static)
-target_link_libraries(fileseq antlr4_static)
+# Link static library against vendored ANTLR4 runtime (static)
+target_link_libraries(fileseq_static antlr4_static)
+
+# Merge ANTLR4 static library into fileseq to make it self-contained
+# This avoids requiring users to separately link libantlr4_static.a
+if(APPLE)
+    add_custom_command(TARGET fileseq_static POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo "Merging libantlr4_static.a into libfileseq.a..."
+        COMMAND libtool -static -o libfileseq_combined.a
+            $<TARGET_FILE:fileseq_static>
+            $<TARGET_FILE:antlr4_static>
+        COMMAND ${CMAKE_COMMAND} -E rename libfileseq_combined.a $<TARGET_FILE:fileseq_static>
+        WORKING_DIRECTORY $<TARGET_FILE_DIR:fileseq_static>
+        COMMENT "Combining fileseq and ANTLR4 static libraries"
+    )
+elseif(UNIX)
+    # Linux: use ar/mri script to merge archives
+    add_custom_command(TARGET fileseq_static POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo "Merging libantlr4_static.a into libfileseq.a..."
+        COMMAND echo "CREATE libfileseq_combined.a\nADDLIB $<TARGET_FILE:fileseq_static>\nADDLIB $<TARGET_FILE:antlr4_static>\nSAVE\nEND" | ar -M
+        COMMAND ${CMAKE_COMMAND} -E rename libfileseq_combined.a $<TARGET_FILE:fileseq_static>
+        WORKING_DIRECTORY $<TARGET_FILE_DIR:fileseq_static>
+        COMMENT "Combining fileseq and ANTLR4 static libraries"
+    )
+endif()
+
+# Create shared library
+add_library(fileseq_shared SHARED ${LIB_SOURCES} ${PARSER_SOURCES})
+target_compile_features(fileseq_shared PUBLIC cxx_std_14)
+set_target_properties(fileseq_shared PROPERTIES OUTPUT_NAME fileseq)
+
+# Link shared library against ANTLR4 static (embedded in the .so/.dylib)
+target_link_libraries(fileseq_shared antlr4_static)
+
+# Set version for shared library
+set_target_properties(fileseq_shared PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+)
 
 # Testing
 enable_testing()
@@ -103,16 +141,15 @@ add_executable(fileseq_tests
 
 target_include_directories(fileseq_tests PRIVATE ${GTEST_INCLUDE_DIRS})
 target_link_libraries(fileseq_tests
-    fileseq
+    fileseq_static
     ${GTEST_LIBRARIES}
-    ${GTEST_MAIN_LIBRARIES}
     pthread
 )
 
 add_test(NAME fileseq_tests COMMAND fileseq_tests)
 
 # Install targets
-install(TARGETS fileseq
+install(TARGETS fileseq_static fileseq_shared
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
 )
@@ -132,5 +169,6 @@ message(STATUS "FileSeq Configuration:")
 message(STATUS "  C++ Standard:     C++${CMAKE_CXX_STANDARD}")
 message(STATUS "  Compiler:         ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "  ANTLR4 runtime:   Vendored (static)")
+message(STATUS "  Libraries:        Static + Shared")
 message(STATUS "  Build type:       ${CMAKE_BUILD_TYPE}")
 message(STATUS "")
