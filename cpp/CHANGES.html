@@ -88,6 +88,16 @@ $(document).ready(function(){initNavTree('CHANGES.html',''); initResizable(); })
 <div class="contents">
 <div class="textblock"><pre class="fragment">Changes:
 
+3.0.0
+----------------
+
+Major rewrite of the underlying parser for sequence patterns. Replaces regular expressions with an ANTLR4 grammar.
+Expected to be transparent to users and follow all of the same rules, while aligning with the canonical python fileseq
+implementation.
+
+The future goal is to refactor the C++ (and even the python fileseq implementation) to use the same grammar file and
+better align the parsing.
+
 2.14.1
 ----------------
 
@@ -158,7 +168,7 @@ too aggressively identified as sequences and this fix restores the behavior to m
 ----------------
 * Removed vendored Go dependencies
 * Fix handling of Windows path separator in FileSequence.SetDirname and findSequencesOnDisk
-* cmd/seqls - Properly build against gofileseq/v2
+* cmd/seqls - Properly build against gofileseq/v3
 * cmd/seqls - Add --hash1 flag to use pad hash width=1 instead of 4
 * cmd/seqls - Add --strict flag to apply strict length of search pattern pad character to matches
 * cpp: Add a cmake build setup
