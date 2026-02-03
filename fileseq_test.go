@@ -267,8 +267,8 @@ func TestNewFileSequence(t *testing.T) {
 			"/dir/f.exr", 0, 0, 0,
 			1, ".exr"},
 		{"/dir/f.100",
-			"/dir/f.100@@@", 100, 100, 3,
-			1, ""},
+			"/dir/f.100", 0, 0, 0,
+			1, ".100"},
 		{"/dir/f.@@.ext",
 			"/dir/f.@@.ext", 0, 0, 2,
 			1, ".ext"},
@@ -288,8 +288,8 @@ func TestNewFileSequence(t *testing.T) {
 			"/dir/.hidden", 0, 0, 0,
 			1, ".hidden"},
 		{"/dir/.hidden.100",
-			"/dir/.hidden.100@@@", 100, 100, 3,
-			1, ""},
+			"/dir/.hidden.100", 0, 0, 0,
+			1, ".hidden.100"},
 		{"/dir/.hidden.100.ext",
 			"/dir/.hidden.100@@@.ext", 100, 100, 3,
 			1, ".ext"},
@@ -482,10 +482,10 @@ func TestParserEdgeCases(t *testing.T) {
 			"/path/.hidden", 0, 0, 0,
 			"/path/", "", "", ".hidden"},
 
-		// Hidden file with single frame (leading zero uses single #)
+		// Hidden file with number but no extension after - treated as plain file
 		{"/path/.config.0050",
-			"/path/.config.0050#", 50, 50, 4,
-			"/path/", ".config.", "#", ""},
+			"/path/.config.0050", 0, 0, 0,
+			"/path/", "", "", ".config.0050"},
 	}
 
 	for _, tt := range table {

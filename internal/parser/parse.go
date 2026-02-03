@@ -46,9 +46,11 @@ func ParseFileSequence(input string) (ParseResult, error) {
 	// Create the parser
 	parser := NewfileseqParser(stream)
 
-	// Add custom error listener
-	parser.RemoveErrorListeners()
+	// Add custom error listener to both lexer and parser
 	errListener := &errorListener{}
+	lexer.RemoveErrorListeners()
+	lexer.AddErrorListener(errListener)
+	parser.RemoveErrorListeners()
 	parser.AddErrorListener(errListener)
 
 	// Parse the input

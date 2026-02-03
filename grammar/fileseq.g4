@@ -24,10 +24,12 @@ patternOnly
     : directory patternBasename? padding extension*
     ;
 
-// Single frame: /path/file.100.exr or /path/file.100 (extension optional)
-// Also handles hidden files: /path/.hidden.100
+// Single frame: /path/file.100.exr (extension required after frame number)
+// Also handles hidden files: /path/.hidden.100.ext
+// Python semantic rule: a dot-number is only treated as a frame if there's an extension after it
+// Basename is optional to handle cases like .10000000000.123 where both are DOT_NUM tokens
 singleFrame
-    : directory singleFrameBasename frameNum extension*
+    : directory singleFrameBasename? frameNum extension+
     ;
 
 // Plain file: /path/file.txt or /path/file or /path/.hidden (no frame pattern)
