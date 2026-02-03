@@ -1,5 +1,4 @@
 #pragma clang diagnostic push
-#pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
 #include "fileseq.h"
 #include "pad.h"
 #include "private/frameset_p.h"

@@ -1,6 +1,4 @@
 #pragma clang diagnostic push
-#pragma ide diagnostic ignored "google-explicit-constructor"
-#pragma ide diagnostic ignored "modernize-use-equals-default"
 #ifndef FILESEQ_ERROR_H_
 #define FILESEQ_ERROR_H_
 
