@@ -1,4 +1,3 @@
-#pragma clang diagnostic push
 #include "fileseq.h"
 #include "pad.h"
 #include "private/frameset_p.h"
@@ -551,5 +550,3 @@ Status findSequencesOnDisk(FileSequences &seqs,
 
 
 } // fileseq
-
-#pragma clang diagnostic pop

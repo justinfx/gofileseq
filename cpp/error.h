@@ -1,4 +1,3 @@
-#pragma clang diagnostic push
 #ifndef FILESEQ_ERROR_H_
 #define FILESEQ_ERROR_H_
 
@@ -71,6 +70,3 @@ void setError(const std::string &msg, Status* stat);
 } // fileseq
 
 #endif // FILESEQ_ERROR_H_
-
-
-#pragma clang diagnostic pop
