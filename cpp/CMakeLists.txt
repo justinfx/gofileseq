@@ -38,6 +38,10 @@ set(ANTLR4_INSTALL OFF CACHE BOOL "Don't install ANTLR4 runtime" FORCE)
 set(WITH_DEMO OFF CACHE BOOL "Don't build ANTLR4 demos" FORCE)
 set(WITH_LIBCXX OFF CACHE BOOL "Don't use libc++" FORCE)
 set(ANTLR_BUILD_CPP_TESTS OFF CACHE BOOL "Don't build ANTLR4 tests" FORCE)
+
+# Force ANTLR4 to build with -fPIC so it can be linked into shared libraries
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 add_subdirectory(ext/antlr4 EXCLUDE_FROM_ALL)
 
 # ANTLR4 include directories (from vendored runtime)
