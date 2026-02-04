@@ -5,6 +5,8 @@
 #include "fileseqBaseVisitor.h"
 
 #include "antlr4-runtime.h"
+#include "atn/ParserATNSimulator.h"
+#include "atn/PredictionMode.h"
 
 #include <sstream>
 
@@ -162,12 +164,30 @@ bool parseFileSequence(ParseResult& result, const std::string& path) {
         // Remove default error listeners from parser
         parser.removeErrorListeners();
 
+        // Try SLL prediction mode first (30x faster for unambiguous grammars)
+        parser.getInterpreter<antlr4::atn::ParserATNSimulator>()->setPredictionMode(
+            antlr4::atn::PredictionMode::SLL);
+
         // Parse the input
         fileseqParser::InputContext* tree = parser.input();
 
-        // Check for parse errors (from both lexer and parser)
+        // If SLL failed, retry with LL prediction mode (slower but more thorough)
         if (lexer.getNumberOfSyntaxErrors() > 0 || parser.getNumberOfSyntaxErrors() > 0) {
-            return false;
+            // Reset for retry
+            input.seek(0);
+            lexer.setInputStream(&input);
+            tokens.setTokenSource(&lexer);
+            parser.setInputStream(&tokens);
+
+            parser.getInterpreter<antlr4::atn::ParserATNSimulator>()->setPredictionMode(
+                antlr4::atn::PredictionMode::LL);
+
+            tree = parser.input();
+
+            // Check for parse errors after LL retry
+            if (lexer.getNumberOfSyntaxErrors() > 0 || parser.getNumberOfSyntaxErrors() > 0) {
+                return false;
+            }
         }
 
         // Create visitor and walk the tree
