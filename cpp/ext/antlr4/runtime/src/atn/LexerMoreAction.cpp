@@ -12,23 +12,34 @@ using namespace antlr4;
 using namespace antlr4::atn;
 using namespace antlr4::misc;
 
-const Ref<const LexerMoreAction>& LexerMoreAction::getInstance() {
-  static const Ref<const LexerMoreAction> instance(new LexerMoreAction());
+const Ref<LexerMoreAction> LexerMoreAction::getInstance() {
+  static Ref<LexerMoreAction> instance(new LexerMoreAction());
   return instance;
 }
 
-void LexerMoreAction::execute(Lexer *lexer) const {
+LexerMoreAction::LexerMoreAction() {
+}
+
+LexerActionType LexerMoreAction::getActionType() const {
+  return LexerActionType::MORE;
+}
+
+bool LexerMoreAction::isPositionDependent() const {
+  return false;
+}
+
+void LexerMoreAction::execute(Lexer *lexer) {
   lexer->more();
 }
 
-size_t LexerMoreAction::hashCodeImpl() const {
+size_t LexerMoreAction::hashCode() const {
   size_t hash = MurmurHash::initialize();
   hash = MurmurHash::update(hash, static_cast<size_t>(getActionType()));
   return MurmurHash::finish(hash, 1);
 }
 
-bool LexerMoreAction::equals(const LexerAction &other) const {
-  return this == std::addressof(other);
+bool LexerMoreAction::operator == (const LexerAction &obj) const {
+  return &obj == this;
 }
 
 std::string LexerMoreAction::toString() const {

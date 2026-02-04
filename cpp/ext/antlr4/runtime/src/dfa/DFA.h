@@ -7,38 +7,29 @@
 
 #include "dfa/DFAState.h"
 
+namespace antlrcpp {
+  class SingleWriteMultipleReadLock;
+}
+
 namespace antlr4 {
 namespace dfa {
 
-  class ANTLR4CPP_PUBLIC DFA final {
-  private:
-    struct DFAStateHasher final {
-      size_t operator()(const DFAState *dfaState) const {
-        return dfaState->hashCode();
-      }
-    };
-
-    struct DFAStateComparer final {
-      bool operator()(const DFAState *lhs, const DFAState *rhs) const {
-        return lhs == rhs || *lhs == *rhs;
-      }
-    };
-
+  class ANTLR4CPP_PUBLIC DFA {
   public:
     /// A set of all DFA states. Use a map so we can get old state back.
     /// Set only allows you to see if it's there.
 
     /// From which ATN state did we create this DFA?
     atn::DecisionState *atnStartState;
-    std::unordered_set<DFAState*, DFAStateHasher, DFAStateComparer> states; // States are owned by this class.
+    std::unordered_set<DFAState *, DFAState::Hasher, DFAState::Comparer> states; // States are owned by this class.
     DFAState *s0;
     size_t decision;
 
-    explicit DFA(atn::DecisionState *atnStartState);
+    DFA(atn::DecisionState *atnStartState);
     DFA(atn::DecisionState *atnStartState, size_t decision);
     DFA(const DFA &other) = delete;
     DFA(DFA &&other);
-    ~DFA();
+    virtual ~DFA();
 
     /**
      * Gets whether this DFA is a precedence DFA. Precedence DFAs use a special
@@ -75,14 +66,18 @@ namespace dfa {
      * @throws IllegalStateException if this is not a precedence DFA.
      * @see #isPrecedenceDfa()
      */
-    void setPrecedenceStartState(int precedence, DFAState *startState);
+    void setPrecedenceStartState(int precedence, DFAState *startState, antlrcpp::SingleWriteMultipleReadLock &lock);
 
     /// Return a list of all states in this DFA, ordered by state number.
-    std::vector<DFAState *> getStates() const;
+    virtual std::vector<DFAState *> getStates() const;
 
+    /**
+     * @deprecated Use {@link #toString(Vocabulary)} instead.
+     */
+    virtual std::string toString(const std::vector<std::string>& tokenNames);
     std::string toString(const Vocabulary &vocabulary) const;
 
-    std::string toLexerString() const;
+    virtual std::string toLexerString();
 
   private:
     /**

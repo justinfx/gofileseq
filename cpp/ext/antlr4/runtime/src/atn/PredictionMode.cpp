@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2017 The ANTLR Project. All rights reserved.
+﻿/* Copyright (c) 2012-2017 The ANTLR Project. All rights reserved.
  * Use of this file is governed by the BSD 3-clause license that
  * can be found in the LICENSE.txt file in the project root.
  */
@@ -62,7 +62,7 @@ bool PredictionModeClass::hasSLLConflictTerminatingPrediction(PredictionMode mod
     // dup configs, tossing out semantic predicates
     ATNConfigSet dup(true);
     for (auto &config : configs->configs) {
-      Ref<ATNConfig> c = std::make_shared<ATNConfig>(*config, SemanticContext::Empty::Instance);
+      Ref<ATNConfig> c = std::make_shared<ATNConfig>(config, SemanticContext::NONE);
       dup.add(c);
     }
     std::vector<antlrcpp::BitSet> altsets = getConflictingAltSubsets(&dup);
@@ -73,8 +73,8 @@ bool PredictionModeClass::hasSLLConflictTerminatingPrediction(PredictionMode mod
 }
 
 bool PredictionModeClass::hasConfigInRuleStopState(ATNConfigSet *configs) {
-  for (const auto &config : configs->configs) {
-    if (RuleStopState::is(config->state)) {
+  for (auto &c : configs->configs) {
+    if (is<RuleStopState *>(c->state)) {
       return true;
     }
   }
@@ -83,8 +83,8 @@ bool PredictionModeClass::hasConfigInRuleStopState(ATNConfigSet *configs) {
 }
 
 bool PredictionModeClass::allConfigsInRuleStopStates(ATNConfigSet *configs) {
-  for (const auto &config : configs->configs) {
-    if (!RuleStopState::is(config->state)) {
+  for (auto &config : configs->configs) {
+    if (!is<RuleStopState*>(config->state)) {
       return false;
     }
   }
@@ -142,7 +142,7 @@ size_t PredictionModeClass::getUniqueAlt(const std::vector<antlrcpp::BitSet>& al
 
 antlrcpp::BitSet PredictionModeClass::getAlts(const std::vector<antlrcpp::BitSet>& altsets) {
   antlrcpp::BitSet all;
-  for (const auto &alts : altsets) {
+  for (antlrcpp::BitSet alts : altsets) {
     all |= alts;
   }
 
@@ -151,44 +151,43 @@ antlrcpp::BitSet PredictionModeClass::getAlts(const std::vector<antlrcpp::BitSet
 
 antlrcpp::BitSet PredictionModeClass::getAlts(ATNConfigSet *configs) {
   antlrcpp::BitSet alts;
-  for (const auto &config : configs->configs) {
+  for (auto &config : configs->configs) {
     alts.set(config->alt);
   }
   return alts;
 }
 
 std::vector<antlrcpp::BitSet> PredictionModeClass::getConflictingAltSubsets(ATNConfigSet *configs) {
-  std::unordered_map<ATNConfig*, antlrcpp::BitSet, AltAndContextConfigHasher, AltAndContextConfigComparer> configToAlts;
+  std::unordered_map<ATNConfig *, antlrcpp::BitSet, AltAndContextConfigHasher, AltAndContextConfigComparer> configToAlts;
   for (auto &config : configs->configs) {
     configToAlts[config.get()].set(config->alt);
   }
   std::vector<antlrcpp::BitSet> values;
-  values.reserve(configToAlts.size());
-  for (const auto &pair : configToAlts) {
-    values.push_back(pair.second);
+  for (auto it : configToAlts) {
+    values.push_back(it.second);
   }
   return values;
 }
 
-std::unordered_map<ATNState*, antlrcpp::BitSet> PredictionModeClass::getStateToAltMap(ATNConfigSet *configs) {
-  std::unordered_map<ATNState*, antlrcpp::BitSet> m;
-  for (const auto &c : configs->configs) {
+std::map<ATNState*, antlrcpp::BitSet> PredictionModeClass::getStateToAltMap(ATNConfigSet *configs) {
+  std::map<ATNState*, antlrcpp::BitSet> m;
+  for (auto &c : configs->configs) {
     m[c->state].set(c->alt);
   }
   return m;
 }
 
 bool PredictionModeClass::hasStateAssociatedWithOneAlt(ATNConfigSet *configs) {
-  auto x = getStateToAltMap(configs);
-  for (const auto &pair : x){
-    if (pair.second.count() == 1) return true;
+  std::map<ATNState*, antlrcpp::BitSet> x = getStateToAltMap(configs);
+  for (std::map<ATNState*, antlrcpp::BitSet>::iterator it = x.begin(); it != x.end(); it++){
+    if (it->second.count() == 1) return true;
   }
   return false;
 }
 
 size_t PredictionModeClass::getSingleViableAlt(const std::vector<antlrcpp::BitSet>& altsets) {
   antlrcpp::BitSet viableAlts;
-  for (const auto &alts : altsets) {
+  for (antlrcpp::BitSet alts : altsets) {
     size_t minAlt = alts.nextSetBit(0);
 
     viableAlts.set(minAlt);

@@ -11,7 +11,11 @@
 using namespace antlr4::misc;
 using namespace antlr4::atn;
 
-AtomTransition::AtomTransition(ATNState *target, size_t label) : Transition(TransitionType::ATOM, target), _label(label) {
+AtomTransition::AtomTransition(ATNState *target, size_t label) : Transition(target), _label(label) {
+}
+
+Transition::SerializationType AtomTransition::getSerializationType() const {
+  return ATOM;
 }
 
 IntervalSet AtomTransition::label() const {

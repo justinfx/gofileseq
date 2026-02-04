@@ -5,39 +5,52 @@
 
 #include "misc/MurmurHash.h"
 #include "Lexer.h"
-#include "support/Casts.h"
 
 #include "atn/LexerPushModeAction.h"
 
 using namespace antlr4;
 using namespace antlr4::atn;
 using namespace antlr4::misc;
-using namespace antlrcpp;
 
-LexerPushModeAction::LexerPushModeAction(int mode) : LexerAction(LexerActionType::PUSH_MODE, false), _mode(mode) {}
-
-void LexerPushModeAction::execute(Lexer *lexer) const {
-  lexer->pushMode(getMode());
+LexerPushModeAction::LexerPushModeAction(int mode) : _mode(mode) {
 }
 
-size_t LexerPushModeAction::hashCodeImpl() const {
+int LexerPushModeAction::getMode() const {
+  return _mode;
+}
+
+LexerActionType LexerPushModeAction::getActionType() const {
+  return LexerActionType::PUSH_MODE;
+}
+
+bool LexerPushModeAction::isPositionDependent() const {
+  return false;
+}
+
+void LexerPushModeAction::execute(Lexer *lexer) {
+  lexer->pushMode(_mode);
+}
+
+size_t LexerPushModeAction::hashCode() const {
   size_t hash = MurmurHash::initialize();
   hash = MurmurHash::update(hash, static_cast<size_t>(getActionType()));
-  hash = MurmurHash::update(hash, getMode());
+  hash = MurmurHash::update(hash, _mode);
   return MurmurHash::finish(hash, 2);
 }
 
-bool LexerPushModeAction::equals(const LexerAction &other) const {
-  if (this == std::addressof(other)) {
+bool LexerPushModeAction::operator == (const LexerAction &obj) const {
+  if (&obj == this) {
     return true;
   }
-  if (getActionType() != other.getActionType()) {
+
+  const LexerPushModeAction *action = dynamic_cast<const LexerPushModeAction *>(&obj);
+  if (action == nullptr) {
     return false;
   }
-  const auto &lexerAction = downCast<const LexerPushModeAction&>(other);
-  return getMode() == lexerAction.getMode();
+
+  return _mode == action->_mode;
 }
 
 std::string LexerPushModeAction::toString() const {
-  return "pushMode(" + std::to_string(getMode()) + ")";
+  return "pushMode(" + std::to_string(_mode) + ")";
 }

@@ -8,11 +8,15 @@
 using namespace antlr4::atn;
 
 ActionTransition::ActionTransition(ATNState *target, size_t ruleIndex)
-  : Transition(TransitionType::ACTION, target), ruleIndex(ruleIndex), actionIndex(INVALID_INDEX), isCtxDependent(false) {
+  : Transition(target), ruleIndex(ruleIndex), actionIndex(INVALID_INDEX), isCtxDependent(false) {
 }
 
 ActionTransition::ActionTransition(ATNState *target, size_t ruleIndex, size_t actionIndex, bool isCtxDependent)
-  : Transition(TransitionType::ACTION, target), ruleIndex(ruleIndex), actionIndex(actionIndex), isCtxDependent(isCtxDependent) {
+  : Transition(target), ruleIndex(ruleIndex), actionIndex(actionIndex), isCtxDependent(isCtxDependent) {
+}
+
+Transition::SerializationType ActionTransition::getSerializationType() const {
+  return ACTION;
 }
 
 bool ActionTransition::isEpsilon() const {

@@ -1,5 +1,10 @@
 Changes:
 
+3.0.1
+----------------
+
+* cpp - Restore support for C++11 by downgrading antlr4 generator and runtime to 4.9.3
+
 3.0.0
 ----------------
 

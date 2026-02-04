@@ -20,7 +20,7 @@ namespace atn {
     /// <summary>
     /// The type of a <seealso cref="LexerChannelAction"/> action.
     /// </summary>
-    CHANNEL = 0,
+    CHANNEL,
     /// <summary>
     /// The type of a <seealso cref="LexerCustomAction"/> action.
     /// </summary>
@@ -49,8 +49,6 @@ namespace atn {
     /// The type of a <seealso cref="LexerTypeAction"/> action.
     /// </summary>
     TYPE,
-
-    INDEXED_CUSTOM,
   };
 
 } // namespace atn

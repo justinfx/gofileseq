@@ -6,10 +6,9 @@
 #pragma once
 
 #include "atn/ATN.h"
-#include "atn/PredictionContext.h"
-#include "atn/PredictionContextCache.h"
 #include "misc/IntervalSet.h"
 #include "support/CPPUtils.h"
+#include "atn/PredictionContext.h"
 
 namespace antlr4 {
 namespace atn {
@@ -21,8 +20,7 @@ namespace atn {
     const ATN &atn;
 
     ATNSimulator(const ATN &atn, PredictionContextCache &sharedContextCache);
-
-    virtual ~ATNSimulator() = default;
+    virtual ~ATNSimulator();
 
     virtual void reset() = 0;
 
@@ -38,11 +36,29 @@ namespace atn {
      * @since 4.3
      */
     virtual void clearDFA();
+    virtual PredictionContextCache& getSharedContextCache();
+    virtual Ref<PredictionContext> getCachedContext(Ref<PredictionContext> const& context);
 
-    PredictionContextCache& getSharedContextCache() const;
-    Ref<const PredictionContext> getCachedContext(const Ref<const PredictionContext> &context);
+    /// @deprecated Use <seealso cref="ATNDeserializer#deserialize"/> instead.
+    static ATN deserialize(const std::vector<uint16_t> &data);
+
+    /// @deprecated Use <seealso cref="ATNDeserializer#checkCondition(boolean)"/> instead.
+    static void checkCondition(bool condition);
+
+    /// @deprecated Use <seealso cref="ATNDeserializer#checkCondition(boolean, String)"/> instead.
+    static void checkCondition(bool condition, const std::string &message);
+
+    /// @deprecated Use <seealso cref="ATNDeserializer#edgeFactory"/> instead.
+    static Transition *edgeFactory(const ATN &atn, int type, int src, int trg, int arg1, int arg2, int arg3,
+                                   const std::vector<misc::IntervalSet> &sets);
+
+    /// @deprecated Use <seealso cref="ATNDeserializer#stateFactory"/> instead.
+    static ATNState *stateFactory(int type, int ruleIndex);
 
   protected:
+    static antlrcpp::SingleWriteMultipleReadLock _stateLock; // Lock for DFA states.
+    static antlrcpp::SingleWriteMultipleReadLock _edgeLock; // Lock for the sparse edge map in DFA states.
+
     /// <summary>
     /// The context cache maps all PredictionContext objects that are equals()
     ///  to a single cached copy. This cache is shared across all contexts

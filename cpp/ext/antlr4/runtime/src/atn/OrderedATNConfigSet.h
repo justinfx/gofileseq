@@ -11,14 +11,9 @@
 namespace antlr4 {
 namespace atn {
 
-  class ANTLR4CPP_PUBLIC OrderedATNConfigSet final : public ATNConfigSet {
-  public:
-    OrderedATNConfigSet() = default;
-
-  private:
-    size_t hashCode(const ATNConfig &atnConfig) const override;
-
-    bool equals(const ATNConfig &lhs, const ATNConfig &rhs) const override;
+  class ANTLR4CPP_PUBLIC OrderedATNConfigSet : public ATNConfigSet {
+  protected:
+    virtual size_t getHash(ATNConfig *c) override;
   };
 
 } // namespace atn

@@ -5,39 +5,52 @@
 
 #include "misc/MurmurHash.h"
 #include "Lexer.h"
-#include "support/Casts.h"
 
 #include "atn/LexerTypeAction.h"
 
 using namespace antlr4;
 using namespace antlr4::atn;
 using namespace antlr4::misc;
-using namespace antlrcpp;
 
-LexerTypeAction::LexerTypeAction(int type) : LexerAction(LexerActionType::TYPE, false), _type(type) {}
-
-void LexerTypeAction::execute(Lexer *lexer) const {
-  lexer->setType(getType());
+LexerTypeAction::LexerTypeAction(int type) : _type(type) {
 }
 
-size_t LexerTypeAction::hashCodeImpl() const {
+int LexerTypeAction::getType() const {
+  return _type;
+}
+
+LexerActionType LexerTypeAction::getActionType() const {
+  return LexerActionType::TYPE;
+}
+
+bool LexerTypeAction::isPositionDependent() const {
+  return false;
+}
+
+void LexerTypeAction::execute(Lexer *lexer) {
+  lexer->setType(_type);
+}
+
+size_t LexerTypeAction::hashCode() const {
   size_t hash = MurmurHash::initialize();
   hash = MurmurHash::update(hash, static_cast<size_t>(getActionType()));
-  hash = MurmurHash::update(hash, getType());
+  hash = MurmurHash::update(hash, _type);
   return MurmurHash::finish(hash, 2);
 }
 
-bool LexerTypeAction::equals(const LexerAction &other) const {
-  if (this == std::addressof(other)) {
+bool LexerTypeAction::operator == (const LexerAction &obj) const {
+  if (&obj == this) {
     return true;
   }
-  if (getActionType() != other.getActionType()) {
+
+  const LexerTypeAction *action = dynamic_cast<const LexerTypeAction *>(&obj);
+  if (action == nullptr) {
     return false;
   }
-  const auto &lexerAction = downCast<const LexerTypeAction&>(other);
-  return getType() == lexerAction.getType();
+
+  return _type == action->_type;
 }
 
 std::string LexerTypeAction::toString() const {
-  return "type(" + std::to_string(getType()) + ")";
+  return "type(" + std::to_string(_type) + ")";
 }

@@ -12,12 +12,10 @@ namespace antlr4 {
 namespace atn {
 
   class ANTLR4CPP_PUBLIC BasicBlockStartState final : public BlockStartState {
+
   public:
-    static bool is(const ATNState &atnState) { return atnState.getStateType() == ATNStateType::BLOCK_START; }
+    virtual size_t getStateType() override;
 
-    static bool is(const ATNState *atnState) { return atnState != nullptr && is(*atnState); }
-
-    BasicBlockStartState() : BlockStartState(ATNStateType::BLOCK_START) {}
   };
 
 } // namespace atn

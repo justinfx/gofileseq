@@ -1,5 +1,5 @@
 
-// Generated from fileseq.g4 by ANTLR 4.13.1
+// Generated from fileseq.g4 by ANTLR 4.9.3
 
 #pragma once
 
@@ -17,63 +17,63 @@ namespace fileseq {
 class  fileseqBaseVisitor : public fileseqVisitor {
 public:
 
-  virtual std::any visitInput(fileseqParser::InputContext *ctx) override {
+  virtual antlrcpp::Any visitInput(fileseqParser::InputContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitSequence(fileseqParser::SequenceContext *ctx) override {
+  virtual antlrcpp::Any visitSequence(fileseqParser::SequenceContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitPatternOnly(fileseqParser::PatternOnlyContext *ctx) override {
+  virtual antlrcpp::Any visitPatternOnly(fileseqParser::PatternOnlyContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitSingleFrame(fileseqParser::SingleFrameContext *ctx) override {
+  virtual antlrcpp::Any visitSingleFrame(fileseqParser::SingleFrameContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitPlainFile(fileseqParser::PlainFileContext *ctx) override {
+  virtual antlrcpp::Any visitPlainFile(fileseqParser::PlainFileContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitDirectory(fileseqParser::DirectoryContext *ctx) override {
+  virtual antlrcpp::Any visitDirectory(fileseqParser::DirectoryContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitDirSegment(fileseqParser::DirSegmentContext *ctx) override {
+  virtual antlrcpp::Any visitDirSegment(fileseqParser::DirSegmentContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitSequenceBasename(fileseqParser::SequenceBasenameContext *ctx) override {
+  virtual antlrcpp::Any visitSequenceBasename(fileseqParser::SequenceBasenameContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitPatternBasename(fileseqParser::PatternBasenameContext *ctx) override {
+  virtual antlrcpp::Any visitPatternBasename(fileseqParser::PatternBasenameContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitSingleFrameBasename(fileseqParser::SingleFrameBasenameContext *ctx) override {
+  virtual antlrcpp::Any visitSingleFrameBasename(fileseqParser::SingleFrameBasenameContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitPlainBasename(fileseqParser::PlainBasenameContext *ctx) override {
+  virtual antlrcpp::Any visitPlainBasename(fileseqParser::PlainBasenameContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitFrameRange(fileseqParser::FrameRangeContext *ctx) override {
+  virtual antlrcpp::Any visitFrameRange(fileseqParser::FrameRangeContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitFrameNum(fileseqParser::FrameNumContext *ctx) override {
+  virtual antlrcpp::Any visitFrameNum(fileseqParser::FrameNumContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitPadding(fileseqParser::PaddingContext *ctx) override {
+  virtual antlrcpp::Any visitPadding(fileseqParser::PaddingContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitExtension(fileseqParser::ExtensionContext *ctx) override {
+  virtual antlrcpp::Any visitExtension(fileseqParser::ExtensionContext *ctx) override {
     return visitChildren(ctx);
   }
 

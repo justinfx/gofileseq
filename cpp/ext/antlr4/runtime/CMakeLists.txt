@@ -1,17 +1,7 @@
-option(ANTLR_BUILD_CPP_TESTS "Build C++ tests." ON)
-option(TRACE_ATN "Trace ATN simulation" OFF)
-option(ANTLR_BUILD_SHARED "Build the shared library of the ANTLR runtime" ON)
-option(ANTLR_BUILD_STATIC "Build the static library of the ANTLR runtime" ON)
-
-if (NOT ANTLR_BUILD_SHARED AND NOT ANTLR_BUILD_STATIC)
-  message(FATAL_ERROR "Options ANTLR_BUILD_SHARED and ANTLR_BUILD_STATIC can't both be OFF")
-endif()
-
 include_directories(
   ${PROJECT_SOURCE_DIR}/runtime/src
   ${PROJECT_SOURCE_DIR}/runtime/src/atn
   ${PROJECT_SOURCE_DIR}/runtime/src/dfa
-  ${PROJECT_SOURCE_DIR}/runtime/src/internal
   ${PROJECT_SOURCE_DIR}/runtime/src/misc
   ${PROJECT_SOURCE_DIR}/runtime/src/support
   ${PROJECT_SOURCE_DIR}/runtime/src/tree
@@ -24,7 +14,6 @@ file(GLOB libantlrcpp_SRC
   "${PROJECT_SOURCE_DIR}/runtime/src/*.cpp"
   "${PROJECT_SOURCE_DIR}/runtime/src/atn/*.cpp"
   "${PROJECT_SOURCE_DIR}/runtime/src/dfa/*.cpp"
-  "${PROJECT_SOURCE_DIR}/runtime/src/internal/*.cpp"
   "${PROJECT_SOURCE_DIR}/runtime/src/misc/*.cpp"
   "${PROJECT_SOURCE_DIR}/runtime/src/support/*.cpp"
   "${PROJECT_SOURCE_DIR}/runtime/src/tree/*.cpp"
@@ -32,72 +21,66 @@ file(GLOB libantlrcpp_SRC
   "${PROJECT_SOURCE_DIR}/runtime/src/tree/xpath/*.cpp"
 )
 
-if (ANTLR_BUILD_SHARED)
-  add_library(antlr4_shared SHARED ${libantlrcpp_SRC})
-endif()
-if (ANTLR_BUILD_STATIC)
-  add_library(antlr4_static STATIC ${libantlrcpp_SRC})
-endif()
+add_library(antlr4_shared SHARED ${libantlrcpp_SRC})
+add_library(antlr4_static STATIC ${libantlrcpp_SRC})
 
-if (CMAKE_HOST_UNIX)
-  # Make sure to link against threads (pthreads) library in order to be able to
-  # make use of std::call_once in the code without producing runtime errors
-  # (see also https://github.com/antlr/antlr4/issues/3708 and/or https://stackoverflow.com/q/51584960).
-  find_package(Threads REQUIRED)
+set(LIB_OUTPUT_DIR "${CMAKE_HOME_DIRECTORY}/dist") # put generated libraries here.
+message(STATUS "Output libraries to ${LIB_OUTPUT_DIR}")
 
-  if (TARGET antlr4_shared)
-    target_link_libraries(antlr4_shared Threads::Threads)
+# make sure 'make' works fine even if ${LIB_OUTPUT_DIR} is deleted.
+add_custom_target(make_lib_output_dir ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${LIB_OUTPUT_DIR}
+    )
+
+add_dependencies(antlr4_shared make_lib_output_dir)
+add_dependencies(antlr4_static make_lib_output_dir)
+
+find_package(utf8cpp QUIET)
+
+set(INSTALL_utf8cpp FALSE)
+
+if (utf8cpp_FOUND)
+  target_link_libraries(antlr4_shared utf8cpp)
+  target_link_libraries(antlr4_static utf8cpp)
+else()
+
+  # older utf8cpp doesn't define the package above
+  find_path(utf8cpp_HEADER utf8.h
+    PATH_SUFFIXES utf8cpp
+    )
+
+  if (utf8cpp_HEADER)
+    include_directories(${utf8cpp_HEADER})
+  else()
+    include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
+    set(THIRDPARTY_DIR ${CMAKE_BINARY_DIR}/runtime/thirdparty)
+    set(UTFCPP_DIR ${THIRDPARTY_DIR}/utfcpp)
+    ExternalProject_Add(
+      utf8cpp
+      GIT_REPOSITORY        "https://github.com/nemtrif/utfcpp"
+      GIT_TAG               "v3.1.1"
+      SOURCE_DIR            ${UTFCPP_DIR}
+      UPDATE_DISCONNECTED   1
+      CMAKE_ARGS            -DCMAKE_INSTALL_PREFIX=${UTFCPP_DIR}/install -DUTF8_TESTS=off -DUTF8_SAMPLES=off -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+      STEP_TARGETS          build)
+
+    include_directories(
+      ${UTFCPP_DIR}/install/include/utf8cpp
+      ${UTFCPP_DIR}/install/include/utf8cpp/utf8
+      )
+
+    add_dependencies(antlr4_shared utf8cpp)
+    add_dependencies(antlr4_static utf8cpp)
+    set(INSTALL_utf8cpp TRUE)
   endif()
-  if (TARGET antlr4_static)
-    target_link_libraries(antlr4_static Threads::Threads)
-  endif()
-endif()
-
-IF(TRACE_ATN)
-    ADD_DEFINITIONS(-DTRACE_ATN_SIM=1)
-ENDIF(TRACE_ATN)
-
-if (ANTLR_BUILD_CPP_TESTS)
-  include(FetchContent)
-
-  FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/e2239ee6043f73722e7aa812a459f54a28552929.zip
-  )
-
-  if(WITH_STATIC_CRT)
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-  endif()
-
-  FetchContent_MakeAvailable(googletest)
-
-  file(GLOB libantlrcpp_TESTS
-    "${PROJECT_SOURCE_DIR}/runtime/tests/*.cpp"
-  )
-
-  add_executable(
-    antlr4_tests
-    ${libantlrcpp_TESTS}
-  )
-
-  target_link_libraries(
-    antlr4_tests
-	$<IF:$<TARGET_EXISTS:antlr4_static>,antlr4_static,antlr4_shared>
-    gtest_main
-  )
-
-  include(GoogleTest)
-
-  gtest_discover_tests(antlr4_tests)
 endif()
 
-if(APPLE)
-  if (TARGET antlr4_shared)
-    target_link_libraries(antlr4_shared ${COREFOUNDATION_LIBRARY})
-  endif()
-  if (TARGET antlr4_static)
-    target_link_libraries(antlr4_static ${COREFOUNDATION_LIBRARY})
-  endif()
+if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+  target_link_libraries(antlr4_shared ${UUID_LIBRARIES})
+  target_link_libraries(antlr4_static ${UUID_LIBRARIES})
+elseif(APPLE)
+  target_link_libraries(antlr4_shared ${COREFOUNDATION_LIBRARY})
+  target_link_libraries(antlr4_static ${COREFOUNDATION_LIBRARY})
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
@@ -107,85 +90,78 @@ else()
 endif()
 
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
   set(disabled_compile_warnings "${disabled_compile_warnings} -Wno-dollar-in-identifier-extension -Wno-four-char-constants")
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Intel")
   set(disabled_compile_warnings "${disabled_compile_warnings} -Wno-multichar")
 endif()
 
 set(extra_share_compile_flags "")
 set(extra_static_compile_flags "")
+if(WIN32)
+  set(extra_share_compile_flags "-DANTLR4CPP_EXPORTS")
+  set(extra_static_compile_flags "-DANTLR4CPP_STATIC")
+endif(WIN32)
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+  if(WITH_STATIC_CRT)
+    target_compile_options(antlr4_shared PRIVATE "/MT$<$<CONFIG:Debug>:d>")
+    target_compile_options(antlr4_static PRIVATE "/MT$<$<CONFIG:Debug>:d>")
+  else()
+    target_compile_options(antlr4_shared PRIVATE "/MD$<$<CONFIG:Debug>:d>")
+    target_compile_options(antlr4_static PRIVATE "/MD$<$<CONFIG:Debug>:d>")
+  endif()
+endif()
+
 set(static_lib_suffix "")
-
-if (WIN32)
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   set(static_lib_suffix "-static")
-  if (TARGET antlr4_shared)
-    target_compile_definitions(antlr4_shared PUBLIC ANTLR4CPP_EXPORTS)
-  endif()
-  if (TARGET antlr4_static)
-    target_compile_definitions(antlr4_static PUBLIC ANTLR4CPP_STATIC)
-  endif()
-  if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    set(extra_share_compile_flags "-MP /wd4251")
-    set(extra_static_compile_flags "-MP")
-  endif()
 endif()
 
-if (TARGET antlr4_shared)
-  set_target_properties(antlr4_shared
-                        PROPERTIES VERSION   ${ANTLR_VERSION}
-                                   SOVERSION ${ANTLR_VERSION}
-                                   OUTPUT_NAME antlr4-runtime
-                                   COMPILE_FLAGS "${disabled_compile_warnings} ${extra_share_compile_flags}")
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+  set(extra_share_compile_flags "-DANTLR4CPP_EXPORTS -MP /wd4251")
+  set(extra_static_compile_flags "-DANTLR4CPP_STATIC -MP")
 endif()
 
-if (TARGET antlr4_static)
-  set_target_properties(antlr4_static
-                        PROPERTIES VERSION   ${ANTLR_VERSION}
-                                   SOVERSION ${ANTLR_VERSION}
-                                   OUTPUT_NAME "antlr4-runtime${static_lib_suffix}"
-                                   COMPILE_PDB_NAME "antlr4-runtime${static_lib_suffix}"
-                                   COMPILE_FLAGS "${disabled_compile_warnings} ${extra_static_compile_flags}")
-endif()
+set_target_properties(antlr4_shared
+                      PROPERTIES VERSION   ${ANTLR_VERSION}
+                                 SOVERSION ${ANTLR_VERSION}
+                                 OUTPUT_NAME antlr4-runtime
+                                 LIBRARY_OUTPUT_DIRECTORY ${LIB_OUTPUT_DIR}
+                                 # TODO: test in windows. DLL is treated as runtime.
+                                 # see https://cmake.org/cmake/help/v3.0/prop_tgt/LIBRARY_OUTPUT_DIRECTORY.html
+                                 RUNTIME_OUTPUT_DIRECTORY ${LIB_OUTPUT_DIR}
+                                 ARCHIVE_OUTPUT_DIRECTORY ${LIB_OUTPUT_DIR}
+                                 COMPILE_FLAGS "${disabled_compile_warnings} ${extra_share_compile_flags}")
 
-if (ANTLR_BUILD_CPP_TESTS)
-  # Copy the generated binaries to dist folder (required by test suite)
-  if (TARGET antlr4_shared)
-  add_custom_command(
-      TARGET antlr4_shared
-      POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_HOME_DIRECTORY}/dist
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:antlr4_shared> ${CMAKE_HOME_DIRECTORY}/dist
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_LINKER_FILE:antlr4_shared> ${CMAKE_HOME_DIRECTORY}/dist)
-  endif()
-  
-  if (TARGET antlr4_static)
-    add_custom_command(
-      TARGET antlr4_static
-      POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_HOME_DIRECTORY}/dist
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:antlr4_static> ${CMAKE_HOME_DIRECTORY}/dist)
-  endif()
-endif()
+set_target_properties(antlr4_static
+                      PROPERTIES VERSION   ${ANTLR_VERSION}
+                                 SOVERSION ${ANTLR_VERSION}
+                                 OUTPUT_NAME "antlr4-runtime${static_lib_suffix}"
+                                 ARCHIVE_OUTPUT_DIRECTORY ${LIB_OUTPUT_DIR}
+                                 COMPILE_FLAGS "${disabled_compile_warnings} ${extra_static_compile_flags}")
 
-if (TARGET antlr4_shared)
-  install(TARGETS antlr4_shared
-          EXPORT antlr4-targets
-          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif()
-
-if (TARGET antlr4_static)
-  install(TARGETS antlr4_static
-          EXPORT antlr4-targets
-          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif()
+install(TARGETS antlr4_shared
+        DESTINATION lib
+        EXPORT antlr4-targets)
+install(TARGETS antlr4_static
+        DESTINATION lib
+        EXPORT antlr4-targets)
 
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/runtime/src/"
         DESTINATION "include/antlr4-runtime"
         COMPONENT dev
         FILES_MATCHING PATTERN "*.h"
         )
+
+if (INSTALL_utf8cpp)
+  install(FILES "${UTFCPP_DIR}/source/utf8.h"
+	  DESTINATION "include/antlr4-runtime")
+  install(DIRECTORY "${UTFCPP_DIR}/source/utf8"
+	  DESTINATION "include/antlr4-runtime"
+	  COMPONENT dev
+	  FILES_MATCHING PATTERN "*.h"
+	  )
+endif()
+
+
+

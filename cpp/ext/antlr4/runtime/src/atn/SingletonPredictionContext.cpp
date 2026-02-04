@@ -3,67 +3,69 @@
  * can be found in the LICENSE.txt file in the project root.
  */
 
+#include "atn/EmptyPredictionContext.h"
+
 #include "atn/SingletonPredictionContext.h"
 
-#include "support/Casts.h"
-#include "misc/MurmurHash.h"
-#include "atn/HashUtils.h"
-
 using namespace antlr4::atn;
-using namespace antlrcpp;
 
-SingletonPredictionContext::SingletonPredictionContext(Ref<const PredictionContext> parent, size_t returnState)
-    : PredictionContext(PredictionContextType::SINGLETON), parent(std::move(parent)), returnState(returnState) {
+SingletonPredictionContext::SingletonPredictionContext(Ref<PredictionContext> const& parent, size_t returnState)
+  : PredictionContext(parent ? calculateHashCode(parent, returnState) : calculateEmptyHashCode()),
+    parent(parent), returnState(returnState) {
   assert(returnState != ATNState::INVALID_STATE_NUMBER);
 }
 
-Ref<const SingletonPredictionContext> SingletonPredictionContext::create(Ref<const PredictionContext> parent, size_t returnState) {
-  if (returnState == EMPTY_RETURN_STATE && parent == nullptr) {
-    // someone can pass in the bits of an array ctx that mean $
-    return std::dynamic_pointer_cast<const SingletonPredictionContext>(EMPTY);
-  }
-  return std::make_shared<SingletonPredictionContext>(std::move(parent), returnState);
+SingletonPredictionContext::~SingletonPredictionContext() {
 }
 
-bool SingletonPredictionContext::isEmpty() const {
-  return parent == nullptr && returnState == EMPTY_RETURN_STATE;
+Ref<SingletonPredictionContext> SingletonPredictionContext::create(Ref<PredictionContext> const& parent, size_t returnState) {
+
+  if (returnState == EMPTY_RETURN_STATE && parent) {
+    // someone can pass in the bits of an array ctx that mean $
+    return std::dynamic_pointer_cast<SingletonPredictionContext>(EMPTY);
+  }
+  return std::make_shared<SingletonPredictionContext>(parent, returnState);
 }
 
 size_t SingletonPredictionContext::size() const {
   return 1;
 }
 
-const Ref<const PredictionContext>& SingletonPredictionContext::getParent(size_t index) const {
+Ref<PredictionContext> SingletonPredictionContext::getParent(size_t index) const {
   assert(index == 0);
-  static_cast<void>(index);
+  ((void)(index)); // Make Release build happy.
   return parent;
 }
 
 size_t SingletonPredictionContext::getReturnState(size_t index) const {
   assert(index == 0);
-  static_cast<void>(index);
+  ((void)(index)); // Make Release build happy.
   return returnState;
 }
 
-size_t SingletonPredictionContext::hashCodeImpl() const {
-  size_t hash = misc::MurmurHash::initialize();
-  hash = misc::MurmurHash::update(hash, static_cast<size_t>(getContextType()));
-  hash = misc::MurmurHash::update(hash, parent);
-  hash = misc::MurmurHash::update(hash, returnState);
-  return misc::MurmurHash::finish(hash, 3);
-}
-
-bool SingletonPredictionContext::equals(const PredictionContext &other) const {
-  if (this == std::addressof(other)) {
+bool SingletonPredictionContext::operator == (const PredictionContext &o) const {
+  if (this == &o) {
     return true;
   }
-  if (getContextType() != other.getContextType()) {
+
+  const SingletonPredictionContext *other = dynamic_cast<const SingletonPredictionContext*>(&o);
+  if (other == nullptr) {
     return false;
   }
-  const auto &singleton = downCast<const SingletonPredictionContext&>(other);
-  return returnState == singleton.returnState &&
-         cachedHashCodeEqual(cachedHashCode(), singleton.cachedHashCode()) &&
-         (parent == singleton.parent || (parent != nullptr && singleton.parent != nullptr && *parent == *singleton.parent));
+
+  if (this->hashCode() != other->hashCode()) {
+    return false; // can't be same if hash is different
+  }
+
+  if (returnState != other->returnState)
+    return false;
+
+  if (!parent && !other->parent)
+    return true;
+  if (!parent || !other->parent)
+    return false;
+
+   return *parent == *other->parent;
 }
 
 std::string SingletonPredictionContext::toString() const {

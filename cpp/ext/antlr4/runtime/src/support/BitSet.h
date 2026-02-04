@@ -54,7 +54,7 @@ namespace antlrcpp {
       return result;
     }
 
-    std::string toString() const {
+    std::string toString(){
       std::stringstream stream;
       stream << "{";
       bool valueAdded = false;

@@ -6,14 +6,12 @@
 #pragma once
 
 #include "antlr4-common.h"
-#include "atn/ATN.h"
-#include "Vocabulary.h"
 
 namespace antlr4 {
 namespace misc {
 
   struct InterpreterData {
-    std::unique_ptr<atn::ATN> atn;
+    atn::ATN atn;
     dfa::Vocabulary vocabulary;
     std::vector<std::string> ruleNames;
     std::vector<std::string> channels; // Only valid for lexer grammars.

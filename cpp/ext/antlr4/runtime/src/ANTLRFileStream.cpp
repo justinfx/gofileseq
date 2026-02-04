@@ -3,6 +3,8 @@
  * can be found in the LICENSE.txt file in the project root.
  */
 
+#include "support/StringUtils.h"
+
 #include "ANTLRFileStream.h"
 
 using namespace antlr4;
@@ -13,7 +15,11 @@ void ANTLRFileStream::loadFromFile(const std::string &fileName) {
     return;
   }
 
+#ifdef _MSC_VER
+  std::ifstream stream(antlrcpp::s2ws(fileName), std::ios::binary);
+#else
   std::ifstream stream(fileName, std::ios::binary);
+#endif
 
   ANTLRInputStream::load(stream);
 }

@@ -12,14 +12,13 @@ namespace atn {
 
   class ANTLR4CPP_PUBLIC RuleStartState final : public ATNState {
   public:
-    static bool is(const ATNState &atnState) { return atnState.getStateType() == ATNStateType::RULE_START; }
-
-    static bool is(const ATNState *atnState) { return atnState != nullptr && is(*atnState); }
+    RuleStartState();
 
     RuleStopState *stopState = nullptr;
     bool isLeftRecursiveRule = false;
 
-    RuleStartState() : ATNState(ATNStateType::RULE_START) {}
+    virtual size_t getStateType() override;
+
   };
 
 } // namespace atn

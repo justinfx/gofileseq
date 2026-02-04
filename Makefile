@@ -1,4 +1,4 @@
-.PHONY: all build test fuzz clean help seqls seqinfo
+.PHONY: all build test fuzz clean help seqls seqinfo grammar
 
 # Build output directory
 BIN_DIR ?= bin
@@ -19,6 +19,7 @@ help:
 	@echo "  seqinfo     - Build seqinfo executable"
 	@echo "  test        - Run all unit tests"
 	@echo "  fuzz        - Run all fuzz tests for $(FUZZ_TIME) each (set FUZZ_TIME=30s to customize)"
+	@echo "  grammar     - Regenerate Go and C++ parsers from ANTLR grammar"
 	@echo "  clean       - Remove built executables"
 	@echo ""
 	@echo "Examples:"
@@ -26,6 +27,7 @@ help:
 	@echo "  make test"
 	@echo "  make fuzz"
 	@echo "  make fuzz FUZZ_TIME=30s"
+	@echo "  make grammar"
 
 all: seqls seqinfo
 
@@ -58,6 +60,10 @@ else
 	@echo ""
 	@echo "✅ All fuzz tests passed!"
 endif
+
+grammar:
+	@echo "Regenerating parsers from ANTLR grammar..."
+	$(MAKE) -C grammar all
 
 clean:
 	@echo "Cleaning build artifacts..."

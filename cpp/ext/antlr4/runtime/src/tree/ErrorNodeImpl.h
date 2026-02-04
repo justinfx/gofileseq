@@ -21,22 +21,12 @@ namespace tree {
   ///  and deletion as well as during "consume until error recovery set"
   ///  upon no viable alternative exceptions.
   /// </summary>
-  class ANTLR4CPP_PUBLIC ErrorNodeImpl : public ErrorNode {
+  class ANTLR4CPP_PUBLIC ErrorNodeImpl : public virtual TerminalNodeImpl, public virtual ErrorNode {
   public:
-    Token *symbol;
+    ErrorNodeImpl(Token *token);
+    ~ErrorNodeImpl() override;
 
-    explicit ErrorNodeImpl(Token *symbol) : ErrorNode(ParseTreeType::ERROR), symbol(symbol) {}
-
-    virtual Token* getSymbol() const override;
-    virtual void setParent(RuleContext *parent) override;
-    virtual misc::Interval getSourceInterval() override;
-
-    virtual std::any accept(ParseTreeVisitor *visitor) override;
-
-    virtual std::string getText() override;
-    virtual std::string toStringTree(Parser *parser, bool pretty = false) override;
-    virtual std::string toString() override;
-    virtual std::string toStringTree(bool pretty = false) override;
+    virtual antlrcpp::Any accept(ParseTreeVisitor *visitor) override;
   };
 
 } // namespace tree

@@ -9,7 +9,6 @@
 #include "Parser.h"
 #include "Token.h"
 
-#include "support/Casts.h"
 #include "support/CPPUtils.h"
 
 #include "ParserRuleContext.h"
@@ -40,9 +39,10 @@ void ParserRuleContext::copyFrom(ParserRuleContext *ctx) {
   // copy any error nodes to alt label node
   if (!ctx->children.empty()) {
     for (auto *child : ctx->children) {
-      if (ErrorNode::is(child)) {
-        downCast<ErrorNode*>(child)->setParent(this);
-        children.push_back(child);
+      auto *errorNode = dynamic_cast<ErrorNode *>(child);
+      if (errorNode != nullptr) {
+        errorNode->setParent(this);
+        children.push_back(errorNode);
       }
     }
 
@@ -76,36 +76,39 @@ void ParserRuleContext::removeLastChild() {
   }
 }
 
-tree::TerminalNode* ParserRuleContext::getToken(size_t ttype, size_t i) const {
+tree::TerminalNode* ParserRuleContext::getToken(size_t ttype, size_t i) {
   if (i >= children.size()) {
     return nullptr;
   }
+
   size_t j = 0; // what token with ttype have we found?
-  for (auto *child : children) {
-    if (TerminalNode::is(child)) {
-      tree::TerminalNode *typedChild = downCast<tree::TerminalNode*>(child);
-      Token *symbol = typedChild->getSymbol();
+  for (auto *o : children) {
+    if (is<tree::TerminalNode *>(o)) {
+      tree::TerminalNode *tnode = dynamic_cast<tree::TerminalNode *>(o);
+      Token *symbol = tnode->getSymbol();
       if (symbol->getType() == ttype) {
         if (j++ == i) {
-          return typedChild;
+          return tnode;
         }
       }
     }
   }
+
   return nullptr;
 }
 
-std::vector<tree::TerminalNode *> ParserRuleContext::getTokens(size_t ttype) const {
-  std::vector<tree::TerminalNode*> tokens;
-  for (auto *child : children) {
-    if (TerminalNode::is(child)) {
-      tree::TerminalNode *typedChild = downCast<tree::TerminalNode*>(child);
-      Token *symbol = typedChild->getSymbol();
+std::vector<tree::TerminalNode *> ParserRuleContext::getTokens(size_t ttype) {
+  std::vector<tree::TerminalNode *> tokens;
+  for (auto &o : children) {
+    if (is<tree::TerminalNode *>(o)) {
+      tree::TerminalNode *tnode = dynamic_cast<tree::TerminalNode *>(o);
+      Token *symbol = tnode->getSymbol();
       if (symbol->getType() == ttype) {
-        tokens.push_back(typedChild);
+        tokens.push_back(tnode);
       }
     }
   }
+
   return tokens;
 }
 
@@ -120,11 +123,11 @@ misc::Interval ParserRuleContext::getSourceInterval() {
   return misc::Interval(start->getTokenIndex(), stop->getTokenIndex());
 }
 
-Token* ParserRuleContext::getStart() const {
+Token* ParserRuleContext::getStart() {
   return start;
 }
 
-Token* ParserRuleContext::getStop() const {
+Token* ParserRuleContext::getStop() {
   return stop;
 }
 

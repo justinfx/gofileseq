@@ -1,5 +1,9 @@
 # Configuration
-ANTLR_JAR := ../tools/antlr-4.13.1-complete.jar
+# Different ANTLR versions are required for Go vs C++:
+#   - Go 4.13.1: Generates code with antlr4-go/antlr import paths (matches v4.13.0 runtime)
+#   - C++ 4.9.3:  Generates C++11-compatible code (no std::any) for GCC 4.8+ support
+ANTLR_GO_JAR := ../tools/antlr-4.13.1-complete.jar
+ANTLR_CPP_JAR := ../tools/antlr-4.9.3-complete.jar
 OUTPUT_DIR := ../internal/parser
 GO_PACKAGE := parser
 CPP_OUTPUT_DIR := ../cpp/private/parser
@@ -12,17 +16,20 @@ JAVA ?= $(shell command -v /opt/homebrew/opt/openjdk@21/bin/java 2>/dev/null || 
                 command -v java 2>/dev/null || \
                 echo "java")
 
-ANTLR := $(JAVA) -jar $(ANTLR_JAR)
+ANTLR_GO := $(JAVA) -jar $(ANTLR_GO_JAR)
+ANTLR_CPP := $(JAVA) -jar $(ANTLR_CPP_JAR)
 
 # Docker configuration (for Java-free generation)
 JAVA_IMAGE := eclipse-temurin:21-jdk
 WORKDIR := /work
 
-.PHONY: generate-go generate-go-docker generate-cpp generate-cpp-docker generate-all clean test-grammar check-java check-docker
+.PHONY: all generate-go generate-go-docker generate-cpp generate-cpp-docker generate-all clean test-grammar check-java check-docker
+
+all: generate-all
 
 generate-go:
-	@echo "Generating Go parser from ANTLR grammar..."
-	$(ANTLR) -Dlanguage=Go \
+	@echo "Generating Go parser (ANTLR 4.13.1)..."
+	$(ANTLR_GO) -Dlanguage=Go \
 	         -package $(GO_PACKAGE) \
 	         -o $(OUTPUT_DIR) \
 	         -visitor \
@@ -31,13 +38,13 @@ generate-go:
 	@echo "Parser generated successfully in $(OUTPUT_DIR)"
 
 generate-go-docker:
-	@echo "Generating Go parser from ANTLR grammar using Docker (Java-only image)..."
+	@echo "Generating Go parser using Docker (ANTLR 4.13.1)..."
 	@docker run --rm --platform linux/amd64 \
 	  -v $(realpath ../tools):/tools \
 	  -v $(PWD):$(WORKDIR) \
 	  -w $(WORKDIR) \
 	  $(JAVA_IMAGE) \
-	  java -jar $(ANTLR_JAR) \
+	  java -jar /tools/$(notdir $(ANTLR_GO_JAR)) \
 	    -Dlanguage=Go \
 	    -package $(GO_PACKAGE) \
 	    -o $(OUTPUT_DIR) \
@@ -47,8 +54,8 @@ generate-go-docker:
 	@echo "Parser generated successfully in $(OUTPUT_DIR)"
 
 generate-cpp:
-	@echo "Generating C++ parser from ANTLR grammar..."
-	$(ANTLR) -Dlanguage=Cpp \
+	@echo "Generating C++ parser (ANTLR 4.9.3)..."
+	$(ANTLR_CPP) -Dlanguage=Cpp \
 	         -package $(CPP_NAMESPACE) \
 	         -o $(CPP_OUTPUT_DIR) \
 	         -visitor \
@@ -57,13 +64,13 @@ generate-cpp:
 	@echo "C++ parser generated successfully in $(CPP_OUTPUT_DIR)"
 
 generate-cpp-docker:
-	@echo "Generating C++ parser from ANTLR grammar using Docker..."
+	@echo "Generating C++ parser using Docker (ANTLR 4.9.3)..."
 	@docker run --rm --platform linux/amd64 \
 	  -v $(realpath ../tools):/tools \
 	  -v $(PWD):$(WORKDIR) \
 	  -w $(WORKDIR) \
 	  $(JAVA_IMAGE) \
-	  java -jar $(ANTLR_JAR) \
+	  java -jar /tools/$(notdir $(ANTLR_CPP_JAR)) \
 	    -Dlanguage=Cpp \
 	    -package $(CPP_NAMESPACE) \
 	    -o $(CPP_OUTPUT_DIR) \
@@ -82,8 +89,8 @@ clean:
 	@echo "Clean complete"
 
 test-grammar:
-	@echo "Testing grammar compilation..."
-	$(ANTLR) fileseq.g4
+	@echo "Testing grammar compilation (Go version)..."
+	$(ANTLR_GO) fileseq.g4
 	@echo "Grammar test complete"
 
 check-java:

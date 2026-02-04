@@ -22,31 +22,35 @@ namespace atn {
   /// </summary>
   class ANTLR4CPP_PUBLIC LexerMoreAction final : public LexerAction {
   public:
-    static bool is(const LexerAction &lexerAction) { return lexerAction.getActionType() == LexerActionType::MORE; }
-
-    static bool is(const LexerAction *lexerAction) { return lexerAction != nullptr && is(*lexerAction); }
-
     /// <summary>
     /// Provides a singleton instance of this parameterless lexer action.
     /// </summary>
-    static const Ref<const LexerMoreAction>& getInstance();
+    static const Ref<LexerMoreAction> getInstance();
+
+    /// <summary>
+    /// {@inheritDoc} </summary>
+    /// <returns> This method returns <seealso cref="LexerActionType#MORE"/>. </returns>
+    virtual LexerActionType getActionType() const override;
+
+    /// <summary>
+    /// {@inheritDoc} </summary>
+    /// <returns> This method returns {@code false}. </returns>
+    virtual bool isPositionDependent() const override;
 
     /// <summary>
     /// {@inheritDoc}
     ///
     /// <para>This action is implemented by calling <seealso cref="Lexer#more"/>.</para>
     /// </summary>
-    void execute(Lexer *lexer) const override;
+    virtual void execute(Lexer *lexer) override;
 
-    bool equals(const LexerAction &obj) const override;
-    std::string toString() const override;
-
-  protected:
-    size_t hashCodeImpl() const override;
+    virtual size_t hashCode() const override;
+    virtual bool operator == (const LexerAction &obj) const override;
+    virtual std::string toString() const override;
 
   private:
     /// Constructs the singleton instance of the lexer {@code more} command.
-    LexerMoreAction() : LexerAction(LexerActionType::MORE, false) {}
+    LexerMoreAction();
   };
 
 } // namespace atn

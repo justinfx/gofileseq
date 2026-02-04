@@ -10,7 +10,12 @@
 using namespace antlr4;
 using namespace antlr4::atn;
 
-NotSetTransition::NotSetTransition(ATNState *target, misc::IntervalSet set) : SetTransition(TransitionType::NOT_SET, target, std::move(set)) {}
+NotSetTransition::NotSetTransition(ATNState *target, const misc::IntervalSet &set) : SetTransition(target, set) {
+}
+
+Transition::SerializationType NotSetTransition::getSerializationType() const {
+  return NOT_SET;
+}
 
 bool NotSetTransition::matches(size_t symbol, size_t minVocabSymbol, size_t maxVocabSymbol) const {
   return symbol >= minVocabSymbol && symbol <= maxVocabSymbol

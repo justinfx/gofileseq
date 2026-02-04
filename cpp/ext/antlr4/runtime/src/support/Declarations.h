@@ -69,6 +69,7 @@ namespace antlr4 {
     class ATNSimulator;
     class ATNState;
     enum class ATNType;
+    class AbstractPredicateTransition;
     class ActionTransition;
     class ArrayPredictionContext;
     class AtomTransition;
@@ -77,6 +78,7 @@ namespace antlr4 {
     class BlockEndState;
     class BlockStartState;
     class DecisionState;
+    class EmptyPredictionContext;
     class EpsilonTransition;
     class LL1Analyzer;
     class LexerAction;

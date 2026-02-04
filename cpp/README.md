@@ -17,8 +17,8 @@
 ### Build Requirements
 
 * [CMake](https://cmake.org/) 3.15+
-* C++17 compatible compiler (GCC 7+, Clang 5+, MSVC 2017+)
-* Java 11+ (optional, only needed to regenerate the ANTLR parser from grammar)
+* C++11 compatible compiler (GCC 4.8+, Clang 3.3+, MSVC 2013+)
+* Java 8+ (optional, only needed to regenerate the ANTLR parser from grammar)
 
 ### Runtime Dependencies
 
@@ -53,7 +53,10 @@ $ make install
 
 This installs:
 * Headers to `<prefix>/include/fileseq/`
-* Static library to `<prefix>/lib/`
+* Static library (`libfileseq.a`) to `<prefix>/lib/`
+* Shared library (`libfileseq.so`/`.dylib`) to `<prefix>/lib/`
+
+The static library is self-contained with ANTLR4 runtime merged in, requiring no external dependencies.
 
 ### Development
 
@@ -69,7 +72,7 @@ cd grammar && make generate-cpp
 cd grammar && make generate-all
 ```
 
-The ANTLR4 C++ runtime (v4.13.1) is vendored in `ext/antlr4/` and statically linked. No external ANTLR installation is required to build the project.
+The ANTLR4 C++ runtime (v4.9.3) is vendored in `ext/antlr4/` and statically linked. The generator uses ANTLR 4.9.3 JAR for code generation, compatible with GCC 4.8+ and C++11. No external ANTLR installation is required to build the project.
 
 #### Running Tests
 

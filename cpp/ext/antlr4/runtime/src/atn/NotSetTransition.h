@@ -12,11 +12,9 @@ namespace atn {
 
   class ANTLR4CPP_PUBLIC NotSetTransition final : public SetTransition {
   public:
-    static bool is(const Transition &transition) { return transition.getTransitionType() == TransitionType::NOT_SET; }
+    NotSetTransition(ATNState *target, const misc::IntervalSet &set);
 
-    static bool is(const Transition *transition) { return transition != nullptr && is(*transition); }
-
-    NotSetTransition(ATNState *target, misc::IntervalSet set);
+    virtual SerializationType getSerializationType() const override;
 
     virtual bool matches(size_t symbol, size_t minVocabSymbol, size_t maxVocabSymbol) const override;
 

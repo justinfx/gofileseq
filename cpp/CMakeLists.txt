@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 project(fileseq VERSION 3.0.0 LANGUAGES CXX)
 
-# ANTLR4 4.13.1 requires C++17 (for std::optional, std::any, etc.)
-# This is still widely supported: GCC 7+, Clang 5+, MSVC 2017+
-set(CMAKE_CXX_STANDARD 17)
+# ANTLR4 4.9.3 requires C++11 minimum
+# Supports older compilers: GCC 4.8+, Clang 3.3+, MSVC 2013+
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -13,7 +13,7 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 # ANTLR4 parser generation (optional - only if Java is available)
 find_program(JAVA_EXECUTABLE java)
 if(JAVA_EXECUTABLE)
-    set(ANTLR_JAR "${CMAKE_SOURCE_DIR}/../tools/antlr-4.13.1-complete.jar")
+    set(ANTLR_JAR "${CMAKE_SOURCE_DIR}/../tools/antlr-4.9.3-complete.jar")
     set(GRAMMAR_FILE "${CMAKE_SOURCE_DIR}/../grammar/fileseq.g4")
     set(PARSER_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/private/parser")
 

@@ -8,7 +8,12 @@
 using namespace antlr4::atn;
 
 PrecedencePredicateTransition::PrecedencePredicateTransition(ATNState *target, int precedence)
-  : Transition(TransitionType::PRECEDENCE, target), _predicate(std::make_shared<SemanticContext::PrecedencePredicate>(precedence)) {}
+  : AbstractPredicateTransition(target), precedence(precedence) {
+}
+
+Transition::SerializationType PrecedencePredicateTransition::getSerializationType() const {
+  return PRECEDENCE;
+}
 
 bool PrecedencePredicateTransition::isEpsilon() const {
   return true;
@@ -18,6 +23,10 @@ bool PrecedencePredicateTransition::matches(size_t /*symbol*/, size_t /*minVocab
   return false;
 }
 
+Ref<SemanticContext::PrecedencePredicate> PrecedencePredicateTransition::getPredicate() const {
+  return std::make_shared<SemanticContext::PrecedencePredicate>(precedence);
+}
+
 std::string PrecedencePredicateTransition::toString() const {
-  return "PRECEDENCE " + Transition::toString() + " { precedence: " + std::to_string(getPrecedence()) + " }";
+  return "PRECEDENCE " + Transition::toString() + " { precedence: " + std::to_string(precedence) + " }";
 }

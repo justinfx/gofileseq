@@ -13,7 +13,7 @@
 using namespace antlr4;
 using namespace antlr4::misc;
 
-IntervalSet const IntervalSet::COMPLETE_CHAR_SET =
+IntervalSet const IntervalSet::COMPLETE_CHAR_SET = 
     IntervalSet::of(Lexer::MIN_CHAR_VALUE, Lexer::MAX_CHAR_VALUE);
 
 IntervalSet const IntervalSet::EMPTY_SET;
@@ -37,7 +37,7 @@ IntervalSet& IntervalSet::operator=(const IntervalSet& other) {
 }
 
 IntervalSet& IntervalSet::operator=(IntervalSet&& other) {
-  _intervals = std::move(other._intervals);
+  _intervals = move(other._intervals);
   return *this;
 }
 
@@ -265,13 +265,18 @@ bool IntervalSet::contains(size_t el) const {
 }
 
 bool IntervalSet::contains(ssize_t el) const {
-  if (_intervals.empty() || el < _intervals.front().a || el > _intervals.back().b) {
+  if (_intervals.empty())
     return false;
-  }
 
-  return std::binary_search(_intervals.begin(), _intervals.end(), Interval(el, el), [](const Interval &lhs, const Interval &rhs) {
-    return lhs.b < rhs.a;
-  });
+  if (el < _intervals[0].a) // list is sorted and el is before first interval; not here
+    return false;
+
+  for (const auto &interval : _intervals) {
+    if (el >= interval.a && el <= interval.b) {
+      return true; // found in this interval
+    }
+  }
+  return false;
 }
 
 bool IntervalSet::isEmpty() const {
@@ -301,7 +306,7 @@ ssize_t IntervalSet::getMinElement() const {
     return Token::INVALID_TYPE;
   }
 
-  return _intervals.front().a;
+  return _intervals[0].a;
 }
 
 std::vector<Interval> const& IntervalSet::getIntervals() const {
@@ -374,6 +379,10 @@ std::string IntervalSet::toString(bool elemAreChar) const {
   return ss.str();
 }
 
+std::string IntervalSet::toString(const std::vector<std::string> &tokenNames) const {
+  return toString(dfa::Vocabulary::fromTokenNames(tokenNames));
+}
+
 std::string IntervalSet::toString(const dfa::Vocabulary &vocabulary) const {
   if (_intervals.empty()) {
     return "{}";
@@ -409,6 +418,10 @@ std::string IntervalSet::toString(const dfa::Vocabulary &vocabulary) const {
   }
 
   return ss.str();
+}
+
+std::string IntervalSet::elementName(const std::vector<std::string> &tokenNames, ssize_t a) const {
+  return elementName(dfa::Vocabulary::fromTokenNames(tokenNames), a);
 }
 
 std::string IntervalSet::elementName(const dfa::Vocabulary &vocabulary, ssize_t a) const {

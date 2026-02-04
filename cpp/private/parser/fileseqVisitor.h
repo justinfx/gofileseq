@@ -1,5 +1,5 @@
 
-// Generated from fileseq.g4 by ANTLR 4.13.1
+// Generated from fileseq.g4 by ANTLR 4.9.3
 
 #pragma once
 
@@ -20,35 +20,35 @@ public:
   /**
    * Visit parse trees produced by fileseqParser.
    */
-    virtual std::any visitInput(fileseqParser::InputContext *context) = 0;
+    virtual antlrcpp::Any visitInput(fileseqParser::InputContext *context) = 0;
 
-    virtual std::any visitSequence(fileseqParser::SequenceContext *context) = 0;
+    virtual antlrcpp::Any visitSequence(fileseqParser::SequenceContext *context) = 0;
 
-    virtual std::any visitPatternOnly(fileseqParser::PatternOnlyContext *context) = 0;
+    virtual antlrcpp::Any visitPatternOnly(fileseqParser::PatternOnlyContext *context) = 0;
 
-    virtual std::any visitSingleFrame(fileseqParser::SingleFrameContext *context) = 0;
+    virtual antlrcpp::Any visitSingleFrame(fileseqParser::SingleFrameContext *context) = 0;
 
-    virtual std::any visitPlainFile(fileseqParser::PlainFileContext *context) = 0;
+    virtual antlrcpp::Any visitPlainFile(fileseqParser::PlainFileContext *context) = 0;
 
-    virtual std::any visitDirectory(fileseqParser::DirectoryContext *context) = 0;
+    virtual antlrcpp::Any visitDirectory(fileseqParser::DirectoryContext *context) = 0;
 
-    virtual std::any visitDirSegment(fileseqParser::DirSegmentContext *context) = 0;
+    virtual antlrcpp::Any visitDirSegment(fileseqParser::DirSegmentContext *context) = 0;
 
-    virtual std::any visitSequenceBasename(fileseqParser::SequenceBasenameContext *context) = 0;
+    virtual antlrcpp::Any visitSequenceBasename(fileseqParser::SequenceBasenameContext *context) = 0;
 
-    virtual std::any visitPatternBasename(fileseqParser::PatternBasenameContext *context) = 0;
+    virtual antlrcpp::Any visitPatternBasename(fileseqParser::PatternBasenameContext *context) = 0;
 
-    virtual std::any visitSingleFrameBasename(fileseqParser::SingleFrameBasenameContext *context) = 0;
+    virtual antlrcpp::Any visitSingleFrameBasename(fileseqParser::SingleFrameBasenameContext *context) = 0;
 
-    virtual std::any visitPlainBasename(fileseqParser::PlainBasenameContext *context) = 0;
+    virtual antlrcpp::Any visitPlainBasename(fileseqParser::PlainBasenameContext *context) = 0;
 
-    virtual std::any visitFrameRange(fileseqParser::FrameRangeContext *context) = 0;
+    virtual antlrcpp::Any visitFrameRange(fileseqParser::FrameRangeContext *context) = 0;
 
-    virtual std::any visitFrameNum(fileseqParser::FrameNumContext *context) = 0;
+    virtual antlrcpp::Any visitFrameNum(fileseqParser::FrameNumContext *context) = 0;
 
-    virtual std::any visitPadding(fileseqParser::PaddingContext *context) = 0;
+    virtual antlrcpp::Any visitPadding(fileseqParser::PaddingContext *context) = 0;
 
-    virtual std::any visitExtension(fileseqParser::ExtensionContext *context) = 0;
+    virtual antlrcpp::Any visitExtension(fileseqParser::ExtensionContext *context) = 0;
 
 
 };

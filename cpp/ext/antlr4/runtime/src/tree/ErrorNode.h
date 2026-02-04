@@ -10,14 +10,9 @@
 namespace antlr4 {
 namespace tree {
 
-  class ANTLR4CPP_PUBLIC ErrorNode : public TerminalNode {
+  class ANTLR4CPP_PUBLIC ErrorNode : public virtual TerminalNode {
   public:
-    static bool is(const tree::ParseTree &parseTree) { return parseTree.getTreeType() == tree::ParseTreeType::ERROR; }
-
-    static bool is(const tree::ParseTree *parseTree) { return parseTree != nullptr && is(*parseTree); }
-
-  protected:
-    using TerminalNode::TerminalNode;
+    ~ErrorNode() override;
   };
 
 } // namespace tree

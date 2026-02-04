@@ -16,7 +16,7 @@ The C++ target has been the work of the following people:
 
 * Dan McLaughlin, dan.mclaughlin@gmail.com (initial port, got code to compile)
 * David Sisson, dsisson@google.com (initial port, made the runtime C++ tests runnable)
-* [Mike Lischke](http://www.soft-gems.net), mike@lischke-online.de (brought the initial port to a working library, made most runtime tests passing)
+* [Mike Lischke](www.soft-gems.net), mike@lischke-online.de (brought the initial port to a working library, made most runtime tests passing)
 
 ## Other contributors
 
@@ -35,17 +35,17 @@ The C++ target has been the work of the following people:
 
 ### Build + Usage Notes
 
-The minimum C++ version to compile the ANTLR C++ runtime with is C++17. The supplied projects can built the runtime either as static or dynamic library, as both 32bit and 64bit arch. The macOS project contains a target for iOS and can also be built using cmake (instead of XCode).
+The minimum C++ version to compile the ANTLR C++ runtime with is C++11. The supplied projects can built the runtime either as static or dynamic library, as both 32bit and 64bit arch. The macOS project contains a target for iOS and can also be built using cmake (instead of XCode).
 
 Include the antlr4-runtime.h umbrella header in your target application to get everything needed to use the library.
 
 If you are compiling with cmake, the minimum version required is cmake 2.8.
-By default, the libraries produced by the CMake build target C++17. If you want to target a different C++ standard, you can explicitly pass the standard - e.g. `-DCMAKE_CXX_STANDARD=17`.
+By default, the libraries produced by the CMake build target C++11. If you want to target a different C++ standard, you can explicitly pass the standard - e.g. `-DCMAKE_CXX_STANDARD=17`.
 
 #### Compiling on Windows with Visual Studio using he Visual Studio projects
-Simply open the VS project from the runtime folder (VS 2019+) and build it.
+Simply open the VS project from the runtime folder (VS 2013+) and build it.
 
-#### Compiling on Windows using cmake with Visual Studio VS2019 and later
+#### Compiling on Windows using cmake with Visual Studio VS2017 and later
 Use the "Open Folder" Feature from the File->Open->Folder menu to open the runtime/Cpp directory.
 It will automatically use the CMake description to open up a Visual Studio Solution.
 
@@ -62,7 +62,7 @@ Try run cmake -DCMAKE_ANDROID_NDK=/folder/of/android_ndkr17_and_above -DCMAKE_SY
 - make
 - DESTDIR=\<antlr4-dir\>/runtime/Cpp/run make install
 
-If you don't want to build the demo then replace the "cmake .. -DANTLR_JAR_LOCATION<...>" command in the above recipe with "cmake .." without any further parameters.
+If you don't want to build the demo then simply run cmake without parameters.
 There is another cmake script available in the subfolder cmake/ for those who prefer the superbuild cmake pattern.
 
 #### CMake Package support
