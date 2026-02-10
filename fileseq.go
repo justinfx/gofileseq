@@ -30,7 +30,7 @@ import (
 	"strings"
 )
 
-const Version = "2.13.0"
+const Version = "3.0.3"
 
 var (
 	// Regular expression patterns for matching frame set strings.
@@ -53,38 +53,6 @@ var (
 		`(?:\.\w*[a-zA-Z]\w?)*` + // optional leading alnum ext prefix (.foo.1bar)
 		`(?:\.[^.]+)?` + // ext suffix
 		`)`
-
-	// Regular expression for matching a file sequence string.
-	// Example:
-	//     /film/shot/renders/hero_bty.1-100#.exr
-	//     /film/shot/renders/hero_bty.@@.exr
-	//     /film/shot/renders/hero_bty.1-100%04d.exr
-	//     /film/shot/renders/hero_bty.1-100$F04.exr
-	splitPattern = regexp.MustCompile(
-		`^` +
-			`(?P<name>.*?)` +
-			`(?P<range>[\d-][:xy\d,-]*)?` +
-			// padding options
-			`(?P<pad>` +
-			`[#@]+` + // standard pad chars
-			`|%\d*d` + // or printf padding
-			`|\$F\d*` + // or houdini padding
-			`|<UDIM>|%\(UDIM\)d` + // or UDIM padding
-			`)` + // end <pad>
-			`(?P<ext>.*)?` +
-			`$`,
-	)
-
-	// Regular expression pattern for matching single file path names containing a frame.
-	// Example:
-	//     /film/shot/renders/hero_bty.100.exr
-	singleFramePattern = regexp.MustCompile(
-		`^` +
-			`(?P<name>.*?)` +
-			`(?P<frame>-?\d+)` +
-			extPatternStr +
-			`$`,
-	)
 
 	// Regular expression pattern for matching single file path names where the
 	// frame may be optional.
