@@ -88,6 +88,14 @@ $(document).ready(function(){initNavTree('CHANGES.html',''); initResizable(); })
 <div class="contents">
 <div class="textblock"><pre class="fragment">Changes:
 
+3.0.3
+----------------
+
+* grammar - Update grammar to proper handle mixed padding characters like "##@"
+* go/cpp - Update grammar and private parser code to support the subframe sequence range syntax that is only
+  currently implemented in python fileseq (file.#.#.ext). Subframes in a sequence pattern are still rejected in go/cpp
+  public API
+
 3.0.2
 ----------------
 
