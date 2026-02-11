@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"runtime"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -1178,5 +1179,24 @@ func TestHandleSymlinksOnDisk(t *testing.T) {
 func cleanPaths(paths []string) {
 	for i, path := range paths {
 		paths[i] = filepath.Clean(path)
+	}
+}
+
+func TestSubframeRejection(t *testing.T) {
+	// Python subframe syntax should be rejected in Go until full support is implemented
+	// This maintains backward compatibility with v2.x behavior
+	tests := []string{
+		"/path/file.1-5#.10-20@@.exr",  // Dual range: main + subframes
+		"/path/file.1-5@.#.exr",        // Composite padding: subframe range + frame padding
+		"/path/file.#.@@.exr",          // Pattern-only with subframe padding
+	}
+
+	for _, path := range tests {
+		_, err := NewFileSequence(path)
+		if err == nil {
+			t.Errorf("Expected %q to be rejected as unsupported subframe syntax, but it was accepted", path)
+		} else if !strings.Contains(err.Error(), "subframe syntax not supported") {
+			t.Errorf("Expected subframe error for %q, got: %v", path, err)
+		}
 	}
 }

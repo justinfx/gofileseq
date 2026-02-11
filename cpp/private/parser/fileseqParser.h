@@ -74,9 +74,12 @@ public:
     SequenceContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     DirectoryContext *directory();
-    FrameRangeContext *frameRange();
-    PaddingContext *padding();
+    std::vector<FrameRangeContext *> frameRange();
+    FrameRangeContext* frameRange(size_t i);
+    std::vector<PaddingContext *> padding();
+    PaddingContext* padding(size_t i);
     SequenceBasenameContext *sequenceBasename();
+    antlr4::tree::TerminalNode *SPECIAL_CHAR();
     std::vector<ExtensionContext *> extension();
     ExtensionContext* extension(size_t i);
 
@@ -92,8 +95,10 @@ public:
     PatternOnlyContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     DirectoryContext *directory();
-    PaddingContext *padding();
+    std::vector<PaddingContext *> padding();
+    PaddingContext* padding(size_t i);
     PatternBasenameContext *patternBasename();
+    antlr4::tree::TerminalNode *SPECIAL_CHAR();
     std::vector<ExtensionContext *> extension();
     ExtensionContext* extension(size_t i);
 

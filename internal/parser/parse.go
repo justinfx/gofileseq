@@ -80,6 +80,11 @@ func ParseFileSequence(input string) (ParseResult, error) {
 	visitor := &fileSeqVisitor{}
 	tree.Accept(visitor)
 
+	// Check for visitor errors (e.g., unsupported subframe syntax)
+	if visitor.err != nil {
+		return ParseResult{}, visitor.err
+	}
+
 	return visitor.result, nil
 }
 
@@ -88,6 +93,7 @@ func ParseFileSequence(input string) (ParseResult, error) {
 type fileSeqVisitor struct {
 	BasefileseqVisitor
 	result ParseResult
+	err    error
 }
 
 // VisitInput dispatches to the correct child visitor
@@ -121,8 +127,15 @@ func (v *fileSeqVisitor) VisitSequence(ctx *SequenceContext) interface{} {
 		v.result.Basename = basenameCtx.GetText()
 	}
 
+	// Check for unsupported subframe syntax (Python-only feature)
+	// Subframes use: file.1-5#.10-20@@.exr (dual range) or file.1-5@.#.exr (composite padding)
+	if len(ctx.AllFrameRange()) > 1 || len(ctx.AllPadding()) > 1 {
+		v.err = fmt.Errorf("subframe syntax not supported: %s", ctx.GetText())
+		return nil
+	}
+
 	// Extract frame range (grammar already parsed it)
-	if frameRangeCtx := ctx.FrameRange(); frameRangeCtx != nil {
+	if frameRangeCtx := ctx.FrameRange(0); frameRangeCtx != nil {
 		v.result.FrameRange = frameRangeCtx.GetText()
 	}
 
@@ -131,7 +144,7 @@ func (v *fileSeqVisitor) VisitSequence(ctx *SequenceContext) interface{} {
 	moveLeadingDotFromFrameRange(&v.result)
 
 	// Extract padding (grammar already parsed it)
-	if padCtx := ctx.Padding(); padCtx != nil {
+	if padCtx := ctx.Padding(0); padCtx != nil {
 		v.result.Padding = padCtx.GetText()
 	}
 
@@ -188,10 +201,17 @@ func (v *fileSeqVisitor) VisitPatternOnly(ctx *PatternOnlyContext) interface{} {
 		v.result.Basename = basenameCtx.GetText()
 	}
 
+	// Check for unsupported subframe syntax (Python-only feature)
+	// Pattern-only subframes use: file.#.@@.exr (composite padding)
+	if len(ctx.AllPadding()) > 1 {
+		v.err = fmt.Errorf("subframe syntax not supported: %s", ctx.GetText())
+		return nil
+	}
+
 	// No frame range for pattern-only (initially)
 
-	// Extract padding
-	if padCtx := ctx.Padding(); padCtx != nil {
+	// Get first padding
+	if padCtx := ctx.Padding(0); padCtx != nil {
 		v.result.Padding = padCtx.GetText()
 	}
 

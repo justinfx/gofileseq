@@ -14,14 +14,20 @@ input
 // Sequence with padding: /path/file.1-100#.exr or /path/file1-100#.exr
 // Also handles hidden files: /path/.hidden5.1-10#.7zip
 // Basename and extension are optional (allows patterns like /path/1-100#.ext)
+// Python-specific: Supports optional subframe patterns:
+//   - Dual range: /path/file.1-5#.10-20@@.exr (frameRange with dot prefix + padding)
+//   - Composite padding: /path/file.1-5@.#.exr (dot + padding only)
+//   Go/C++ ignore the second pair until subframe support is implemented
 sequence
-    : directory sequenceBasename? frameRange padding extension*
+    : directory sequenceBasename? frameRange padding (frameRange padding | SPECIAL_CHAR padding)? extension*
     ;
 
 // Pattern-only sequence (padding without frame range): /path/file.@@.ext
 // Basename and extension are optional (allows patterns like /path/@@@.ext)
+// Python-specific: Supports optional subframe padding: /path/file.#.#.ext
+//   Go/C++ ignore the second padding until subframe support is implemented
 patternOnly
-    : directory patternBasename? padding extension*
+    : directory patternBasename? padding (SPECIAL_CHAR padding)? extension*
     ;
 
 // Single frame: /path/file.100.exr (extension required after frame number)
@@ -90,13 +96,14 @@ frameNum
     : DOT_NUM
     ;
 
+// Padding may use mixed characters (e.g. ###@ = 13 chars with HASH4 style)
+// Each language's PaddingCharsSize handles per-character width calculation
 padding
     : UDIM_ANGLE
     | UDIM_PAREN
     | PRINTF_PAD
     | HOUDINI_PAD
-    | HASH+
-    | AT+
+    | (HASH | AT)+
     ;
 
 // Extension can be:
@@ -128,11 +135,13 @@ EXTENSION: '.' ([a-zA-Z_] | [0-9]* [a-zA-Z] [a-zA-Z0-9_]*);
 
 // Frame range with leading dot (must have comma, colon, or dash after first number)
 // Matches: .1-100, .-10-100, .1,2,3, .1-10x2, .1,2,3,5-10,20-30
-DOT_FRAME_RANGE: '.' '-'? [0-9]+ [,:-] [0-9xy:,-]*;
+// Optional decimal suffix for decimal step values: .1-5x0.25
+DOT_FRAME_RANGE: '.' '-'? [0-9]+ [,:-] [0-9xy:,-]* ('.' [0-9]+)?;
 
 // Frame range without leading dot (must have comma, colon, or dash after first number)
 // Matches: 1-100, -10-100, 1,2,3, 1-10x2
-FRAME_RANGE: '-'? [0-9]+ [,:-] [0-9xy:,-]*;
+// Optional decimal suffix for decimal step values: 1-5x0.25
+FRAME_RANGE: '-'? [0-9]+ [,:-] [0-9xy:,-]* ('.' [0-9]+)?;
 
 // Frame number with dot: .100 or .-10 (single frame, no range delimiter)
 DOT_NUM: '.' '-'? [0-9]+;

@@ -568,3 +568,23 @@ TEST_F( TestSplitPatternChars, SplitPattern ) {
 //
 //     std::cerr << "Total secs: " << elapsed_secs << "\n";
 // }
+
+class TestSubframeRejection : public testing::Test {};
+
+TEST_F( TestSubframeRejection, RejectSubframeSyntax ) {
+    // Python subframe syntax should be rejected in C++ until full support is implemented
+    // This maintains backward compatibility with v2.x behavior
+    std::vector<std::string> tests = {
+        "/path/file.1-5#.10-20@@.exr",  // Dual range: main + subframes
+        "/path/file.1-5@.#.exr",        // Composite padding: subframe range + frame padding
+        "/path/file.#.@@.exr",          // Pattern-only with subframe padding
+    };
+
+    for (const auto& path : tests) {
+        fileseq::Status stat;
+        fileseq::FileSequence seq(path, &stat);
+        
+        // Should fail to parse (stat will be false)
+        EXPECT_FALSE(stat) << "Expected " << path << " to be rejected as unsupported subframe syntax";
+    }
+}

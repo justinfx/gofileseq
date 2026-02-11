@@ -85,7 +85,7 @@ func NewFileSequencePad(sequence string, style PadStyle) (*FileSequence, error) 
 	// Parse using ANTLR grammar-based parser
 	result, err := parser.ParseFileSequence(sequence)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to parse sequence: %s", sequence)
+		return nil, fmt.Errorf("Failed to parse sequence: %w", err)
 	}
 
 	var dir, basename, pad, ext string

@@ -17,6 +17,7 @@ namespace internal {
 class FileSequenceVisitor : public fileseqBaseVisitor {
 public:
     ParseResult result;
+    std::string error;
 
     // Visit sequence: dir + basename? + frameRange + padding + extension*
     virtual antlrcpp::Any visitSequence(fileseqParser::SequenceContext *ctx) override {
@@ -32,14 +33,21 @@ public:
             result.basename = ctx->sequenceBasename()->getText();
         }
 
+        // Check for unsupported subframe syntax (Python-only feature)
+        // Subframes use: file.1-5#.10-20@@.exr (dual range) or file.1-5@.#.exr (composite padding)
+        if (ctx->frameRange().size() > 1 || ctx->padding().size() > 1) {
+            error = "subframe syntax not supported: " + ctx->getText();
+            return nullptr;
+        }
+
         // Extract frame range
-        if (ctx->frameRange()) {
-            result.frameRange = ctx->frameRange()->getText();
+        if (ctx->frameRange(0)) {
+            result.frameRange = ctx->frameRange(0)->getText();
         }
 
         // Extract padding
-        if (ctx->padding()) {
-            result.padding = ctx->padding()->getText();
+        if (ctx->padding(0)) {
+            result.padding = ctx->padding(0)->getText();
         }
 
         // Extract extension (can be multiple parts)
@@ -68,9 +76,16 @@ public:
             result.basename = ctx->patternBasename()->getText();
         }
 
+        // Check for unsupported subframe syntax (Python-only feature)
+        // Pattern-only subframes use: file.#.@@.exr (composite padding)
+        if (ctx->padding().size() > 1) {
+            error = "subframe syntax not supported: " + ctx->getText();
+            return nullptr;
+        }
+
         // Extract padding
-        if (ctx->padding()) {
-            result.padding = ctx->padding()->getText();
+        if (ctx->padding(0)) {
+            result.padding = ctx->padding(0)->getText();
         }
 
         // Extract extension (can be multiple parts)
@@ -193,6 +208,11 @@ bool parseFileSequence(ParseResult& result, const std::string& path) {
         // Create visitor and walk the tree
         FileSequenceVisitor visitor;
         visitor.visit(tree);
+
+        // Check for visitor errors (e.g., unsupported subframe syntax)
+        if (!visitor.error.empty()) {
+            return false;
+        }
 
         // Get the result
         result = visitor.result;
