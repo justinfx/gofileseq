@@ -25,17 +25,17 @@ type fileseqVisitor interface {
 	// Visit a parse tree produced by fileseqParser#directory.
 	VisitDirectory(ctx *DirectoryContext) interface{}
 
+	// Visit a parse tree produced by fileseqParser#basenameChar.
+	VisitBasenameChar(ctx *BasenameCharContext) interface{}
+
+	// Visit a parse tree produced by fileseqParser#plainBasenameChar.
+	VisitPlainBasenameChar(ctx *PlainBasenameCharContext) interface{}
+
 	// Visit a parse tree produced by fileseqParser#dirSegment.
 	VisitDirSegment(ctx *DirSegmentContext) interface{}
 
-	// Visit a parse tree produced by fileseqParser#sequenceBasename.
-	VisitSequenceBasename(ctx *SequenceBasenameContext) interface{}
-
-	// Visit a parse tree produced by fileseqParser#patternBasename.
-	VisitPatternBasename(ctx *PatternBasenameContext) interface{}
-
-	// Visit a parse tree produced by fileseqParser#singleFrameBasename.
-	VisitSingleFrameBasename(ctx *SingleFrameBasenameContext) interface{}
+	// Visit a parse tree produced by fileseqParser#basename.
+	VisitBasename(ctx *BasenameContext) interface{}
 
 	// Visit a parse tree produced by fileseqParser#plainBasename.
 	VisitPlainBasename(ctx *PlainBasenameContext) interface{}

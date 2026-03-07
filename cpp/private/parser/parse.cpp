@@ -29,8 +29,8 @@ public:
         }
 
         // Extract basename (optional)
-        if (ctx->sequenceBasename()) {
-            result.basename = ctx->sequenceBasename()->getText();
+        if (ctx->basename()) {
+            result.basename = ctx->basename()->getText();
         }
 
         // Check for unsupported subframe syntax (Python-only feature)
@@ -72,8 +72,8 @@ public:
         }
 
         // Extract basename (optional)
-        if (ctx->patternBasename()) {
-            result.basename = ctx->patternBasename()->getText();
+        if (ctx->basename()) {
+            result.basename = ctx->basename()->getText();
         }
 
         // Check for unsupported subframe syntax (Python-only feature)
@@ -110,8 +110,8 @@ public:
         }
 
         // Extract basename
-        if (ctx->singleFrameBasename()) {
-            result.basename = ctx->singleFrameBasename()->getText();
+        if (ctx->basename()) {
+            result.basename = ctx->basename()->getText();
         }
 
         // Extract frame number

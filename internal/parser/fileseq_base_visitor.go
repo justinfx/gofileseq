@@ -31,19 +31,19 @@ func (v *BasefileseqVisitor) VisitDirectory(ctx *DirectoryContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BasefileseqVisitor) VisitBasenameChar(ctx *BasenameCharContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BasefileseqVisitor) VisitPlainBasenameChar(ctx *PlainBasenameCharContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BasefileseqVisitor) VisitDirSegment(ctx *DirSegmentContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BasefileseqVisitor) VisitSequenceBasename(ctx *SequenceBasenameContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BasefileseqVisitor) VisitPatternBasename(ctx *PatternBasenameContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BasefileseqVisitor) VisitSingleFrameBasename(ctx *SingleFrameBasenameContext) interface{} {
+func (v *BasefileseqVisitor) VisitBasename(ctx *BasenameContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

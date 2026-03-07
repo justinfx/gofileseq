@@ -32,13 +32,13 @@ public:
 
     virtual antlrcpp::Any visitDirectory(fileseqParser::DirectoryContext *context) = 0;
 
+    virtual antlrcpp::Any visitBasenameChar(fileseqParser::BasenameCharContext *context) = 0;
+
+    virtual antlrcpp::Any visitPlainBasenameChar(fileseqParser::PlainBasenameCharContext *context) = 0;
+
     virtual antlrcpp::Any visitDirSegment(fileseqParser::DirSegmentContext *context) = 0;
 
-    virtual antlrcpp::Any visitSequenceBasename(fileseqParser::SequenceBasenameContext *context) = 0;
-
-    virtual antlrcpp::Any visitPatternBasename(fileseqParser::PatternBasenameContext *context) = 0;
-
-    virtual antlrcpp::Any visitSingleFrameBasename(fileseqParser::SingleFrameBasenameContext *context) = 0;
+    virtual antlrcpp::Any visitBasename(fileseqParser::BasenameContext *context) = 0;
 
     virtual antlrcpp::Any visitPlainBasename(fileseqParser::PlainBasenameContext *context) = 0;
 

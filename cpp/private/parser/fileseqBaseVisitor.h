@@ -41,19 +41,19 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitBasenameChar(fileseqParser::BasenameCharContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitPlainBasenameChar(fileseqParser::PlainBasenameCharContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitDirSegment(fileseqParser::DirSegmentContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitSequenceBasename(fileseqParser::SequenceBasenameContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitPatternBasename(fileseqParser::PatternBasenameContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitSingleFrameBasename(fileseqParser::SingleFrameBasenameContext *ctx) override {
+  virtual antlrcpp::Any visitBasename(fileseqParser::BasenameContext *ctx) override {
     return visitChildren(ctx);
   }
 

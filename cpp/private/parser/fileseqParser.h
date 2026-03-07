@@ -21,9 +21,9 @@ public:
 
   enum {
     RuleInput = 0, RuleSequence = 1, RulePatternOnly = 2, RuleSingleFrame = 3, 
-    RulePlainFile = 4, RuleDirectory = 5, RuleDirSegment = 6, RuleSequenceBasename = 7, 
-    RulePatternBasename = 8, RuleSingleFrameBasename = 9, RulePlainBasename = 10, 
-    RuleFrameRange = 11, RuleFrameNum = 12, RulePadding = 13, RuleExtension = 14
+    RulePlainFile = 4, RuleDirectory = 5, RuleBasenameChar = 6, RulePlainBasenameChar = 7, 
+    RuleDirSegment = 8, RuleBasename = 9, RulePlainBasename = 10, RuleFrameRange = 11, 
+    RuleFrameNum = 12, RulePadding = 13, RuleExtension = 14
   };
 
   explicit fileseqParser(antlr4::TokenStream *input);
@@ -42,10 +42,10 @@ public:
   class SingleFrameContext;
   class PlainFileContext;
   class DirectoryContext;
+  class BasenameCharContext;
+  class PlainBasenameCharContext;
   class DirSegmentContext;
-  class SequenceBasenameContext;
-  class PatternBasenameContext;
-  class SingleFrameBasenameContext;
+  class BasenameContext;
   class PlainBasenameContext;
   class FrameRangeContext;
   class FrameNumContext;
@@ -78,7 +78,7 @@ public:
     FrameRangeContext* frameRange(size_t i);
     std::vector<PaddingContext *> padding();
     PaddingContext* padding(size_t i);
-    SequenceBasenameContext *sequenceBasename();
+    BasenameContext *basename();
     antlr4::tree::TerminalNode *SPECIAL_CHAR();
     std::vector<ExtensionContext *> extension();
     ExtensionContext* extension(size_t i);
@@ -97,7 +97,7 @@ public:
     DirectoryContext *directory();
     std::vector<PaddingContext *> padding();
     PaddingContext* padding(size_t i);
-    PatternBasenameContext *patternBasename();
+    BasenameContext *basename();
     antlr4::tree::TerminalNode *SPECIAL_CHAR();
     std::vector<ExtensionContext *> extension();
     ExtensionContext* extension(size_t i);
@@ -115,7 +115,7 @@ public:
     virtual size_t getRuleIndex() const override;
     DirectoryContext *directory();
     FrameNumContext *frameNum();
-    SingleFrameBasenameContext *singleFrameBasename();
+    BasenameContext *basename();
     std::vector<ExtensionContext *> extension();
     ExtensionContext* extension(size_t i);
 
@@ -158,30 +158,54 @@ public:
 
   DirectoryContext* directory();
 
+  class  BasenameCharContext : public antlr4::ParserRuleContext {
+  public:
+    BasenameCharContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *WORD();
+    antlr4::tree::TerminalNode *NUM();
+    antlr4::tree::TerminalNode *DOT_NUM();
+    antlr4::tree::TerminalNode *DASH();
+    antlr4::tree::TerminalNode *SPECIAL_CHAR();
+    antlr4::tree::TerminalNode *EXTENSION();
+    antlr4::tree::TerminalNode *FRAME_RANGE();
+    antlr4::tree::TerminalNode *DOT_FRAME_RANGE();
+    antlr4::tree::TerminalNode *WS();
+    antlr4::tree::TerminalNode *OTHER_CHAR();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  BasenameCharContext* basenameChar();
+
+  class  PlainBasenameCharContext : public antlr4::ParserRuleContext {
+  public:
+    PlainBasenameCharContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *WORD();
+    antlr4::tree::TerminalNode *NUM();
+    antlr4::tree::TerminalNode *DASH();
+    antlr4::tree::TerminalNode *SPECIAL_CHAR();
+    antlr4::tree::TerminalNode *FRAME_RANGE();
+    antlr4::tree::TerminalNode *DOT_FRAME_RANGE();
+    antlr4::tree::TerminalNode *WS();
+    antlr4::tree::TerminalNode *OTHER_CHAR();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  PlainBasenameCharContext* plainBasenameChar();
+
   class  DirSegmentContext : public antlr4::ParserRuleContext {
   public:
     DirSegmentContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    std::vector<antlr4::tree::TerminalNode *> WORD();
-    antlr4::tree::TerminalNode* WORD(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> NUM();
-    antlr4::tree::TerminalNode* NUM(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> DASH();
-    antlr4::tree::TerminalNode* DASH(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> SPECIAL_CHAR();
-    antlr4::tree::TerminalNode* SPECIAL_CHAR(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> EXTENSION();
-    antlr4::tree::TerminalNode* EXTENSION(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> FRAME_RANGE();
-    antlr4::tree::TerminalNode* FRAME_RANGE(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> DOT_FRAME_RANGE();
-    antlr4::tree::TerminalNode* DOT_FRAME_RANGE(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> DOT_NUM();
-    antlr4::tree::TerminalNode* DOT_NUM(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> WS();
-    antlr4::tree::TerminalNode* WS(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> OTHER_CHAR();
-    antlr4::tree::TerminalNode* OTHER_CHAR(size_t i);
+    std::vector<BasenameCharContext *> basenameChar();
+    BasenameCharContext* basenameChar(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -190,122 +214,26 @@ public:
 
   DirSegmentContext* dirSegment();
 
-  class  SequenceBasenameContext : public antlr4::ParserRuleContext {
+  class  BasenameContext : public antlr4::ParserRuleContext {
   public:
-    SequenceBasenameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    BasenameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    std::vector<antlr4::tree::TerminalNode *> WORD();
-    antlr4::tree::TerminalNode* WORD(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> NUM();
-    antlr4::tree::TerminalNode* NUM(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> DOT_NUM();
-    antlr4::tree::TerminalNode* DOT_NUM(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> DASH();
-    antlr4::tree::TerminalNode* DASH(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> SPECIAL_CHAR();
-    antlr4::tree::TerminalNode* SPECIAL_CHAR(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> EXTENSION();
-    antlr4::tree::TerminalNode* EXTENSION(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> FRAME_RANGE();
-    antlr4::tree::TerminalNode* FRAME_RANGE(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> DOT_FRAME_RANGE();
-    antlr4::tree::TerminalNode* DOT_FRAME_RANGE(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> WS();
-    antlr4::tree::TerminalNode* WS(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> OTHER_CHAR();
-    antlr4::tree::TerminalNode* OTHER_CHAR(size_t i);
+    std::vector<BasenameCharContext *> basenameChar();
+    BasenameCharContext* basenameChar(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
   };
 
-  SequenceBasenameContext* sequenceBasename();
-
-  class  PatternBasenameContext : public antlr4::ParserRuleContext {
-  public:
-    PatternBasenameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    std::vector<antlr4::tree::TerminalNode *> WORD();
-    antlr4::tree::TerminalNode* WORD(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> NUM();
-    antlr4::tree::TerminalNode* NUM(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> DOT_NUM();
-    antlr4::tree::TerminalNode* DOT_NUM(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> DASH();
-    antlr4::tree::TerminalNode* DASH(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> SPECIAL_CHAR();
-    antlr4::tree::TerminalNode* SPECIAL_CHAR(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> EXTENSION();
-    antlr4::tree::TerminalNode* EXTENSION(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> FRAME_RANGE();
-    antlr4::tree::TerminalNode* FRAME_RANGE(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> DOT_FRAME_RANGE();
-    antlr4::tree::TerminalNode* DOT_FRAME_RANGE(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> WS();
-    antlr4::tree::TerminalNode* WS(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> OTHER_CHAR();
-    antlr4::tree::TerminalNode* OTHER_CHAR(size_t i);
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  PatternBasenameContext* patternBasename();
-
-  class  SingleFrameBasenameContext : public antlr4::ParserRuleContext {
-  public:
-    SingleFrameBasenameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    std::vector<antlr4::tree::TerminalNode *> WORD();
-    antlr4::tree::TerminalNode* WORD(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> NUM();
-    antlr4::tree::TerminalNode* NUM(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> DOT_NUM();
-    antlr4::tree::TerminalNode* DOT_NUM(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> DASH();
-    antlr4::tree::TerminalNode* DASH(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> SPECIAL_CHAR();
-    antlr4::tree::TerminalNode* SPECIAL_CHAR(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> EXTENSION();
-    antlr4::tree::TerminalNode* EXTENSION(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> FRAME_RANGE();
-    antlr4::tree::TerminalNode* FRAME_RANGE(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> DOT_FRAME_RANGE();
-    antlr4::tree::TerminalNode* DOT_FRAME_RANGE(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> WS();
-    antlr4::tree::TerminalNode* WS(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> OTHER_CHAR();
-    antlr4::tree::TerminalNode* OTHER_CHAR(size_t i);
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  SingleFrameBasenameContext* singleFrameBasename();
+  BasenameContext* basename();
 
   class  PlainBasenameContext : public antlr4::ParserRuleContext {
   public:
     PlainBasenameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    std::vector<antlr4::tree::TerminalNode *> WORD();
-    antlr4::tree::TerminalNode* WORD(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> NUM();
-    antlr4::tree::TerminalNode* NUM(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> DASH();
-    antlr4::tree::TerminalNode* DASH(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> SPECIAL_CHAR();
-    antlr4::tree::TerminalNode* SPECIAL_CHAR(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> FRAME_RANGE();
-    antlr4::tree::TerminalNode* FRAME_RANGE(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> DOT_FRAME_RANGE();
-    antlr4::tree::TerminalNode* DOT_FRAME_RANGE(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> WS();
-    antlr4::tree::TerminalNode* WS(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> OTHER_CHAR();
-    antlr4::tree::TerminalNode* OTHER_CHAR(size_t i);
+    std::vector<PlainBasenameCharContext *> plainBasenameChar();
+    PlainBasenameCharContext* plainBasenameChar(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
