@@ -170,6 +170,8 @@ public:
     antlr4::tree::TerminalNode* DASH(size_t i);
     std::vector<antlr4::tree::TerminalNode *> SPECIAL_CHAR();
     antlr4::tree::TerminalNode* SPECIAL_CHAR(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> EXTENSION();
+    antlr4::tree::TerminalNode* EXTENSION(size_t i);
     std::vector<antlr4::tree::TerminalNode *> FRAME_RANGE();
     antlr4::tree::TerminalNode* FRAME_RANGE(size_t i);
     std::vector<antlr4::tree::TerminalNode *> DOT_FRAME_RANGE();

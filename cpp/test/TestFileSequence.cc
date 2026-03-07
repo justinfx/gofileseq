@@ -242,6 +242,15 @@ protected:
             Case t = {"/path/file.-100--1#.exr", "/path/file.-100--1#.exr", -100, -1, 4, 100, ".exr"};
             m_cases.push_back(t);
         }
+        // Directory with dots in name (regression: https://github.com/justinfx/fileseq/issues/152)
+        {
+            Case t = {"/path.with.dots/file.1-100#.exr", "/path.with.dots/file.1-100#.exr", 1, 100, 4, 100, ".exr"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"/dir.v1/dir.v2/file.1-100#.exr", "/dir.v1/dir.v2/file.1-100#.exr", 1, 100, 4, 100, ".exr"};
+            m_cases.push_back(t);
+        }
     }
 
     std::vector<Case> m_cases;

@@ -144,6 +144,26 @@ func TestParseFileSequence(t *testing.T) {
 			wantExt:   ".exr",
 			wantSeq:   true,
 		},
+		// Directory with dots in name (regression: https://github.com/justinfx/fileseq/issues/152)
+		{
+			input:    "/path.with.dots/file.1-100#.exr",
+			wantDir:  "/path.with.dots/",
+			wantBase: "file.",
+			wantRange: "1-100",
+			wantPad:  "#",
+			wantExt:  ".exr",
+			wantSeq:  true,
+		},
+		// Multiple dotted directory segments
+		{
+			input:    "/dir.v1/dir.v2/file.1-100#.exr",
+			wantDir:  "/dir.v1/dir.v2/",
+			wantBase: "file.",
+			wantRange: "1-100",
+			wantPad:  "#",
+			wantExt:  ".exr",
+			wantSeq:  true,
+		},
 	}
 
 	for _, tt := range tests {
