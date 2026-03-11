@@ -7,5 +7,5 @@ var searchData=
   ['framerange_11',['frameRange',['../classfileseq_1_1FrameSet.html#aa0fe9ca91313bae1f53259ed335173ed',1,'fileseq::FrameSet::frameRange()'],['../classfileseq_1_1FileSequence.html#a54bcf839d417f53f5517990b13e65de1',1,'fileseq::FileSequence::frameRange()']]],
   ['frames_12',['frames',['../classfileseq_1_1FrameSet.html#a0a30ab10948fdd0b3407b7f54b0276ed',1,'fileseq::FrameSet']]],
   ['frameset_13',['FrameSet',['../classfileseq_1_1FrameSet.html',1,'fileseq::FrameSet'],['../classfileseq_1_1FrameSet.html#af77c1459a9dfb5635cb9174329199406',1,'fileseq::FrameSet::FrameSet(const std::string &amp;frange, Status *ok=nullptr)'],['../classfileseq_1_1FrameSet.html#a6fda0dc278acf42b50dec993c6894582',1,'fileseq::FrameSet::FrameSet()']]],
-  ['frameset_14',['frameSet',['../classfileseq_1_1FileSequence.html#a44dd3a3c6c6b46461d4387c7aeec46f1',1,'fileseq::FileSequence']]]
+  ['frameset_14',['frameSet',['../classfileseq_1_1FileSequence.html#a817d78f3adf22871424dd71f1d4f3f1e',1,'fileseq::FileSequence']]]
 ];
