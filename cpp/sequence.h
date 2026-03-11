@@ -175,48 +175,48 @@ public:
     /*!
     Dirname returns the parsed directory component of the sequence string
     */
-    std::string dirname() const;
+    const std::string& dirname() const;
 
     /*!
     Set the dir name component of the sequence string
     */
-    void setDirname(const std::string &dirname) const;
+    void setDirname(const std::string &dirname);
 
     /*!
     Basename returns the parsed basename component of the sequence string.
     This is the file part, just before the frame range component.
     */
-    std::string basename() const;
+    const std::string& basename() const;
 
     /*!
     Set the basename component of the sequence string.
     This is the file part, just before the frame range component.
     */
-    void setBasename(const std::string &basename) const;
+    void setBasename(const std::string &basename);
 
     /*!
     Ext returns the file extension component from the sequence, including
     the leading period character.
     */
-    std::string ext() const;
+    const std::string& ext() const;
 
     /*!
     Set a new extension component for the sequence, which should include
     the leading period character.
     */
-    void setExt(const std::string &ext) const;
+    void setExt(const std::string &ext);
 
     /*!
     Returns the parsed padding characters component of the sequence string.
     May return an empty string if the file sequence was really a single
     file. i.e. # or @ or @@@
     */
-    std::string padding() const;
+    const std::string& padding() const;
 
     /*!
     Set new padding characters for the sequence, i.e. # or @ or @@@
     */
-    void setPadding(const std::string &padChars) const;
+    void setPadding(const std::string &padChars);
 
     /*!
     Returns the style of padding being used to convert between characters
@@ -228,7 +228,7 @@ public:
     Returns the style of padding being used to convert between characters
     and their numeric width, i.e. # == 4
     */
-    void setPaddingStyle(PadStyle style) const;
+    void setPaddingStyle(PadStyle style);
 
     /*!
     FrameRange returns the string frame range component, parsed from the
@@ -294,7 +294,7 @@ public:
     sequence was parsed. If no frame range was parsed from the sequence,
     then this method will return an invalid FrameSet.
     */
-    FrameSet frameSet();
+    const FrameSet& frameSet() const;
 
     /*!
     Set a new FrameSet for this sequence

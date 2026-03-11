@@ -13,6 +13,8 @@
 
 namespace fileseq {
 
+static const std::string s_emptyStr;
+
 
 FileSequence::FileSequence() : m_seqData(nullptr) , m_frameSet() {
 
@@ -153,12 +155,12 @@ std::string FileSequence::string() const {
     return ss.str();
 }
 
-std::string FileSequence::dirname() const {
-    if (!isValid()) return "";
+const std::string& FileSequence::dirname() const {
+    if (!isValid()) return s_emptyStr;
     return m_seqData->dir;
 }
 
-void FileSequence::setDirname(const std::string& dirname) const {
+void FileSequence::setDirname(const std::string& dirname) {
     m_seqData->dir.assign(dirname);
 
     if (!dirname.empty() && dirname[dirname.size()-1] != fileseq::strings::kPathSep) {
@@ -168,21 +170,21 @@ void FileSequence::setDirname(const std::string& dirname) const {
     }
 }
 
-std::string FileSequence::basename() const {
-    if (!isValid()) return "";
+const std::string& FileSequence::basename() const {
+    if (!isValid()) return s_emptyStr;
     return m_seqData->base;
 }
 
-void FileSequence::setBasename(const std::string& basename) const {
+void FileSequence::setBasename(const std::string& basename) {
     m_seqData->base.assign(basename);
 }
 
-std::string FileSequence::ext() const {
-    if (!isValid()) return "";
+const std::string& FileSequence::ext() const {
+    if (!isValid()) return s_emptyStr;
     return m_seqData->ext;
 }
 
-void FileSequence::setExt(const std::string& ext) const {
+void FileSequence::setExt(const std::string& ext) {
     m_seqData->ext.assign(ext);
 
     if (!ext.empty() && ext[0] != '.') {
@@ -192,12 +194,12 @@ void FileSequence::setExt(const std::string& ext) const {
     }
 }
 
-std::string FileSequence::padding() const {
-    if (!isValid()) return "";
+const std::string& FileSequence::padding() const {
+    if (!isValid()) return s_emptyStr;
     return m_seqData->pad;
 }
 
-void FileSequence::setPadding(const std::string &padChars) const {
+void FileSequence::setPadding(const std::string &padChars) {
     m_seqData->pad = padChars;
 
     using namespace fileseq::internal;
@@ -212,7 +214,7 @@ PadStyle FileSequence::paddingStyle() const {
     return m_seqData->padStyle;
 }
 
-void FileSequence::setPaddingStyle(PadStyle style) const {
+void FileSequence::setPaddingStyle(PadStyle style) {
     m_seqData->padStyle = style;
 
     using namespace fileseq::internal;
@@ -235,7 +237,7 @@ int FileSequence::zfill() const {
     return m_seqData->zfill;
 }
 
-FrameSet FileSequence::frameSet() {
+const FrameSet& FileSequence::frameSet() const {
     return m_frameSet;
 }
 
