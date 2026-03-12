@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(fileseq VERSION 3.0.0 LANGUAGES CXX)
+project(fileseq VERSION 3.1.1 LANGUAGES CXX)
 
 # ANTLR4 4.9.3 requires C++11 minimum
 # Supports older compilers: GCC 4.8+, Clang 3.3+, MSVC 2013+

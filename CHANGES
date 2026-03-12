@@ -1,5 +1,10 @@
 Changes:
 
+3.1.1
+----------------
+
+* grammar - fix directory rule to allow UNC paths (//server/share/)
+
 3.1.0
 ----------------
 
