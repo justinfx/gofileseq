@@ -284,6 +284,77 @@ TEST_F( TestNewFileSequences, New ) {
 }
 
 
+// Regression test for UNC paths (//server/share/...).
+// The grammar's directory rule previously only allowed a single optional leading slash,
+// causing //server/share/... to fail with a parse error.
+// See: https://github.com/justinfx/fileseq/issues/153
+class TestUNCPaths : public testing::Test {
+
+public:
+    struct Case {
+        std::string path;
+        std::string wantDir;
+        std::string wantStr;
+    };
+
+protected:
+    void SetUp() {
+        {
+            Case t = {
+                "//rama/dev/fileseq_test/fileseq_test.1-100####.exr",
+                "//rama/dev/fileseq_test/",
+                "//rama/dev/fileseq_test/fileseq_test.1-100####.exr"
+            };
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {
+                "//server/share/file.1-50@@@@.exr",
+                "//server/share/",
+                "//server/share/file.1-50@@@@.exr"
+            };
+            m_cases.push_back(t);
+        }
+        // Pattern-only UNC path: C++ omits padding from string() when no frame range
+        // (same behavior as single-slash: /dir/f.@@.ext -> /dir/f..ext)
+        {
+            Case t = {
+                "//server/share/file.####.exr",
+                "//server/share/",
+                "//server/share/file..exr"
+            };
+            m_cases.push_back(t);
+        }
+        // Single-frame UNC path (C++ adds inferred padding to string representation)
+        {
+            Case t = {
+                "//server/share/file.0001.exr",
+                "//server/share/",
+                "//server/share/file.0001#.exr"
+            };
+            m_cases.push_back(t);
+        }
+    }
+
+    std::vector<Case> m_cases;
+};
+
+
+TEST_F( TestUNCPaths, UNCPaths ) {
+    fileseq::Status stat;
+
+    for (size_t i=0; i < m_cases.size(); ++i) {
+        Case t = m_cases[i];
+
+        fileseq::FileSequence s(t.path, &stat);
+        ASSERT_TRUE(stat) << "#" << i << ": Failed to parse " << t.path << " : " << stat;
+
+        EXPECT_EQ(t.wantDir, s.dirname()) << "dirname does not match, given " << t.path;
+        EXPECT_EQ(t.wantStr, s.string()) << "string does not match, given " << t.path;
+    }
+}
+
+
 class TestNewFileSequenceFrameIndex : public testing::Test {
 
 public:

@@ -531,6 +531,55 @@ func TestParserEdgeCases(t *testing.T) {
 	}
 }
 
+// TestUNCPaths is a regression test for UNC paths (//server/share/...).
+// The grammar's directory rule previously only allowed a single optional leading slash,
+// causing //server/share/... to fail with a parse error.
+func TestUNCPaths(t *testing.T) {
+	var table = []struct {
+		path    string
+		wantDir string
+		wantStr string
+	}{
+		{
+			path:    "//rama/dev/fileseq_test/fileseq_test.1-100####.exr",
+			wantDir: "//rama/dev/fileseq_test/",
+			wantStr: "//rama/dev/fileseq_test/fileseq_test.1-100####.exr",
+		},
+		{
+			path:    "//server/share/file.1-50@@@@.exr",
+			wantDir: "//server/share/",
+			wantStr: "//server/share/file.1-50@@@@.exr",
+		},
+		// Pattern-only and single-frame UNC paths must not fail
+		{
+			path:    "//server/share/file.####.exr",
+			wantDir: "//server/share/",
+			wantStr: "//server/share/file.####.exr",
+		},
+		{
+			// Single-frame: Go adds inferred padding to String() representation
+			path:    "//server/share/file.0001.exr",
+			wantDir: "//server/share/",
+			wantStr: "//server/share/file.0001#.exr",
+		},
+	}
+
+	for _, tt := range table {
+		t.Run(tt.path, func(t *testing.T) {
+			seq, err := NewFileSequence(tt.path)
+			if err != nil {
+				t.Fatalf("Parse error: %v", err)
+			}
+			if actual := seq.Dirname(); actual != tt.wantDir {
+				t.Errorf("Dirname(): expected %q, got %q", tt.wantDir, actual)
+			}
+			if actual := seq.String(); actual != tt.wantStr {
+				t.Errorf("String(): expected %q, got %q", tt.wantStr, actual)
+			}
+		})
+	}
+}
+
 func TestFileSequenceFrameIndex(t *testing.T) {
 	var table = []struct {
 		path     string
