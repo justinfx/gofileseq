@@ -8,6 +8,7 @@ var hierarchy =
       [ "fileseq::internal::SingleHashPad", "classfileseq_1_1internal_1_1SingleHashPad.html", null ]
     ] ],
     [ "fileseq::Range", "classfileseq_1_1Range.html", null ],
+    [ "fileseq::RangeInterval", "structfileseq_1_1RangeInterval.html", null ],
     [ "fileseq::RangeIterator", "classfileseq_1_1RangeIterator.html", null ],
     [ "fileseq::Ranges", "classfileseq_1_1Ranges.html", null ],
     [ "fileseq::RangesIterator", "classfileseq_1_1RangesIterator.html", null ],

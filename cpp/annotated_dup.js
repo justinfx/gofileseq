@@ -11,6 +11,7 @@ var annotated_dup =
       [ "Status", "classfileseq_1_1Status.html", "classfileseq_1_1Status" ],
       [ "FrameSet", "classfileseq_1_1FrameSet.html", "classfileseq_1_1FrameSet" ],
       [ "FileSequence", "classfileseq_1_1FileSequence.html", "classfileseq_1_1FileSequence" ],
+      [ "RangeInterval", "structfileseq_1_1RangeInterval.html", "structfileseq_1_1RangeInterval" ],
       [ "RangeIterator", "classfileseq_1_1RangeIterator.html", "classfileseq_1_1RangeIterator" ],
       [ "Range", "classfileseq_1_1Range.html", "classfileseq_1_1Range" ],
       [ "RangesIterator", "classfileseq_1_1RangesIterator.html", "classfileseq_1_1RangesIterator" ],
