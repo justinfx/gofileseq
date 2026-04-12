@@ -5,23 +5,26 @@ well as complex non-contiguous ranges.
 
 Simple range:
 
-    1-10
-    20-100x3
-    -10-50
+	1-10
+	20-100x3
+	-10-50
 
 Complex ranges:
 
-    1-10,20-40x2,30,80-100x3
-
+	1-10,20-40x2,30,80-100x3
 */
 package ranges
 
 import (
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 )
+
+// rangeInterval is a simple inclusive [lo, hi] interval used for overlap detection.
+type rangeInterval struct{ lo, hi int }
 
 // Iterator is an interface type that can
 // iterate over int values.
@@ -400,41 +403,73 @@ func (l *InclusiveRanges) AppendUnique(start, end, step int) {
 		return
 	}
 
-	subStart := start
-	subEnd := start
-	subStep := step
-	last := start
-	pending := 0 // Track unique value count
-
-	// Handle loop test for both increasing
-	// and decreasing ranges
-	var pred func() bool
-	if start <= end {
-		if step < 0 {
-			step *= -1
-		}
-		pred = func() bool { return subEnd <= end }
-	} else {
-		if step > 0 {
-			step *= -1
-		}
-		pred = func() bool { return subEnd >= end }
+	// Normalize step direction to match the start/end direction.
+	if start <= end && step < 0 {
+		step = -step
+	} else if start > end && step > 0 {
+		step = -step
 	}
 
-	// Short-circuit if this is the first range being added
+	// Short-circuit if this is the first range being added.
 	if len(l.blocks) == 0 {
 		l.Append(start, end, step)
 		return
 	}
 
-	// TODO: More intelligent fast-paths for easy-to-identify
-	// overlapping ranges. Such as when the existing range is:
-	// 1-100x1 and we are appending 50-150x1. Should be easy
-	// enough to just know we can Append(101,150,1)
+	// Value bounds for the new range (direction-independent).
+	lo, hi := start, end
+	if lo > hi {
+		lo, hi = hi, lo
+	}
+
+	// Fast path: new range has no overlap with existing ranges at all.
+	if lo > l.Max() || hi < l.Min() {
+		l.Append(start, end, step)
+		return
+	}
+
+	// Fast path for contiguous new ranges (|step|==1) when all existing
+	// blocks are also contiguous: compute non-overlapping sub-ranges via
+	// interval arithmetic, with no per-value iteration required.
+	absStep := step
+	if absStep < 0 {
+		absStep = -absStep
+	}
+	if absStep == 1 && l.allBlocksContiguous() {
+		l.appendUniqueContiguous(lo, hi, step)
+		return
+	}
+
+	// General slow path: iterate each value in the new range and check
+	// uniqueness individually.
+	//
+	// Snapshot the current blocks before the loop so that any sub-ranges
+	// appended mid-iteration are not included in subsequent uniqueness checks.
+	originalBlocks := l.blocks
+
+	subStart := start
+	subEnd := start
+	last := start
+	pending := 0
+
+	containsInOriginal := func(value int) bool {
+		for _, b := range originalBlocks {
+			if b.Contains(value) {
+				return true
+			}
+		}
+		return false
+	}
+
+	var pred func() bool
+	if start <= end {
+		pred = func() bool { return subEnd <= end }
+	} else {
+		pred = func() bool { return subEnd >= end }
+	}
 
 	for ; pred(); subEnd += step {
-		if !l.Contains(subEnd) {
-			// Is a unique value in the range
+		if !containsInOriginal(subEnd) {
 			last = subEnd
 			if pending == 0 {
 				subStart = last
@@ -442,23 +477,101 @@ func (l *InclusiveRanges) AppendUnique(start, end, step int) {
 			pending++
 			continue
 		}
-
 		if pending == 0 {
-			// Nothing to add yet
 			continue
 		}
-
-		// Current value is already in range.
-		// Add previous values
-		l.Append(subStart, last, subStep)
+		l.Append(subStart, last, step)
 		subStart = subEnd + step
 		pending = 0
 	}
-
-	// Flush the remaining values
 	if pending > 0 {
-		l.Append(subStart, last, subStep)
+		l.Append(subStart, last, step)
 	}
+}
+
+// allBlocksContiguous returns true if all existing blocks have a step of 1 or -1.
+func (l *InclusiveRanges) allBlocksContiguous() bool {
+	for _, b := range l.blocks {
+		s := b.Step()
+		if s != 1 && s != -1 {
+			return false
+		}
+	}
+	return true
+}
+
+// appendUniqueContiguous appends only the portions of [lo, hi] not already
+// covered by existing blocks. It works by computing coverage intervals rather
+// than checking each value individually, and is only called when all existing
+// blocks and the new range have a step of 1 or -1.
+func (l *InclusiveRanges) appendUniqueContiguous(lo, hi, step int) {
+	coverage := mergedCoverage(l.blocks)
+	gaps := gapsInRange(lo, hi, coverage)
+
+	// For a descending range, append from high to low so that the resulting
+	// block order matches the direction of iteration.
+	if step < 0 {
+		for i := len(gaps) - 1; i >= 0; i-- {
+			l.Append(gaps[i].hi, gaps[i].lo, step)
+		}
+		return
+	}
+	for _, g := range gaps {
+		l.Append(g.lo, g.hi, step)
+	}
+}
+
+// mergedCoverage returns a sorted, non-overlapping list of coverage intervals
+// built from the given blocks.
+func mergedCoverage(blocks []*InclusiveRange) []rangeInterval {
+	// Because all blocks have a step of 1 or -1, Min and Max describe their
+	// full coverage with no gaps, so a simple [min, max] interval is enough.
+	intervals := make([]rangeInterval, len(blocks))
+	for i, b := range blocks {
+		intervals[i] = rangeInterval{b.Min(), b.Max()}
+	}
+
+	// Sort so we can merge in a single left-to-right pass.
+	sort.Slice(intervals, func(i, j int) bool {
+		return intervals[i].lo < intervals[j].lo
+	})
+
+	// Walk the sorted list, extending the last interval when the next one
+	// overlaps or is adjacent, otherwise starting a new one.
+	// Reusing the same backing array avoids a second allocation.
+	merged := intervals[:0:len(intervals)]
+	for _, iv := range intervals {
+		last := len(merged) - 1
+		if len(merged) == 0 || iv.lo > merged[last].hi+1 {
+			merged = append(merged, iv)
+		} else if iv.hi > merged[last].hi {
+			merged[last].hi = iv.hi
+		}
+	}
+	return merged
+}
+
+// gapsInRange returns the portions of [lo, hi] not covered by the given
+// coverage intervals, in ascending order.
+func gapsInRange(lo, hi int, coverage []rangeInterval) []rangeInterval {
+	var gaps []rangeInterval
+	cur := lo
+	for _, iv := range coverage {
+		if iv.hi < cur {
+			continue // entirely before our position
+		}
+		if iv.lo > hi {
+			break // entirely beyond our range
+		}
+		if iv.lo > cur {
+			gaps = append(gaps, rangeInterval{cur, iv.lo - 1})
+		}
+		cur = iv.hi + 1
+	}
+	if cur <= hi {
+		gaps = append(gaps, rangeInterval{cur, hi})
+	}
+	return gaps
 }
 
 // Contains returns true if a given value is a valid

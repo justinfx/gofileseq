@@ -4,11 +4,18 @@
 
 #include <cmath>
 #include <algorithm>
-#include <functional>
 #include <sstream>
 
 
 namespace fileseq {
+
+
+// RangeInterval is a simple [lo, hi] interval used internally
+// for coverage and overlap calculations in appendUnique.
+struct RangeInterval {
+    long lo;
+    long hi;
+};
 
 
 Range::Range(long start, long end, long step)
@@ -217,32 +224,28 @@ bool RangeIterator::next() {
 
 
 Ranges::~Ranges() {
-    // Delete the range list
-    while (!m_blocks.empty()) delete m_blocks.back(), m_blocks.pop_back();
+    for (auto* b : m_blocks) {
+        delete b;
+    }
 }
 
 
 Ranges::Ranges(const Ranges& other) : m_blocks() {
     m_blocks.reserve(other.m_blocks.size());
-    Blocks::const_iterator it;
-
-    // Copy the block list of ranges
-    for (it = other.m_blocks.begin(); it != other.m_blocks.end(); ++it) {
-        m_blocks.push_back( new Range( *(*it) ) );
+    for (const auto* b : other.m_blocks) {
+        m_blocks.push_back(new Range(*b));
     }
 }
 
 
 std::string Ranges::string() const {
     std::stringstream buf;
-
     bool first = true;
-    Blocks::const_iterator it;
-    for (it = m_blocks.begin(); it != m_blocks.end(); ++it) {
+    for (const auto* b : m_blocks) {
         if (!first) {
             buf << ",";
         }
-        buf << (*it)->string();
+        buf << b->string();
         first = false;
     }
     return buf.str();
@@ -251,9 +254,8 @@ std::string Ranges::string() const {
 
 size_t Ranges::length() const {
     size_t total = 0;
-    Blocks::const_iterator it;
-    for (it = m_blocks.begin(); it != m_blocks.end(); ++it) {
-        total += (*it)->length();
+    for (const auto* b : m_blocks) {
+        total += b->length();
     }
     return total;
 }
@@ -277,9 +279,8 @@ long Ranges::end() const {
 
 long Ranges::min() const {
     long val = start();
-    Blocks::const_iterator it;
-    for (it = m_blocks.begin(); it != m_blocks.end(); ++it) {
-        val = std::min((*it)->min(), val);
+    for (const auto* b : m_blocks) {
+        val = std::min(b->min(), val);
     }
     return val;
 }
@@ -287,65 +288,171 @@ long Ranges::min() const {
 
 long Ranges::max() const {
     long val = end();
-    Blocks::const_iterator it;
-    for (it = m_blocks.begin(); it != m_blocks.end(); ++it) {
-        val = std::max((*it)->max(), val);
+    for (const auto* b : m_blocks) {
+        val = std::max(b->max(), val);
     }
     return val;
 }
 
 
-bool predIncRangeDone(long val, long end) {
-    return val <= end;
+// allBlocksContiguous returns true if all blocks have a step of 1 or -1.
+static bool allBlocksContiguous(const std::vector<Range*>& blocks) {
+    for (const auto* b : blocks) {
+        long s = b->step();
+        if (s != 1 && s != -1) {
+            return false;
+        }
+    }
+    return true;
 }
 
-bool predDecRangeDone(long val, long end) {
-    return val >= end;
+
+// mergedCoverage returns a sorted, non-overlapping list of coverage intervals
+// built from the given blocks.
+static std::vector<RangeInterval> mergedCoverage(const std::vector<Range*>& blocks) {
+    std::vector<RangeInterval> intervals;
+    intervals.reserve(blocks.size());
+
+    // Because all blocks have a step of 1 or -1, min and max describe their
+    // full coverage with no gaps, so a simple [min, max] interval is enough.
+    for (const auto* b : blocks) {
+        intervals.push_back({b->min(), b->max()});
+    }
+
+    // Sort so we can merge in a single left-to-right pass.
+    std::sort(intervals.begin(), intervals.end(),
+        [](const RangeInterval& a, const RangeInterval& b) {
+            return a.lo < b.lo;
+        });
+
+    // Walk the sorted list, extending the last interval when the next one
+    // overlaps or is adjacent, otherwise starting a new one.
+    std::vector<RangeInterval> merged;
+    merged.reserve(intervals.size());
+    for (const auto& iv : intervals) {
+        if (merged.empty() || iv.lo > merged.back().hi + 1) {
+            merged.push_back(iv);
+        } else if (iv.hi > merged.back().hi) {
+            merged.back().hi = iv.hi;
+        }
+    }
+    return merged;
 }
+
+
+// gapsInRange returns the portions of [lo, hi] not covered by the given
+// coverage intervals, in ascending order.
+static std::vector<RangeInterval> gapsInRange(long lo, long hi,
+                                               const std::vector<RangeInterval>& coverage) {
+    std::vector<RangeInterval> gaps;
+    long cur = lo;
+    for (const auto& iv : coverage) {
+        if (iv.hi < cur) {
+            continue; // entirely before our position
+        }
+        if (iv.lo > hi) {
+            break; // entirely beyond our range
+        }
+        if (iv.lo > cur) {
+            gaps.push_back({cur, iv.lo - 1});
+        }
+        cur = iv.hi + 1;
+    }
+    if (cur <= hi) {
+        gaps.push_back({cur, hi});
+    }
+    return gaps;
+}
+
+
+// appendUniqueContiguous appends only the portions of [lo, hi] not already
+// covered by existing blocks, using interval arithmetic rather than per-value
+// iteration. Only called when all existing blocks and the new range have a
+// step of 1 or -1.
+static void appendUniqueContiguous(Ranges* self,
+                                    const std::vector<RangeInterval>& coverage,
+                                    long lo, long hi, long step) {
+    const auto gaps = gapsInRange(lo, hi, coverage);
+
+    // For a descending range, append from high to low so that the
+    // block order matches the direction of iteration.
+    if (step < 0) {
+        for (auto it = gaps.rbegin(); it != gaps.rend(); ++it) {
+            self->append(it->hi, it->lo, step);
+        }
+        return;
+    }
+    for (const auto& g : gaps) {
+        self->append(g.lo, g.hi, step);
+    }
+}
+
 
 void Ranges::appendUnique(long start, long end, long step) {
     if (step == 0) {
-        // Invalid step. Do nothing.
         return;
     }
 
-    long subStart = start;
-    long subEnd = start;
-    long subStep = step;
-    long last = start;
-    size_t pending = 0; // Track unique value count
-
-    // Handle loop test for both increasing
-    // and decreasing ranges
-    bool (*pred) (long, long);
-
-    if (start <= end) {
-        if (step < 0) {
-            step *= -1;
-        }
-        pred = &predIncRangeDone;
-
-    } else {
-        if (step > 0) {
-            step *= -1;
-        }
-        pred = &predDecRangeDone;
+    // Normalize step direction to match the start/end direction.
+    if (start <= end && step < 0) {
+        step = -step;
+    } else if (start > end && step > 0) {
+        step = -step;
     }
 
-    // Short-circuit if this is the first range being added
+    // Short-circuit if this is the first range being added.
     if (m_blocks.empty()) {
         append(start, end, step);
         return;
     }
 
-    // TODO: More intelligent fast-paths for easy-to-identify
-    // overlapping ranges. Such as when the existing range is:
-    // 1-100x1 and we are appending 50-150x1. Should be easy
-    // enough to just know we can Append(101,150,1)
+    // Value bounds for the new range (direction-independent).
+    long lo = std::min(start, end);
+    long hi = std::max(start, end);
+
+    // Fast path: new range has no overlap with existing ranges at all.
+    if (lo > max() || hi < min()) {
+        append(start, end, step);
+        return;
+    }
+
+    long absStep = std::abs(step);
+
+    // Fast path for contiguous new ranges (step of 1 or -1) when all existing
+    // blocks are also contiguous: compute non-overlapping sub-ranges via
+    // interval arithmetic, with no per-value iteration required.
+    if (absStep == 1 && allBlocksContiguous(m_blocks)) {
+        appendUniqueContiguous(this, mergedCoverage(m_blocks), lo, hi, step);
+        return;
+    }
+
+    // General slow path: iterate each value in the new range and check
+    // uniqueness individually.
+    //
+    // Snapshot the current block count before the loop so that any sub-ranges
+    // appended mid-iteration are not included in subsequent uniqueness checks.
+    const size_t originalSize = m_blocks.size();
+    auto containsInOriginal = [&](long value) -> bool {
+        for (size_t i = 0; i < originalSize; ++i) {
+            if (m_blocks[i]->contains(value)) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    long subStart = start;
+    long subEnd = start;
+    long last = start;
+    size_t pending = 0;
+
+    bool (*pred)(long, long) = (start <= end)
+        ? [](long val, long end) -> bool { return val <= end; }
+        : [](long val, long end) -> bool { return val >= end; };
 
     for ( ; pred(subEnd, end); subEnd += step ) {
 
-        if (!contains(subEnd)) {
+        if (!containsInOriginal(subEnd)) {
             // Is a unique value in the range
             last = subEnd;
             if (pending == 0) {
@@ -362,22 +469,21 @@ void Ranges::appendUnique(long start, long end, long step) {
 
         // Current value is already in range.
         // Add previous values
-        append(subStart, last, subStep);
+        append(subStart, last, step);
         subStart = subEnd + step;
         pending = 0;
     }
 
     // Flush the remaining values
     if (pending > 0) {
-        append(subStart, last, subStep);
+        append(subStart, last, step);
     }
 }
 
 
 bool Ranges::contains(long value) const {
-    Blocks::const_iterator it;
-    for (it = m_blocks.begin(); it != m_blocks.end(); ++it) {
-        if ((*it)->contains(value)) {
+    for (const auto* b : m_blocks) {
+        if (b->contains(value)) {
             return true;
         }
     }
@@ -386,25 +492,19 @@ bool Ranges::contains(long value) const {
 
 
 long Ranges::value(size_t idx, Status* ok) const {
-    long val;
-    size_t size, n;
-    Range* range;
-    Status found;
-    Blocks::const_iterator it;
-
-    n = 0;
+    size_t n = 0;
 
     if (ok != NULL) ok->clearError();
 
-    for (it = m_blocks.begin(); it != m_blocks.end(); ++it) {
-        range = (*it);
-        size = range->length();
+    for (const auto* b : m_blocks) {
+        size_t size = b->length();
 
         // modify the original index to be within
         // the range of the current range block, and
         // then check that it is a valid index value
         if ((idx - n) < size) {
-            val = range->value(idx - n, &found);
+            Status found;
+            long val = b->value(idx - n, &found);
             if (found) {
                 return val;
             }
@@ -425,21 +525,17 @@ long Ranges::value(size_t idx, Status* ok) const {
 
 
 ssize_t Ranges::index(long value) const {
-    ssize_t idx;
     size_t n = 0;
-    Range* range;
-    Blocks::const_iterator it;
-
-    for (it = m_blocks.begin(); it != m_blocks.end(); ++it) {
-        range = (*it);
+    for (const auto* b : m_blocks) {
         // If the value is within the current block
         // then return the local index, offset by the
         // number of previous values we have tracked
-        if ((idx = range->index(value)) >= 0) {
+        ssize_t idx = b->index(value);
+        if (idx >= 0) {
             return idx + n;
         }
         // Update the offset for the values we have seen
-        n += range->length();
+        n += b->length();
     }
 
     // The previous loop ended in error
