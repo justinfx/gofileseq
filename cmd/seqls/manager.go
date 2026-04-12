@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"runtime"
 	"sync/atomic"
 	"text/tabwriter"
 
 	fileseq "github.com/justinfx/gofileseq/v3"
-	"github.com/justinfx/gofileseq/v3/cmd/seqls/internal/fastwalk"
 )
 
 // number of goroutines to spawn for processing directories
@@ -23,7 +23,7 @@ var numWorkers = 50
 // workManager contains the input and output channels
 // for all work, as well as the options for processing
 type workManager struct {
-	inDirs   chan string
+	inFiles  chan []string
 	inSeqs   chan *fileseq.FileSequence
 	outSeqs  chan fileseq.FileSequences
 	fileOpts []fileseq.FileOption
@@ -47,7 +47,7 @@ func NewWorkManager() *workManager {
 		fileopts = append(fileopts, fileseq.StrictPadding)
 	}
 	s := &workManager{
-		inDirs:   make(chan string),
+		inFiles:  make(chan []string, numWorkers),
 		inSeqs:   make(chan *fileseq.FileSequence),
 		outSeqs:  make(chan fileseq.FileSequences),
 		fileOpts: fileopts,
@@ -117,34 +117,34 @@ func (w *workManager) Process(rootPaths []string) error {
 func (w *workManager) processSources() uint64 {
 	var (
 		ok       bool
-		path     string
+		files    []string
 		errCount uint64
 		seq      *fileseq.FileSequence
 	)
 
 	fileopts := w.fileOpts
 
-	inDirs := w.inDirs
+	inFiles := w.inFiles
 	inSeqs := w.inSeqs
 	outSeqs := w.outSeqs
 
 	isDone := func() bool {
-		return (inDirs == nil && inSeqs == nil)
+		return (inFiles == nil && inSeqs == nil)
 	}
 
 	for !isDone() {
 		select {
 
-		// Directory paths will be scanned for contents
-		case path, ok = <-inDirs:
+		// Pre-read file lists are collapsed into sequences without a second dir read.
+		case files, ok = <-inFiles:
 			if !ok {
-				inDirs = nil
+				inFiles = nil
 				continue
 			}
-			seqs, err := fileseq.FindSequencesOnDisk(path, fileopts...)
+			seqs, err := fileseq.FindSequencesInList(files, fileopts...)
 			if err != nil {
 				errCount++
-				fmt.Fprintf(errOut, "%s %q: %s\n", ErrorPath, path, err)
+				fmt.Fprintf(errOut, "%s: %s\n", ErrorPath, err)
 				continue
 			}
 			outSeqs <- seqs
@@ -209,23 +209,11 @@ func (w *workManager) processResults() {
 	writ.Flush()
 }
 
-// Returns true if the input channels are nil
-func (w *workManager) isInputDone() bool {
-	if w.inDirs != nil {
-		return false
-	}
-	if w.inSeqs != nil {
-		return false
-	}
-	return true
-}
-
 // CloseInputs closes the input channels indicating
 // that no more paths will be loaded.
 func (w *workManager) closeInputs() {
-	if w.inDirs != nil {
-		close(w.inDirs)
-
+	if w.inFiles != nil {
+		close(w.inFiles)
 	}
 	if w.inSeqs != nil {
 		close(w.inSeqs)
@@ -240,8 +228,7 @@ func (w *workManager) closeOutput() {
 	}
 }
 
-// loadStandard takes paths and loads them into the
-// dir input channel for processing
+// load reads each root directory once and sends its file list for sequence detection.
 func (w *workManager) load(paths []string) uint64 {
 	dirs, seqs, errCount := preparePaths(paths)
 
@@ -249,96 +236,128 @@ func (w *workManager) load(paths []string) uint64 {
 		w.inSeqs <- s
 	}
 
-	for _, r := range dirs {
-		w.inDirs <- r
+	for _, dir := range dirs {
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			atomic.AddUint64(&errCount, 1)
+			fmt.Fprintf(errOut, "%s %q: %s\n", ErrorPath, dir, err)
+			continue
+		}
+		var filePaths []string
+		for _, e := range entries {
+			if e.IsDir() {
+				continue
+			}
+			typ := e.Type()
+			full := filepath.Join(dir, e.Name())
+			if typ&os.ModeSymlink != 0 {
+				info, err := os.Stat(full)
+				if err != nil || info.IsDir() {
+					continue
+				}
+			}
+			filePaths = append(filePaths, full)
+		}
+		if len(filePaths) > 0 {
+			w.inFiles <- filePaths
+		}
 	}
 
 	return errCount
 }
 
-// Parallel walk the root paths and populate the path
-// channel for the worker routines to consume.
+// loadRecursive walks root paths concurrently using os.ReadDir, reading each
+// directory exactly once. File paths are collected and sent directly to workers
+// via inFiles; no second directory read is needed.
 func (w *workManager) loadRecursive(paths []string) uint64 {
-	cache := map[string]struct{}{}
-	var mu sync.RWMutex
+	var errCount uint64
 
-	walkFn := func(path string, typ os.FileMode) error {
-		var isDir bool
-		var ret error
+	sem := make(chan struct{}, runtime.NumCPU()*4)
 
-		if typ.IsDir() {
-			isDir = true
+	// symlink cycle detection
+	var mu sync.Mutex
+	seen := map[string]struct{}{}
 
-		} else if typ&os.ModeSymlink != 0 {
-			if info, err := os.Stat(path); err == nil && info.IsDir() {
-				tgt, err := filepath.EvalSymlinks(path)
-				if err != nil {
-					return err
+	var wg sync.WaitGroup
+
+	var walkDir func(dir string)
+	walkDir = func(dir string) {
+		sem <- struct{}{}
+		defer func() { <-sem }()
+		defer wg.Done()
+
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			atomic.AddUint64(&errCount, 1)
+			fmt.Fprintf(errOut, "%s %q: %s\n", ErrorPath, dir, err)
+			return
+		}
+
+		var filePaths []string
+		for _, e := range entries {
+			name := e.Name()
+			full := filepath.Join(dir, name)
+			typ := e.Type()
+
+			if typ.IsDir() {
+				if !Options.AllFiles && len(name) > 1 && strings.HasPrefix(name, ".") {
+					continue
 				}
+				wg.Add(1)
+				go walkDir(full)
+				continue
+			}
 
-				isDir = true
-				ret = fastwalk.TraverseLink
-
-				// prevent symlink cycles.
-				// don't traverse the same symlink path if a subdirectory
-				// has a reference back to a link we have already seen
-
-				// check with read lock
-				mu.RLock()
-				_, exists := cache[tgt]
-				mu.RUnlock()
-				if exists {
-					ret = fastwalk.SkipFiles
-				} else {
-					// attempt to cache with write lock
+			if typ&os.ModeSymlink != 0 {
+				info, err := os.Stat(full)
+				if err != nil {
+					continue
+				}
+				if info.IsDir() {
+					if !Options.AllFiles && len(name) > 1 && strings.HasPrefix(name, ".") {
+						continue
+					}
+					tgt, err := filepath.EvalSymlinks(full)
+					if err != nil {
+						continue
+					}
 					mu.Lock()
-					if _, exists = cache[tgt]; exists {
-						ret = fastwalk.SkipFiles
-					} else {
-						cache[tgt] = struct{}{}
-						cache[path] = struct{}{}
+					_, exists := seen[tgt]
+					if !exists {
+						seen[tgt] = struct{}{}
+						seen[full] = struct{}{}
 					}
 					mu.Unlock()
+					if !exists {
+						wg.Add(1)
+						go walkDir(full)
+					}
+					continue
 				}
-
-				// We will still allow the immediate file listing
-				// of this symlink no matter what. But we may be
-				// instructing the walk not to recurse any further.
+				// symlink to a regular file — include it
 			}
+
+			filePaths = append(filePaths, full)
 		}
 
-		if !isDir {
-			return ret
+		if len(filePaths) > 0 {
+			w.inFiles <- filePaths
 		}
-
-		if !Options.AllFiles {
-			// Skip traversing into hidden dirs
-			name := filepath.Base(path)
-			if len(name) > 1 && strings.HasPrefix(name, ".") {
-				return filepath.SkipDir
-			}
-		}
-
-		// Add the path to the input channel for sequence scanning
-		w.inDirs <- path
-		return ret
 	}
 
-	dirs, seqs, errCount := preparePaths(paths)
+	dirs, seqs, errCount0 := preparePaths(paths)
+	atomic.AddUint64(&errCount, errCount0)
 
 	for _, s := range seqs {
 		w.inSeqs <- s
 	}
 
-	for _, r := range dirs {
-		if err := fastwalk.Walk(r, walkFn); err != nil {
-			if err != fastwalk.SkipFiles && err != fastwalk.TraverseLink {
-				atomic.AddUint64(&errCount, 1)
-				fmt.Fprintf(errOut, "%s %q: %s\n", ErrorPath, r, err)
-			}
-		}
+	for _, dir := range dirs {
+		wg.Add(1)
+		go walkDir(dir)
 	}
 
+	wg.Wait()
 	return errCount
 }
 
