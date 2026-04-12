@@ -224,32 +224,28 @@ bool RangeIterator::next() {
 
 
 Ranges::~Ranges() {
-    // Delete the range list
-    while (!m_blocks.empty()) delete m_blocks.back(), m_blocks.pop_back();
+    for (auto* b : m_blocks) {
+        delete b;
+    }
 }
 
 
 Ranges::Ranges(const Ranges& other) : m_blocks() {
     m_blocks.reserve(other.m_blocks.size());
-    Blocks::const_iterator it;
-
-    // Copy the block list of ranges
-    for (it = other.m_blocks.begin(); it != other.m_blocks.end(); ++it) {
-        m_blocks.push_back( new Range( *(*it) ) );
+    for (const auto* b : other.m_blocks) {
+        m_blocks.push_back(new Range(*b));
     }
 }
 
 
 std::string Ranges::string() const {
     std::stringstream buf;
-
     bool first = true;
-    Blocks::const_iterator it;
-    for (it = m_blocks.begin(); it != m_blocks.end(); ++it) {
+    for (const auto* b : m_blocks) {
         if (!first) {
             buf << ",";
         }
-        buf << (*it)->string();
+        buf << b->string();
         first = false;
     }
     return buf.str();
@@ -258,9 +254,8 @@ std::string Ranges::string() const {
 
 size_t Ranges::length() const {
     size_t total = 0;
-    Blocks::const_iterator it;
-    for (it = m_blocks.begin(); it != m_blocks.end(); ++it) {
-        total += (*it)->length();
+    for (const auto* b : m_blocks) {
+        total += b->length();
     }
     return total;
 }
@@ -284,9 +279,8 @@ long Ranges::end() const {
 
 long Ranges::min() const {
     long val = start();
-    Blocks::const_iterator it;
-    for (it = m_blocks.begin(); it != m_blocks.end(); ++it) {
-        val = std::min((*it)->min(), val);
+    for (const auto* b : m_blocks) {
+        val = std::min(b->min(), val);
     }
     return val;
 }
@@ -294,9 +288,8 @@ long Ranges::min() const {
 
 long Ranges::max() const {
     long val = end();
-    Blocks::const_iterator it;
-    for (it = m_blocks.begin(); it != m_blocks.end(); ++it) {
-        val = std::max((*it)->max(), val);
+    for (const auto* b : m_blocks) {
+        val = std::max(b->max(), val);
     }
     return val;
 }
@@ -450,7 +443,6 @@ void Ranges::appendUnique(long start, long end, long step) {
 
     long subStart = start;
     long subEnd = start;
-    long subStep = step;
     long last = start;
     size_t pending = 0;
 
@@ -477,22 +469,21 @@ void Ranges::appendUnique(long start, long end, long step) {
 
         // Current value is already in range.
         // Add previous values
-        append(subStart, last, subStep);
+        append(subStart, last, step);
         subStart = subEnd + step;
         pending = 0;
     }
 
     // Flush the remaining values
     if (pending > 0) {
-        append(subStart, last, subStep);
+        append(subStart, last, step);
     }
 }
 
 
 bool Ranges::contains(long value) const {
-    Blocks::const_iterator it;
-    for (it = m_blocks.begin(); it != m_blocks.end(); ++it) {
-        if ((*it)->contains(value)) {
+    for (const auto* b : m_blocks) {
+        if (b->contains(value)) {
             return true;
         }
     }
@@ -501,25 +492,19 @@ bool Ranges::contains(long value) const {
 
 
 long Ranges::value(size_t idx, Status* ok) const {
-    long val;
-    size_t size, n;
-    Range* range;
-    Status found;
-    Blocks::const_iterator it;
-
-    n = 0;
+    size_t n = 0;
 
     if (ok != NULL) ok->clearError();
 
-    for (it = m_blocks.begin(); it != m_blocks.end(); ++it) {
-        range = (*it);
-        size = range->length();
+    for (const auto* b : m_blocks) {
+        size_t size = b->length();
 
         // modify the original index to be within
         // the range of the current range block, and
         // then check that it is a valid index value
         if ((idx - n) < size) {
-            val = range->value(idx - n, &found);
+            Status found;
+            long val = b->value(idx - n, &found);
             if (found) {
                 return val;
             }
@@ -540,21 +525,17 @@ long Ranges::value(size_t idx, Status* ok) const {
 
 
 ssize_t Ranges::index(long value) const {
-    ssize_t idx;
     size_t n = 0;
-    Range* range;
-    Blocks::const_iterator it;
-
-    for (it = m_blocks.begin(); it != m_blocks.end(); ++it) {
-        range = (*it);
+    for (const auto* b : m_blocks) {
         // If the value is within the current block
         // then return the local index, offset by the
         // number of previous values we have tracked
-        if ((idx = range->index(value)) >= 0) {
+        ssize_t idx = b->index(value);
+        if (idx >= 0) {
             return idx + n;
         }
         // Update the offset for the values we have seen
-        n += range->length();
+        n += b->length();
     }
 
     // The previous loop ended in error
