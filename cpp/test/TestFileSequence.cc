@@ -251,6 +251,22 @@ protected:
             Case t = {"/dir.v1/dir.v2/file.1-100#.exr", "/dir.v1/dir.v2/file.1-100#.exr", 1, 100, 4, 100, ".exr"};
             m_cases.push_back(t);
         }
+        // Issue https://github.com/justinfx/fileseq/issues/159:
+        // '#' and '@' as literal filename characters (not padding tokens).
+        // Filenames where '#' or '@' is followed by mixed text+digits must be
+        // treated as plain files — characters preserved, not stripped.
+        {
+            Case t = {"helloMyPhone#Is911.json", "helloMyPhone#Is911.json", 0, 0, 0, 1, ".json"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"/tests/helloMyPhone#Is911.json", "/tests/helloMyPhone#Is911.json", 0, 0, 0, 1, ".json"};
+            m_cases.push_back(t);
+        }
+        {
+            Case t = {"shot_@_v001.exr", "shot_@_v001.exr", 0, 0, 0, 1, ".exr"};
+            m_cases.push_back(t);
+        }
     }
 
     std::vector<Case> m_cases;

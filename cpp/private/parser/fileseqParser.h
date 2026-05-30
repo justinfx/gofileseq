@@ -192,6 +192,8 @@ public:
     antlr4::tree::TerminalNode *DOT_FRAME_RANGE();
     antlr4::tree::TerminalNode *WS();
     antlr4::tree::TerminalNode *OTHER_CHAR();
+    antlr4::tree::TerminalNode *HASH();
+    antlr4::tree::TerminalNode *AT();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

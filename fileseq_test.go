@@ -368,6 +368,18 @@ func TestNewFileSequence(t *testing.T) {
 		{"file$(var).100.exr",
 			"file$(var).100@@@.exr", 100, 100, 3,
 			1, ".exr"},
+		// Issue #159 (Python fileseq issue): '#' and '@' as literal filename characters.
+		// Filenames containing '#' or '@' not in a valid padding position must be
+		// treated as plain files — the characters are preserved, not stripped.
+		{`C:\tests\helloMyPhone#Is911.json`,
+			`C:\tests\helloMyPhone#Is911.json`, 0, 0, 0,
+			1, ".json"},
+		{"helloMyPhone#Is911.json",
+			"helloMyPhone#Is911.json", 0, 0, 0,
+			1, ".json"},
+		{"shot_@_v001.exr",
+			"shot_@_v001.exr", 0, 0, 0,
+			1, ".exr"},
 	}
 	for _, tt := range table {
 		seq, err := NewFileSequence(tt.path)
