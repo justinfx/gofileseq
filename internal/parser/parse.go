@@ -164,7 +164,7 @@ func (v *fileSeqVisitor) VisitSingleFrame(ctx *SingleFrameContext) interface{} {
 	}
 
 	// Extract basename (grammar already parsed it)
-	if basenameCtx := ctx.Basename(); basenameCtx != nil {
+	if basenameCtx := ctx.FrameBasename(); basenameCtx != nil {
 		v.result.Basename = basenameCtx.GetText()
 	}
 
@@ -197,7 +197,7 @@ func (v *fileSeqVisitor) VisitPatternOnly(ctx *PatternOnlyContext) interface{} {
 	}
 
 	// Extract basename
-	if basenameCtx := ctx.Basename(); basenameCtx != nil {
+	if basenameCtx := ctx.PatBasename(); basenameCtx != nil {
 		v.result.Basename = basenameCtx.GetText()
 	}
 

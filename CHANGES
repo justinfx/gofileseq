@@ -1,5 +1,11 @@
 Changes:
 
+3.3.0
+----------------
+
+* grammar - Split the shared basename rule per input alternative so range sequences parse with SLL prediction instead
+  falling back to full LL. Range sequence parsing is about 20x faster in go and cpp, with about 40x fewer allocations.
+
 3.2.1
 ----------------
 

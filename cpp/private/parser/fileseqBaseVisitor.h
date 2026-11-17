@@ -57,6 +57,14 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitPatBasename(fileseqParser::PatBasenameContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitFrameBasename(fileseqParser::FrameBasenameContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitPlainBasename(fileseqParser::PlainBasenameContext *ctx) override {
     return visitChildren(ctx);
   }

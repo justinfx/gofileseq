@@ -37,6 +37,12 @@ type fileseqVisitor interface {
 	// Visit a parse tree produced by fileseqParser#basename.
 	VisitBasename(ctx *BasenameContext) interface{}
 
+	// Visit a parse tree produced by fileseqParser#patBasename.
+	VisitPatBasename(ctx *PatBasenameContext) interface{}
+
+	// Visit a parse tree produced by fileseqParser#frameBasename.
+	VisitFrameBasename(ctx *FrameBasenameContext) interface{}
+
 	// Visit a parse tree produced by fileseqParser#plainBasename.
 	VisitPlainBasename(ctx *PlainBasenameContext) interface{}
 

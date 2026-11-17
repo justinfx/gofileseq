@@ -22,8 +22,9 @@ public:
   enum {
     RuleInput = 0, RuleSequence = 1, RulePatternOnly = 2, RuleSingleFrame = 3, 
     RulePlainFile = 4, RuleDirectory = 5, RuleBasenameChar = 6, RulePlainBasenameChar = 7, 
-    RuleDirSegment = 8, RuleBasename = 9, RulePlainBasename = 10, RuleFrameRange = 11, 
-    RuleFrameNum = 12, RulePadding = 13, RuleExtension = 14
+    RuleDirSegment = 8, RuleBasename = 9, RulePatBasename = 10, RuleFrameBasename = 11, 
+    RulePlainBasename = 12, RuleFrameRange = 13, RuleFrameNum = 14, RulePadding = 15, 
+    RuleExtension = 16
   };
 
   explicit fileseqParser(antlr4::TokenStream *input);
@@ -46,6 +47,8 @@ public:
   class PlainBasenameCharContext;
   class DirSegmentContext;
   class BasenameContext;
+  class PatBasenameContext;
+  class FrameBasenameContext;
   class PlainBasenameContext;
   class FrameRangeContext;
   class FrameNumContext;
@@ -97,7 +100,7 @@ public:
     DirectoryContext *directory();
     std::vector<PaddingContext *> padding();
     PaddingContext* padding(size_t i);
-    BasenameContext *basename();
+    PatBasenameContext *patBasename();
     antlr4::tree::TerminalNode *SPECIAL_CHAR();
     std::vector<ExtensionContext *> extension();
     ExtensionContext* extension(size_t i);
@@ -115,7 +118,7 @@ public:
     virtual size_t getRuleIndex() const override;
     DirectoryContext *directory();
     FrameNumContext *frameNum();
-    BasenameContext *basename();
+    FrameBasenameContext *frameBasename();
     std::vector<ExtensionContext *> extension();
     ExtensionContext* extension(size_t i);
 
@@ -229,6 +232,34 @@ public:
   };
 
   BasenameContext* basename();
+
+  class  PatBasenameContext : public antlr4::ParserRuleContext {
+  public:
+    PatBasenameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<BasenameCharContext *> basenameChar();
+    BasenameCharContext* basenameChar(size_t i);
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  PatBasenameContext* patBasename();
+
+  class  FrameBasenameContext : public antlr4::ParserRuleContext {
+  public:
+    FrameBasenameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<BasenameCharContext *> basenameChar();
+    BasenameCharContext* basenameChar(size_t i);
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  FrameBasenameContext* frameBasename();
 
   class  PlainBasenameContext : public antlr4::ParserRuleContext {
   public:
