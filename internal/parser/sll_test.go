@@ -134,3 +134,30 @@ func TestRangeFollowedByDotNum(t *testing.T) {
 		}
 	}
 }
+
+// go and cpp do not support decimal steps, so a decimal step value keeps its
+// v2 meaning: the text up to the last dot is basename, the rest is the frame.
+var decimalStepInputs = []struct {
+	input, base, frame string
+}{
+	{"/mnt/out/file.1-5x0.25#.exr", "file.1-5x0.", "25"},
+	{"/mnt/out/file1-5x0.25#.exr", "file1-5x0.", "25"},
+	{"/mnt/out/file.1-5y0.25@@.exr", "file.1-5y0.", "25"},
+	{"/mnt/out/file.-1-5x0.25#.exr", "file.-1-5x0.", "25"},
+	{"/mnt/out/file.1-10x2,20-30x0.5#.exr", "file.1-10x2,20-30x0.", "5"},
+	{"/mnt/out/file.1-5x0.25#", "file.1-5x0.", "25"},
+	{"/mnt/out/file.1-5x2#.exr", "file.", "1-5x2"},
+}
+
+func TestDecimalStepMatchesV2(t *testing.T) {
+	for _, c := range decimalStepInputs {
+		res, err := ParseFileSequence(c.input)
+		if err != nil {
+			t.Errorf("%q: %v", c.input, err)
+			continue
+		}
+		if res.Basename != c.base || res.FrameRange != c.frame {
+			t.Errorf("%q: got base %q frame %q, want %q %q", c.input, res.Basename, res.FrameRange, c.base, c.frame)
+		}
+	}
+}

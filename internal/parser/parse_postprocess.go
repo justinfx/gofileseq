@@ -163,3 +163,16 @@ func moveLeadingDotFromFrameRange(result *ParseResult) {
 		result.FrameRange = result.FrameRange[1:] // Remove leading dot
 	}
 }
+
+// splitDecimalStepFromFrameRange restores the v2 meaning of a decimal step
+// value, which go and cpp do not support. The lexer keeps "1-5x0.25" as one
+// FRAME_RANGE token for python's decimal steps. Here the text up to the last
+// dot moves to the basename and the trailing digits become the frame, so
+// "file.1-5x0.25#.exr" is basename "file.1-5x0.", frame "25", as in v2.
+// Must run after moveLeadingDotFromFrameRange.
+func splitDecimalStepFromFrameRange(result *ParseResult) {
+	if i := strings.LastIndexByte(result.FrameRange, '.'); i >= 0 {
+		result.Basename += result.FrameRange[:i+1]
+		result.FrameRange = result.FrameRange[i+1:]
+	}
+}

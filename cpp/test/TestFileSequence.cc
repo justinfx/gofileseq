@@ -350,6 +350,28 @@ TEST( TestParseErrors, RangeFollowedByDotNum ) {
 }
 
 
+TEST( TestParseErrors, DecimalStepMatchesV2 ) {
+    struct Case { const char* path; const char* base; const char* range; };
+    const Case cases[] = {
+        {"/mnt/out/file.1-5x0.25#.exr", "file.1-5x0.", "25"},
+        {"/mnt/out/file1-5x0.25#.exr", "file1-5x0.", "25"},
+        {"/mnt/out/file.1-5y0.25@@.exr", "file.1-5y0.", "25"},
+        {"/mnt/out/file.-1-5x0.25#.exr", "file.-1-5x0.", "25"},
+        {"/mnt/out/file.1-10x2,20-30x0.5#.exr", "file.1-10x2,20-30x0.", "5"},
+        {"/mnt/out/file.1-5x0.25#", "file.1-5x0.", "25"},
+        {"/mnt/out/file.1-5x2#.exr", "file.", "1-5x2"},
+    };
+    for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i) {
+        const Case& c = cases[i];
+        fileseq::Status stat;
+        fileseq::FileSequence s(c.path, &stat);
+        ASSERT_TRUE(stat) << c.path << ": " << stat;
+        EXPECT_EQ(c.base, s.basename()) << c.path;
+        EXPECT_EQ(c.range, s.frameRange()) << c.path;
+    }
+}
+
+
 TEST_F( TestNewFileSequences, New ) {
     fileseq::Status stat;
 

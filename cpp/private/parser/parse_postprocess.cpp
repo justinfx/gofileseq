@@ -72,5 +72,13 @@ void moveLeadingDotFromFrameRange(ParseResult& result) {
     }
 }
 
+void splitDecimalStepFromFrameRange(ParseResult& result) {
+    std::string::size_type i = result.frameRange.rfind('.');
+    if (i != std::string::npos) {
+        result.basename += result.frameRange.substr(0, i + 1);
+        result.frameRange = result.frameRange.substr(i + 1);
+    }
+}
+
 } // namespace internal
 } // namespace fileseq

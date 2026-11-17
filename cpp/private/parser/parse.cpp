@@ -60,6 +60,7 @@ public:
         }
 
         moveLeadingDotFromFrameRange(result);
+        splitDecimalStepFromFrameRange(result);
         return nullptr;
     }
 

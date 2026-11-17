@@ -103,6 +103,13 @@ void extractDigitsFromExtensionToken(ParseResult& result);
 //     String(): "/path/" + "file." + "100" + ".exr" = "/path/file.100.exr" ✓
 void moveLeadingDotFromFrameRange(ParseResult& result);
 
+// Restore the v2 meaning of a decimal step value, which cpp does not support.
+// The lexer keeps "1-5x0.25" as one FRAME_RANGE token for python's decimal
+// steps. The text up to the last dot moves to the basename and the trailing
+// digits become the frame, so "file.1-5x0.25#.exr" is basename "file.1-5x0.",
+// frame "25", as in v2. Must run after moveLeadingDotFromFrameRange.
+void splitDecimalStepFromFrameRange(ParseResult& result);
+
 } // namespace internal
 } // namespace fileseq
 

@@ -145,6 +145,7 @@ func (v *fileSeqVisitor) VisitSequence(ctx *SequenceContext) interface{} {
 	// Post-process: move leading dot from frame range to basename
 	// (see parse_postprocess.go Special Case 3 for detailed explanation)
 	moveLeadingDotFromFrameRange(&v.result)
+	splitDecimalStepFromFrameRange(&v.result)
 
 	// Extract padding (grammar already parsed it)
 	if padCtx := ctx.Padding(0); padCtx != nil {
