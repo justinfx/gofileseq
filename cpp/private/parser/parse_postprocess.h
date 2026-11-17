@@ -103,9 +103,6 @@ void extractDigitsFromExtensionToken(ParseResult& result);
 //     String(): "/path/" + "file." + "100" + ".exr" = "/path/file.100.exr" ✓
 void moveLeadingDotFromFrameRange(ParseResult& result);
 
-// Apply all post-processing steps to a ParseResult
-void postProcessParseResult(ParseResult& result);
-
 } // namespace internal
 } // namespace fileseq
 

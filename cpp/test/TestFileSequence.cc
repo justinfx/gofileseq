@@ -288,6 +288,25 @@ TEST( TestParseErrors, RejectsLexerErrors ) {
 }
 
 
+TEST( TestParseErrors, ExtensionlessNumericBasename ) {
+    struct Case { const char* path; const char* base; const char* range; const char* ext; };
+    const Case cases[] = {
+        {"/a/file.5.1-10#", "file.5.", "1-10", ""},
+        {"/a/v.12.1-100x2@@", "v.12.", "1-100x2", ""},
+        {"/a/shot.3.1001-1100#", "shot.3.", "1001-1100", ""},
+    };
+    for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i) {
+        const Case& c = cases[i];
+        fileseq::Status stat;
+        fileseq::FileSequence s(c.path, &stat);
+        ASSERT_TRUE(stat) << c.path << ": " << stat;
+        EXPECT_EQ(c.base, s.basename()) << c.path;
+        EXPECT_EQ(c.range, s.frameRange()) << c.path;
+        EXPECT_EQ(c.ext, s.ext()) << c.path;
+    }
+}
+
+
 TEST_F( TestNewFileSequences, New ) {
     fileseq::Status stat;
 

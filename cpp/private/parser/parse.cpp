@@ -59,6 +59,7 @@ public:
             result.extension = ext.str();
         }
 
+        moveLeadingDotFromFrameRange(result);
         return nullptr;
     }
 
@@ -97,6 +98,7 @@ public:
             result.extension = ext.str();
         }
 
+        extractDigitsFromExtensionToken(result);
         return nullptr;
     }
 
@@ -128,6 +130,8 @@ public:
             result.extension = ext.str();
         }
 
+        moveLeadingDotFromFrameRange(result);
+        handleMultipleDotNumTokens(result);
         return nullptr;
     }
 
@@ -221,9 +225,6 @@ bool parseFileSequence(ParseResult& result, const std::string& path) {
 
         // Get the result
         result = visitor.result;
-
-        // Apply post-processing for the 3 special cases
-        postProcessParseResult(result);
 
         return true;
 

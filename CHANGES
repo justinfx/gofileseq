@@ -6,6 +6,8 @@ Changes:
 * grammar - Split the shared basename rule per input alternative so range sequences parse with SLL prediction instead
   falling back to full LL. Range sequence parsing is about 20x faster in go and cpp, with about 40x fewer allocations.
 * go/cpp - Reject lexer errors immediately instead of retrying the parse with LL prediction
+* cpp - Fix extensionless sequences with a numeric basename component (file.5.1-10#) being misparsed, by applying each
+  post-parse fix only to the grammar rule it belongs to, as go does
 
 3.2.1
 ----------------

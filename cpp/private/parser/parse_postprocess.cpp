@@ -72,17 +72,5 @@ void moveLeadingDotFromFrameRange(ParseResult& result) {
     }
 }
 
-
-void postProcessParseResult(ParseResult& result) {
-    // Apply all special case handlers in order
-    // Order matters - these are applied sequentially
-
-    // MUST run first - removes leading dot from frame range before other handlers use it
-    moveLeadingDotFromFrameRange(result);
-
-    handleMultipleDotNumTokens(result);
-    extractDigitsFromExtensionToken(result);
-}
-
 } // namespace internal
 } // namespace fileseq
