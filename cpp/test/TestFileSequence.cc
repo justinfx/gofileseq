@@ -307,6 +307,29 @@ TEST( TestParseErrors, ExtensionlessNumericBasename ) {
 }
 
 
+TEST( TestParseErrors, DirectoryAllowsPaddingChars ) {
+    struct Case { const char* path; const char* dir; const char* base; };
+    const Case cases[] = {
+        {"/mnt/shot#1/file.1-10#.exr", "/mnt/shot#1/", "file."},
+        {"/mnt/a@b/file.1001.exr", "/mnt/a@b/", "file."},
+        {"/mnt/a@b/file.exr", "/mnt/a@b/", "file"},
+        {"/mnt/$FOO/file.1-10#.exr", "/mnt/$FOO/", "file."},
+        {"/mnt/out/100%done/file.1-10#.exr", "/mnt/out/100%done/", "file."},
+        {"/mnt/out/%04dir/file.exr", "/mnt/out/%04dir/", "file"},
+        {"/mnt/<UDIM>/tex.1001.exr", "/mnt/<UDIM>/", "tex."},
+        {"/mnt/%(UDIM)d/tex.#.exr", "/mnt/%(UDIM)d/", "tex."},
+    };
+    for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i) {
+        const Case& c = cases[i];
+        fileseq::Status stat;
+        fileseq::FileSequence s(c.path, &stat);
+        ASSERT_TRUE(stat) << c.path << ": " << stat;
+        EXPECT_EQ(c.dir, s.dirname()) << c.path;
+        EXPECT_EQ(c.base, s.basename()) << c.path;
+    }
+}
+
+
 TEST_F( TestNewFileSequences, New ) {
     fileseq::Status stat;
 

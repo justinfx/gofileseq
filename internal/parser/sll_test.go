@@ -77,3 +77,36 @@ func TestLexerErrorsAreRejected(t *testing.T) {
 		}
 	}
 }
+
+// dirPaddingInputs have padding-like characters in directory segments, which
+// are valid POSIX paths. Padding only has meaning in the final component.
+var dirPaddingInputs = []struct {
+	input, dir, base string
+	seq, single bool
+}{
+	{"/mnt/shot#1/file.1-10#.exr", "/mnt/shot#1/", "file.", true, false},
+	{"/mnt/a@b/file.1001.exr", "/mnt/a@b/", "file.", false, true},
+	{"/mnt/a@b/file.exr", "/mnt/a@b/", "file", false, false},
+	{"/mnt/$FOO/file.1-10#.exr", "/mnt/$FOO/", "file.", true, false},
+	{"/mnt/out/100%done/file.1-10#.exr", "/mnt/out/100%done/", "file.", true, false},
+	{"/mnt/out/%04dir/file.exr", "/mnt/out/%04dir/", "file", false, false},
+	{"/mnt/<UDIM>/tex.1001.exr", "/mnt/<UDIM>/", "tex.", false, true},
+	{"/mnt/%(UDIM)d/tex.#.exr", "/mnt/%(UDIM)d/", "tex.", true, false},
+}
+
+func TestDirectoryAllowsPaddingChars(t *testing.T) {
+	for _, c := range dirPaddingInputs {
+		if errs := parsesWithSLL(c.input); len(errs) > 0 {
+			t.Errorf("%q needed the LL fallback or failed: %v", c.input, errs[0])
+		}
+		res, err := ParseFileSequence(c.input)
+		if err != nil {
+			t.Errorf("%q: %v", c.input, err)
+			continue
+		}
+		if res.Directory != c.dir || res.Basename != c.base ||
+			res.IsSequence != c.seq || res.IsSingleFile != c.single || res.IsPlainFile != (!c.seq && !c.single) {
+			t.Errorf("%q: got %+v", c.input, res)
+		}
+	}
+}

@@ -8,6 +8,7 @@ Changes:
 * go/cpp - Reject lexer errors immediately instead of retrying the parse with LL prediction
 * cpp - Fix extensionless sequences with a numeric basename component (file.5.1-10#) being misparsed, by applying each
   post-parse fix only to the grammar rule it belongs to, as go does
+* grammar - Allow padding characters (# @ <UDIM> %04d $F) in directory names, such as /mnt/shot#1/file.1-10#.exr
 
 3.2.1
 ----------------

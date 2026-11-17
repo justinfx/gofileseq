@@ -211,6 +211,18 @@ public:
     virtual size_t getRuleIndex() const override;
     std::vector<BasenameCharContext *> basenameChar();
     BasenameCharContext* basenameChar(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> HASH();
+    antlr4::tree::TerminalNode* HASH(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> AT();
+    antlr4::tree::TerminalNode* AT(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> UDIM_ANGLE();
+    antlr4::tree::TerminalNode* UDIM_ANGLE(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> UDIM_PAREN();
+    antlr4::tree::TerminalNode* UDIM_PAREN(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> PRINTF_PAD();
+    antlr4::tree::TerminalNode* PRINTF_PAD(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> HOUDINI_PAD();
+    antlr4::tree::TerminalNode* HOUDINI_PAD(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
