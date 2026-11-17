@@ -3,8 +3,6 @@ package parser
 import (
 	"fmt"
 	"strings"
-
-	"github.com/antlr4-go/antlr/v4"
 )
 
 // ParseResult holds the components extracted from parsing a file sequence
@@ -22,231 +20,185 @@ type ParseResult struct {
 	IsPlainFile  bool
 }
 
-// errorListener collects parse errors
-type errorListener struct {
-	*antlr.DefaultErrorListener
-	errors []error
-}
-
-func (l *errorListener) SyntaxError(recognizer antlr.Recognizer, offendingSymbol interface{},
-	line, column int, msg string, e antlr.RecognitionException) {
-
-	l.errors = append(l.errors, fmt.Errorf("parse error at %d:%d: %s", line, column, msg))
-}
-
 // ParseFileSequence parses a file sequence string and returns its components.
-// Uses SLL prediction mode for better performance (30x faster), falling back to LL if needed.
+//
+// The parser is generated from grammar/fileseq.g4 by galop
+// (https://github.com/martianoff/galop), which gives the parse ANTLR's LL
+// prediction would give, without a runtime prediction pass in most decisions.
 func ParseFileSequence(input string) (ParseResult, error) {
-	// Create the lexer
-	inputStream := antlr.NewInputStream(input)
-	lexer := NewfileseqLexer(inputStream)
-
-	// Create the token stream
-	stream := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
-
-	// Create the parser
-	parser := NewfileseqParser(stream)
-
-	// Add custom error listener to both lexer and parser
-	errListener := &errorListener{}
-	lexer.RemoveErrorListeners()
-	lexer.AddErrorListener(errListener)
-	parser.RemoveErrorListeners()
-	parser.AddErrorListener(errListener)
-
-	// Try SLL prediction mode first (much faster for unambiguous grammars)
-	parser.GetInterpreter().SetPredictionMode(antlr.PredictionModeSLL)
-	tree := parser.Input()
-
-	// If SLL failed, retry with LL prediction mode (slower but more thorough)
-	if len(errListener.errors) > 0 {
-		// Reset for retry
-		errListener.errors = errListener.errors[:0]
-		inputStream = antlr.NewInputStream(input)
-		lexer.SetInputStream(inputStream)
-		stream.SetTokenSource(lexer)
-		parser.SetInputStream(stream)
-
-		parser.GetInterpreter().SetPredictionMode(antlr.PredictionModeLL)
-		tree = parser.Input()
-
-		// Check for parse errors after LL retry
-		if len(errListener.errors) > 0 {
-			return ParseResult{}, fmt.Errorf("failed to parse sequence %q: %w", input, errListener.errors[0])
+	tokens := FileseqLex(input)
+	tree, err := ParseInput(tokens)
+	// As with ANTLR, a token recognition error fails the parse too, and the
+	// error reported is the first one in the input.
+	if len(tokens.Errors) > 0 {
+		first := tokens.Errors[0]
+		if se, ok := err.(*FileseqSyntaxError); ok && before(*se, first) {
+			first = *se
 		}
+		return ParseResult{}, parseError(input, first)
+	}
+	if err != nil {
+		if se, ok := err.(*FileseqSyntaxError); ok {
+			return ParseResult{}, parseError(input, *se)
+		}
+		return ParseResult{}, fmt.Errorf("failed to parse sequence %q: %w", input, err)
 	}
 
-	// Create and run the visitor
-	visitor := &fileSeqVisitor{}
-	tree.Accept(visitor)
-
-	// Check for visitor errors (e.g., unsupported subframe syntax)
-	if visitor.err != nil {
-		return ParseResult{}, visitor.err
+	var result ParseResult
+	switch {
+	case tree.Sequence().Ok():
+		err = extractSequence(tree.Sequence(), &result)
+	case tree.PatternOnly().Ok():
+		err = extractPatternOnly(tree.PatternOnly(), &result)
+	case tree.SingleFrame().Ok():
+		extractSingleFrame(tree.SingleFrame(), &result)
+	case tree.PlainFile().Ok():
+		extractPlainFile(tree.PlainFile(), &result)
 	}
-
-	return visitor.result, nil
+	if err != nil {
+		return ParseResult{}, err
+	}
+	return result, nil
 }
 
-// fileSeqVisitor implements the visitor pattern to extract components
-// This is TRIVIAL - just extracting what the grammar already parsed
-type fileSeqVisitor struct {
-	BasefileseqVisitor
-	result ParseResult
-	err    error
+// parseError is the error for a syntax error, in the format the ANTLR-based
+// parser used.
+func parseError(input string, e FileseqSyntaxError) error {
+	return fmt.Errorf("failed to parse sequence %q: %w", input,
+		fmt.Errorf("parse error at %d:%d: %s", e.Line, e.Column, e.Msg))
 }
 
-// VisitInput dispatches to the correct child visitor
-func (v *fileSeqVisitor) VisitInput(ctx *InputContext) interface{} {
-	if seqCtx := ctx.Sequence(); seqCtx != nil {
-		return v.VisitSequence(seqCtx.(*SequenceContext))
-	}
-	if poCtx := ctx.PatternOnly(); poCtx != nil {
-		return v.VisitPatternOnly(poCtx.(*PatternOnlyContext))
-	}
-	if sfCtx := ctx.SingleFrame(); sfCtx != nil {
-		return v.VisitSingleFrame(sfCtx.(*SingleFrameContext))
-	}
-	if pfCtx := ctx.PlainFile(); pfCtx != nil {
-		return v.VisitPlainFile(pfCtx.(*PlainFileContext))
-	}
-	return nil
+// before reports whether a is earlier in the input than b.
+func before(a, b FileseqSyntaxError) bool {
+	return a.Line < b.Line || a.Line == b.Line && a.Column < b.Column
 }
 
-// VisitSequence - grammar already separated all components
-func (v *fileSeqVisitor) VisitSequence(ctx *SequenceContext) interface{} {
-	v.result.IsSequence = true
+// extractSequence - grammar already separated all components
+func extractSequence(ctx SequenceNode, result *ParseResult) error {
+	result.IsSequence = true
 
 	// Extract directory (grammar already parsed it)
-	if dirCtx := ctx.Directory(); dirCtx != nil {
-		v.result.Directory = dirCtx.GetText()
+	if dirCtx := ctx.Directory(); dirCtx.Ok() {
+		result.Directory = dirCtx.GetText()
 	}
 
 	// Extract basename (grammar already parsed it)
-	if basenameCtx := ctx.Basename(); basenameCtx != nil {
-		v.result.Basename = basenameCtx.GetText()
+	if basenameCtx := ctx.Basename(); basenameCtx.Ok() {
+		result.Basename = basenameCtx.GetText()
 	}
 
 	// Check for unsupported subframe syntax (Python-only feature)
 	// Subframes use: file.1-5#.10-20@@.exr (dual range) or file.1-5@.#.exr (composite padding)
 	if len(ctx.AllFrameRange()) > 1 || len(ctx.AllPadding()) > 1 {
-		v.err = fmt.Errorf("subframe syntax not supported: %s", ctx.GetText())
-		return nil
+		return fmt.Errorf("subframe syntax not supported: %s", ctx.GetText())
 	}
 
 	// Extract frame range (grammar already parsed it)
-	if frameRangeCtx := ctx.FrameRange(0); frameRangeCtx != nil {
-		v.result.FrameRange = frameRangeCtx.GetText()
+	if frameRangeCtx := ctx.FrameRange(0); frameRangeCtx.Ok() {
+		result.FrameRange = frameRangeCtx.GetText()
 	}
 
 	// Post-process: move leading dot from frame range to basename
 	// (see parse_postprocess.go Special Case 3 for detailed explanation)
-	moveLeadingDotFromFrameRange(&v.result)
+	moveLeadingDotFromFrameRange(result)
 
 	// Extract padding (grammar already parsed it)
-	if padCtx := ctx.Padding(0); padCtx != nil {
-		v.result.Padding = padCtx.GetText()
+	if padCtx := ctx.Padding(0); padCtx.Ok() {
+		result.Padding = padCtx.GetText()
 	}
 
 	// Extract extensions (grammar already parsed them)
-	v.result.Extension = v.extractExtensions(ctx.AllExtension())
-
+	result.Extension = extractExtensions(ctx.AllExtension())
 	return nil
 }
 
-// VisitSingleFrame - grammar already separated all components
-func (v *fileSeqVisitor) VisitSingleFrame(ctx *SingleFrameContext) interface{} {
-	v.result.IsSingleFile = true
+// extractSingleFrame - grammar already separated all components
+func extractSingleFrame(ctx SingleFrameNode, result *ParseResult) {
+	result.IsSingleFile = true
 
 	// Extract directory (grammar already parsed it)
-	if dirCtx := ctx.Directory(); dirCtx != nil {
-		v.result.Directory = dirCtx.GetText()
+	if dirCtx := ctx.Directory(); dirCtx.Ok() {
+		result.Directory = dirCtx.GetText()
 	}
 
 	// Extract basename (grammar already parsed it)
-	if basenameCtx := ctx.Basename(); basenameCtx != nil {
-		v.result.Basename = basenameCtx.GetText()
+	if basenameCtx := ctx.Basename(); basenameCtx.Ok() {
+		result.Basename = basenameCtx.GetText()
 	}
 
 	// Extract frame number (grammar already parsed it)
-	if frameNumCtx := ctx.FrameNum(); frameNumCtx != nil {
-		v.result.FrameRange = frameNumCtx.GetText()
+	if frameNumCtx := ctx.FrameNum(); frameNumCtx.Ok() {
+		result.FrameRange = frameNumCtx.GetText()
 	}
 
 	// Post-process: move leading dot from frame range to basename
 	// (see parse_postprocess.go Special Case 3 for detailed explanation)
-	moveLeadingDotFromFrameRange(&v.result)
+	moveLeadingDotFromFrameRange(result)
 
 	// Extract extensions (grammar already parsed them)
-	v.result.Extension = v.extractExtensions(ctx.AllExtension())
+	result.Extension = extractExtensions(ctx.AllExtension())
 
 	// Post-process: handle special case of multiple DOT_NUM tokens
 	// (see parse_postprocess.go Special Case 3 for detailed explanation)
-	handleMultipleDotNumTokens(&v.result)
-
-	return nil
+	handleMultipleDotNumTokens(result)
 }
 
-// VisitPatternOnly - pattern-only sequence (padding without frame range)
-func (v *fileSeqVisitor) VisitPatternOnly(ctx *PatternOnlyContext) interface{} {
-	v.result.IsSequence = true // Pattern-only is still a sequence type
+// extractPatternOnly - pattern-only sequence (padding without frame range)
+func extractPatternOnly(ctx PatternOnlyNode, result *ParseResult) error {
+	result.IsSequence = true // Pattern-only is still a sequence type
 
 	// Extract directory
-	if dirCtx := ctx.Directory(); dirCtx != nil {
-		v.result.Directory = dirCtx.GetText()
+	if dirCtx := ctx.Directory(); dirCtx.Ok() {
+		result.Directory = dirCtx.GetText()
 	}
 
 	// Extract basename
-	if basenameCtx := ctx.Basename(); basenameCtx != nil {
-		v.result.Basename = basenameCtx.GetText()
+	if basenameCtx := ctx.Basename(); basenameCtx.Ok() {
+		result.Basename = basenameCtx.GetText()
 	}
 
 	// Check for unsupported subframe syntax (Python-only feature)
 	// Pattern-only subframes use: file.#.@@.exr (composite padding)
 	if len(ctx.AllPadding()) > 1 {
-		v.err = fmt.Errorf("subframe syntax not supported: %s", ctx.GetText())
-		return nil
+		return fmt.Errorf("subframe syntax not supported: %s", ctx.GetText())
 	}
 
 	// No frame range for pattern-only (initially)
 
 	// Get first padding
-	if padCtx := ctx.Padding(0); padCtx != nil {
-		v.result.Padding = padCtx.GetText()
+	if padCtx := ctx.Padding(0); padCtx.Ok() {
+		result.Padding = padCtx.GetText()
 	}
 
 	// Extract extensions
-	v.result.Extension = v.extractExtensions(ctx.AllExtension())
+	result.Extension = extractExtensions(ctx.AllExtension())
 
 	// Post-process: extract digits that were absorbed into extension token
 	// (see parse_postprocess.go for detailed explanation)
-	extractDigitsFromExtensionToken(&v.result)
-
+	extractDigitsFromExtensionToken(result)
 	return nil
 }
 
-// VisitPlainFile - grammar already separated all components
-func (v *fileSeqVisitor) VisitPlainFile(ctx *PlainFileContext) interface{} {
-	v.result.IsPlainFile = true
+// extractPlainFile - grammar already separated all components
+func extractPlainFile(ctx PlainFileNode, result *ParseResult) {
+	result.IsPlainFile = true
 
 	// Extract directory (grammar already parsed it)
-	if dirCtx := ctx.Directory(); dirCtx != nil {
-		v.result.Directory = dirCtx.GetText()
+	if dirCtx := ctx.Directory(); dirCtx.Ok() {
+		result.Directory = dirCtx.GetText()
 	}
 
 	// Extract basename (grammar already parsed it)
-	if basenameCtx := ctx.PlainBasename(); basenameCtx != nil {
-		v.result.Basename = basenameCtx.GetText()
+	if basenameCtx := ctx.PlainBasename(); basenameCtx.Ok() {
+		result.Basename = basenameCtx.GetText()
 	}
 
 	// Extract extensions (grammar already parsed them)
-	v.result.Extension = v.extractExtensions(ctx.AllExtension())
-
-	return nil
+	result.Extension = extractExtensions(ctx.AllExtension())
 }
 
 // extractExtensions concatenates all extension tokens
-func (v *fileSeqVisitor) extractExtensions(extCtxs []IExtensionContext) string {
+func extractExtensions(extCtxs []ExtensionNode) string {
 	if len(extCtxs) == 0 {
 		return ""
 	}
