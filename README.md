@@ -67,6 +67,10 @@ Development
 -----------
 
 The file sequence parser is built using an [ANTLR4](https://www.antlr.org/) grammar defined in `grammar/fileseq.g4`.
+Next to ANTLR's generated Go parser, [galop](https://github.com/martianoff/galop) generates the parser
+`ParseFileSequence` uses: it builds the same ANTLR contexts, so the visitor is unchanged, and gives ANTLR's parse
+faster. `make generate-go` runs both; it downloads the pinned galop release into `tools/` on first use and checks it
+against the release's checksums.
 
 When the grammar file is modified, the parser must be regenerated and committed:
 

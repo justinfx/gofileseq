@@ -2,6 +2,12 @@
 # Different ANTLR versions are required for Go vs C++:
 #   - Go 4.13.1: Generates code with antlr4-go/antlr import paths (matches v4.13.0 runtime)
 #   - C++ 4.9.3:  Generates C++11-compatible code (no std::any) for GCC 4.8+ support
+# galop (https://github.com/martianoff/galop) then generates, next to ANTLR's Go
+# parser, the faster parser ParseFileSequence uses: it builds the same contexts as
+# ANTLR's (its "antlr" flavor). It is a native binary, downloaded into ../tools on
+# first use at the pinned version below and checked against the release's checksums.
+GALOP_VERSION := 0.5.1
+GALOP ?= ../tools/galop-$(GALOP_VERSION)
 ANTLR_GO_JAR := ../tools/antlr-4.13.1-complete.jar
 ANTLR_CPP_JAR := ../tools/antlr-4.9.3-complete.jar
 OUTPUT_DIR := ../internal/parser
@@ -27,7 +33,7 @@ WORKDIR := /work
 
 all: generate-all
 
-generate-go:
+generate-go: $(GALOP)
 	@echo "Generating Go parser (ANTLR 4.13.1)..."
 	$(ANTLR_GO) -Dlanguage=Go \
 	         -package $(GO_PACKAGE) \
@@ -35,9 +41,15 @@ generate-go:
 	         -visitor \
 	         -no-listener \
 	         fileseq.g4
+	@echo "Generating the galop parser (galop $(GALOP_VERSION))..."
+	$(GALOP) -Dflavor=antlr \
+	         -package $(GO_PACKAGE) \
+	         -Xexact-output-dir \
+	         -o $(OUTPUT_DIR) \
+	         fileseq.g4
 	@echo "Parser generated successfully in $(OUTPUT_DIR)"
 
-generate-go-docker:
+generate-go-docker: $(GALOP)
 	@echo "Generating Go parser using Docker (ANTLR 4.13.1)..."
 	@docker run --rm --platform linux/amd64 \
 	  -v $(realpath ../tools):/tools \
@@ -51,7 +63,28 @@ generate-go-docker:
 	    -visitor \
 	    -no-listener \
 	    fileseq.g4
+	@echo "Generating the galop parser (galop $(GALOP_VERSION))..."
+	$(GALOP) -Dflavor=antlr \
+	         -package $(GO_PACKAGE) \
+	         -Xexact-output-dir \
+	         -o $(OUTPUT_DIR) \
+	         fileseq.g4
 	@echo "Parser generated successfully in $(OUTPUT_DIR)"
+
+# Downloads the galop release binary for this OS and architecture and checks it
+# against the release's SHA-256 checksums.
+../tools/galop-$(GALOP_VERSION):
+	@os=$$(uname -s | tr '[:upper:]' '[:lower:]'); arch=$$(uname -m); \
+	case "$$arch" in x86_64|amd64) arch=amd64 ;; aarch64|arm64) arch=arm64 ;; esac; \
+	case "$$os" in mingw*|msys*|cygwin*) os=windows; ext=.exe ;; *) ext= ;; esac; \
+	name=galop-$$os-$$arch$$ext; \
+	url=https://github.com/martianoff/galop/releases/download/$(GALOP_VERSION); \
+	echo "Downloading $$name $(GALOP_VERSION)..."; \
+	curl -fsSL -o $@.tmp "$$url/$$name" && \
+	sum=$$(curl -fsSL "$$url/checksums-sha256.txt" | grep " \*\?$$name$$" | cut -d' ' -f1) && \
+	got=$$( (sha256sum $@.tmp 2>/dev/null || shasum -a 256 $@.tmp) | cut -d' ' -f1) && \
+	if [ -z "$$sum" ] || [ "$$sum" != "$$got" ]; then echo "checksum mismatch for $$name"; rm -f $@.tmp; exit 1; fi && \
+	chmod +x $@.tmp && mv $@.tmp $@
 
 generate-cpp:
 	@echo "Generating C++ parser (ANTLR 4.9.3)..."
