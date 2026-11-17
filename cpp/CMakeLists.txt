@@ -163,6 +163,12 @@ target_link_libraries(fileseq_tests
 add_test(NAME fileseq_tests COMMAND fileseq_tests
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)
 
+# Parser benchmark, built on request: make fileseq_bench
+add_executable(fileseq_bench EXCLUDE_FROM_ALL test/bench.cc)
+target_compile_definitions(fileseq_bench PRIVATE
+    FILESEQ_CORPUS_FILE=${CMAKE_CURRENT_SOURCE_DIR}/../grammar/parse_cases.tsv)
+target_link_libraries(fileseq_bench fileseq_static pthread)
+
 # Install targets
 install(TARGETS fileseq_static fileseq_shared
     ARCHIVE DESTINATION lib

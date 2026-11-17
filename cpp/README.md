@@ -42,6 +42,7 @@ The project includes several build targets:
 * `make fileseq` - Build only the library
 * `make fileseq_tests` - Build the test executable
 * `make test` or `ctest` - Run tests via CTest
+* `make fileseq_bench` - Build the parser benchmark (`./fileseq_bench`)
 
 ### Installation
 
