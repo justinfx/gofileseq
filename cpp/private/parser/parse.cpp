@@ -186,8 +186,13 @@ bool parseFileSequence(ParseResult& result, const std::string& path) {
         // Parse the input
         fileseqParser::InputContext* tree = parser.input();
 
+        // LL prediction cannot repair a lexer error, so reject without retrying
+        if (lexer.getNumberOfSyntaxErrors() > 0) {
+            return false;
+        }
+
         // If SLL failed, retry with LL prediction mode (slower but more thorough)
-        if (lexer.getNumberOfSyntaxErrors() > 0 || parser.getNumberOfSyntaxErrors() > 0) {
+        if (parser.getNumberOfSyntaxErrors() > 0) {
             // Reset for retry
             input.seek(0);
             lexer.setInputStream(&input);

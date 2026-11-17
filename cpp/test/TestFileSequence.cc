@@ -273,6 +273,21 @@ protected:
 };
 
 
+TEST( TestParseErrors, RejectsLexerErrors ) {
+    const char* inputs[] = {
+        "/a/foo<bar.exr",
+        "/a/foo>bar.1-10#.exr",
+        "/a/sh<010.1001.exr",
+        "/a/x<y>.#.exr",
+    };
+    for (size_t i = 0; i < sizeof(inputs) / sizeof(inputs[0]); ++i) {
+        fileseq::Status stat;
+        fileseq::FileSequence s(inputs[i], &stat);
+        EXPECT_FALSE(stat) << "expected error for " << inputs[i] << ", got " << s.string();
+    }
+}
+
+
 TEST_F( TestNewFileSequences, New ) {
     fileseq::Status stat;
 

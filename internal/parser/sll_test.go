@@ -61,3 +61,19 @@ func TestValidInputsParseWithSLL(t *testing.T) {
 		}
 	}
 }
+
+// lexerErrorInputs contain characters the lexer cannot tokenize.
+var lexerErrorInputs = []string{
+	"/a/foo<bar.exr",
+	"/a/foo>bar.1-10#.exr",
+	"/a/sh<010.1001.exr",
+	"/a/x<y>.#.exr",
+}
+
+func TestLexerErrorsAreRejected(t *testing.T) {
+	for _, input := range lexerErrorInputs {
+		if res, err := ParseFileSequence(input); err == nil {
+			t.Errorf("%q: expected error, got %+v", input, res)
+		}
+	}
+}
