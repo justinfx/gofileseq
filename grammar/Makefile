@@ -6,7 +6,7 @@
 # parser, the faster parser ParseFileSequence uses: it builds the same contexts as
 # ANTLR's (its "antlr" flavor). It is a native binary, downloaded into ../tools on
 # first use at the pinned version below and checked against the release's checksums.
-GALOP_VERSION := 0.5.1
+GALOP_VERSION := 0.5.2
 GALOP ?= ../tools/galop-$(GALOP_VERSION)
 ANTLR_GO_JAR := ../tools/antlr-4.13.1-complete.jar
 ANTLR_CPP_JAR := ../tools/antlr-4.9.3-complete.jar
