@@ -110,3 +110,27 @@ func TestDirectoryAllowsPaddingChars(t *testing.T) {
 		}
 	}
 }
+
+// A dot-number after a frame range without a step is the frame number, with
+// the range text kept in the basename, as in v2. Only a decimal step value
+// (1-5x0.25) may carry a decimal suffix.
+var rangeDotNumInputs = []struct {
+	input, base, frame, pad string
+}{
+	{"/mnt/out/file.1-100.5#.exr", "file.1-100.", "5", "#"},
+	{"/mnt/out/file.1-100.5@.exr", "file.1-100.", "5", "@"},
+	{"/mnt/out/file.1,2,3.10#.exr", "file.1,2,3.", "10", "#"},
+}
+
+func TestRangeFollowedByDotNum(t *testing.T) {
+	for _, c := range rangeDotNumInputs {
+		res, err := ParseFileSequence(c.input)
+		if err != nil {
+			t.Errorf("%q: %v", c.input, err)
+			continue
+		}
+		if res.Basename != c.base || res.FrameRange != c.frame || res.Padding != c.pad || res.Extension != ".exr" {
+			t.Errorf("%q: got %+v", c.input, res)
+		}
+	}
+}

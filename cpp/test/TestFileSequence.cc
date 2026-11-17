@@ -330,6 +330,26 @@ TEST( TestParseErrors, DirectoryAllowsPaddingChars ) {
 }
 
 
+TEST( TestParseErrors, RangeFollowedByDotNum ) {
+    struct Case { const char* path; const char* base; const char* range; const char* pad; };
+    const Case cases[] = {
+        {"/mnt/out/file.1-100.5#.exr", "file.1-100.", "5", "#"},
+        {"/mnt/out/file.1-100.5@.exr", "file.1-100.", "5", "@"},
+        {"/mnt/out/file.1,2,3.10#.exr", "file.1,2,3.", "10", "#"},
+    };
+    for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i) {
+        const Case& c = cases[i];
+        fileseq::Status stat;
+        fileseq::FileSequence s(c.path, &stat);
+        ASSERT_TRUE(stat) << c.path << ": " << stat;
+        EXPECT_EQ(c.base, s.basename()) << c.path;
+        EXPECT_EQ(c.range, s.frameRange()) << c.path;
+        EXPECT_EQ(c.pad, s.padding()) << c.path;
+        EXPECT_EQ(".exr", s.ext()) << c.path;
+    }
+}
+
+
 TEST_F( TestNewFileSequences, New ) {
     fileseq::Status stat;
 
