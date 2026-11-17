@@ -4,7 +4,7 @@
 #          parser with no runtime dependency. It is downloaded into ../tools on first use,
 #          at the pinned version below, and checked against the release's checksums.
 #   - C++: ANTLR 4.9.3, which generates C++11-compatible code (no std::any) for GCC 4.8+ support
-GALOP_VERSION := 0.5.1
+GALOP_VERSION := 0.5.2
 GALOP ?= ../tools/galop-$(GALOP_VERSION)
 ANTLR_CPP_JAR := ../tools/antlr-4.9.3-complete.jar
 OUTPUT_DIR := ../internal/parser
