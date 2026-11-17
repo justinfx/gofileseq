@@ -6,38 +6,14 @@
 namespace fileseq {
 namespace internal {
 
-// This file contains post-processing logic for 3 special cases that CANNOT be solved
-// in the ANTLR grammar alone. These cases require semantic decision-making or lexer
-// limitations that cannot be expressed in pure context-free grammar rules.
+// This file contains post-processing logic for special cases that are not
+// solved in the ANTLR grammar alone.
 //
-// IMPORTANT: These same 3 post-processing steps are needed in all language implementations.
+// IMPORTANT: These same post-processing steps are needed in all language implementations.
 //
 // Summary of Special Cases:
-//   1. Multiple DOT_NUM tokens - requires semantic choice of which number is the frame
 //   2. Extension with trailing digits - lexer maximal munch embeds digits in token
 //   3. Leading dot in frame range - lexer atomicity includes dot in token text
-
-// ============================================================================
-// SPECIAL CASE 1: Multiple DOT_NUM Tokens
-// ============================================================================
-//
-// Problem: Input like ".10000000000.123" has two DOT_NUM tokens.
-//
-// Grammar limitation:
-//   The grammar matches greedily: singleFrameBasename consumes first DOT_NUM,
-//   frameNum consumes second DOT_NUM. Both parses are syntactically valid:
-//     Parse A: basename=".10000000000." frame="123" ext=""
-//     Parse B: basename="." frame="10000000000" ext=".123"
-//
-// Why can't this be in grammar:
-//   Context-free grammars cannot express semantic preferences like "prefer the
-//   first/larger number as frame". Both parses are valid syntax; we need semantic
-//   knowledge (based on Python's behavior) to choose Parse B.
-//
-// Solution:
-//   When basename ends with DOT_NUM pattern and frameNum is also DOT_NUM, and
-//   extension is empty, swap them to prefer first number as frame.
-void handleMultipleDotNumTokens(ParseResult& result);
 
 // ============================================================================
 // SPECIAL CASE 2: Extension Token Contains Trailing Digits

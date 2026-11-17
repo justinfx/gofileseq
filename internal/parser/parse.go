@@ -184,10 +184,6 @@ func (v *fileSeqVisitor) VisitSingleFrame(ctx *SingleFrameContext) interface{} {
 	// Extract extensions (grammar already parsed them)
 	v.result.Extension = v.extractExtensions(ctx.AllExtension())
 
-	// Post-process: handle special case of multiple DOT_NUM tokens
-	// (see parse_postprocess.go Special Case 3 for detailed explanation)
-	handleMultipleDotNumTokens(&v.result)
-
 	return nil
 }
 
