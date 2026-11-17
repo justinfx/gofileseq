@@ -159,7 +159,9 @@ target_link_libraries(fileseq_tests
     pthread
 )
 
-add_test(NAME fileseq_tests COMMAND fileseq_tests)
+# On-disk tests open testdata/ relative to the working directory
+add_test(NAME fileseq_tests COMMAND fileseq_tests
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)
 
 # Install targets
 install(TARGETS fileseq_static fileseq_shared
