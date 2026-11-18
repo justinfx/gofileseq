@@ -153,6 +153,8 @@ add_executable(fileseq_tests
 )
 
 target_include_directories(fileseq_tests PRIVATE ${GTEST_INCLUDE_DIRS})
+target_compile_definitions(fileseq_tests PRIVATE
+    FILESEQ_CORPUS_FILE=${CMAKE_CURRENT_SOURCE_DIR}/../grammar/parse_cases.tsv)
 target_link_libraries(fileseq_tests
     fileseq_static
     ${GTEST_LIBRARIES}

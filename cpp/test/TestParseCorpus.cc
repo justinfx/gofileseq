@@ -6,11 +6,15 @@
 #include <string>
 #include <vector>
 
+#define xstr(a) str(a)
+#define str(a) #a
+
 namespace {
 
 // Shared with the Python fileseq repository and must be kept identical there,
-// alongside fileseq.g4. Tests run from cpp/test.
-const char* const kCorpusFile = "../../grammar/parse_cases.tsv";
+// alongside fileseq.g4. The path is absolute, so the tests can run from any
+// directory.
+const char* const kCorpusFile = xstr(FILESEQ_CORPUS_FILE);
 
 struct CorpusCase {
     int line;
