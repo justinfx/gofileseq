@@ -132,7 +132,6 @@ public:
         }
 
         moveLeadingDotFromFrameRange(result);
-        handleMultipleDotNumTokens(result);
         return nullptr;
     }
 

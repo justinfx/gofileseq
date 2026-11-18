@@ -1,48 +1,9 @@
 #include "parse_postprocess.h"
 
-#include <algorithm>
 #include <cctype>
 
 namespace fileseq {
 namespace internal {
-
-// Helper function to check if a string contains only digits
-static bool isAllDigits(const std::string& str) {
-    if (str.empty()) {
-        return false;
-    }
-    return std::all_of(str.begin(), str.end(), [](unsigned char c) {
-        return std::isdigit(c);
-    });
-}
-
-
-void handleMultipleDotNumTokens(ParseResult& result) {
-    // Only apply when: extension empty, frame exists, basename exists
-    if (result.extension.empty() && !result.frameRange.empty() && !result.basename.empty()) {
-        std::string basename = result.basename;
-
-        // Remove trailing dot if present (added by normal frameNum processing)
-        if (!basename.empty() && basename.back() == '.') {
-            basename.pop_back();
-        }
-
-        // Check if basename ends with pattern ".digits"
-        size_t dotIdx = basename.find_last_of('.');
-        if (dotIdx != std::string::npos) {
-            std::string suffix = basename.substr(dotIdx + 1);
-
-            // Verify suffix is all digits
-            if (isAllDigits(suffix)) {
-                // Swap: first number → frame, second number → extension
-                result.extension = "." + result.frameRange;
-                result.frameRange = suffix;
-                result.basename = basename.substr(0, dotIdx + 1); // Keep through the dot
-            }
-        }
-    }
-}
-
 
 void extractDigitsFromExtensionToken(ParseResult& result) {
     // Only apply when: padding exists, no frame range yet, basename exists
