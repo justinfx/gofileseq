@@ -273,6 +273,105 @@ protected:
 };
 
 
+TEST( TestParseErrors, RejectsLexerErrors ) {
+    const char* inputs[] = {
+        "/a/foo<bar.exr",
+        "/a/foo>bar.1-10#.exr",
+        "/a/sh<010.1001.exr",
+        "/a/x<y>.#.exr",
+    };
+    for (size_t i = 0; i < sizeof(inputs) / sizeof(inputs[0]); ++i) {
+        fileseq::Status stat;
+        fileseq::FileSequence s(inputs[i], &stat);
+        EXPECT_FALSE(stat) << "expected error for " << inputs[i] << ", got " << s.string();
+    }
+}
+
+
+TEST( TestParseErrors, ExtensionlessNumericBasename ) {
+    struct Case { const char* path; const char* base; const char* range; const char* ext; };
+    const Case cases[] = {
+        {"/a/file.5.1-10#", "file.5.", "1-10", ""},
+        {"/a/v.12.1-100x2@@", "v.12.", "1-100x2", ""},
+        {"/a/shot.3.1001-1100#", "shot.3.", "1001-1100", ""},
+    };
+    for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i) {
+        const Case& c = cases[i];
+        fileseq::Status stat;
+        fileseq::FileSequence s(c.path, &stat);
+        ASSERT_TRUE(stat) << c.path << ": " << stat;
+        EXPECT_EQ(c.base, s.basename()) << c.path;
+        EXPECT_EQ(c.range, s.frameRange()) << c.path;
+        EXPECT_EQ(c.ext, s.ext()) << c.path;
+    }
+}
+
+
+TEST( TestParseErrors, DirectoryAllowsPaddingChars ) {
+    struct Case { const char* path; const char* dir; const char* base; };
+    const Case cases[] = {
+        {"/mnt/shot#1/file.1-10#.exr", "/mnt/shot#1/", "file."},
+        {"/mnt/a@b/file.1001.exr", "/mnt/a@b/", "file."},
+        {"/mnt/a@b/file.exr", "/mnt/a@b/", "file"},
+        {"/mnt/$FOO/file.1-10#.exr", "/mnt/$FOO/", "file."},
+        {"/mnt/out/100%done/file.1-10#.exr", "/mnt/out/100%done/", "file."},
+        {"/mnt/out/%04dir/file.exr", "/mnt/out/%04dir/", "file"},
+        {"/mnt/<UDIM>/tex.1001.exr", "/mnt/<UDIM>/", "tex."},
+        {"/mnt/%(UDIM)d/tex.#.exr", "/mnt/%(UDIM)d/", "tex."},
+    };
+    for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i) {
+        const Case& c = cases[i];
+        fileseq::Status stat;
+        fileseq::FileSequence s(c.path, &stat);
+        ASSERT_TRUE(stat) << c.path << ": " << stat;
+        EXPECT_EQ(c.dir, s.dirname()) << c.path;
+        EXPECT_EQ(c.base, s.basename()) << c.path;
+    }
+}
+
+
+TEST( TestParseErrors, RangeFollowedByDotNum ) {
+    struct Case { const char* path; const char* base; const char* range; const char* pad; };
+    const Case cases[] = {
+        {"/mnt/out/file.1-100.5#.exr", "file.1-100.", "5", "#"},
+        {"/mnt/out/file.1-100.5@.exr", "file.1-100.", "5", "@"},
+        {"/mnt/out/file.1,2,3.10#.exr", "file.1,2,3.", "10", "#"},
+    };
+    for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i) {
+        const Case& c = cases[i];
+        fileseq::Status stat;
+        fileseq::FileSequence s(c.path, &stat);
+        ASSERT_TRUE(stat) << c.path << ": " << stat;
+        EXPECT_EQ(c.base, s.basename()) << c.path;
+        EXPECT_EQ(c.range, s.frameRange()) << c.path;
+        EXPECT_EQ(c.pad, s.padding()) << c.path;
+        EXPECT_EQ(".exr", s.ext()) << c.path;
+    }
+}
+
+
+TEST( TestParseErrors, DecimalStepMatchesV2 ) {
+    struct Case { const char* path; const char* base; const char* range; };
+    const Case cases[] = {
+        {"/mnt/out/file.1-5x0.25#.exr", "file.1-5x0.", "25"},
+        {"/mnt/out/file1-5x0.25#.exr", "file1-5x0.", "25"},
+        {"/mnt/out/file.1-5y0.25@@.exr", "file.1-5y0.", "25"},
+        {"/mnt/out/file.-1-5x0.25#.exr", "file.-1-5x0.", "25"},
+        {"/mnt/out/file.1-10x2,20-30x0.5#.exr", "file.1-10x2,20-30x0.", "5"},
+        {"/mnt/out/file.1-5x0.25#", "file.1-5x0.", "25"},
+        {"/mnt/out/file.1-5x2#.exr", "file.", "1-5x2"},
+    };
+    for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i) {
+        const Case& c = cases[i];
+        fileseq::Status stat;
+        fileseq::FileSequence s(c.path, &stat);
+        ASSERT_TRUE(stat) << c.path << ": " << stat;
+        EXPECT_EQ(c.base, s.basename()) << c.path;
+        EXPECT_EQ(c.range, s.frameRange()) << c.path;
+    }
+}
+
+
 TEST_F( TestNewFileSequences, New ) {
     fileseq::Status stat;
 

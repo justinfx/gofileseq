@@ -47,21 +47,25 @@ func ParseFileSequence(input string) (ParseResult, error) {
 	// Create the parser
 	parser := NewfileseqParser(stream)
 
-	// Add custom error listener to both lexer and parser
-	errListener := &errorListener{}
+	lexErrs := &errorListener{}
+	parseErrs := &errorListener{}
 	lexer.RemoveErrorListeners()
-	lexer.AddErrorListener(errListener)
+	lexer.AddErrorListener(lexErrs)
 	parser.RemoveErrorListeners()
-	parser.AddErrorListener(errListener)
+	parser.AddErrorListener(parseErrs)
 
 	// Try SLL prediction mode first (much faster for unambiguous grammars)
 	parser.GetInterpreter().SetPredictionMode(antlr.PredictionModeSLL)
 	tree := parser.Input()
 
+	// LL prediction cannot repair a lexer error, so reject without retrying
+	if len(lexErrs.errors) > 0 {
+		return ParseResult{}, fmt.Errorf("failed to parse sequence %q: %w", input, lexErrs.errors[0])
+	}
+
 	// If SLL failed, retry with LL prediction mode (slower but more thorough)
-	if len(errListener.errors) > 0 {
-		// Reset for retry
-		errListener.errors = errListener.errors[:0]
+	if len(parseErrs.errors) > 0 {
+		parseErrs.errors = parseErrs.errors[:0]
 		inputStream = antlr.NewInputStream(input)
 		lexer.SetInputStream(inputStream)
 		stream.SetTokenSource(lexer)
@@ -70,9 +74,8 @@ func ParseFileSequence(input string) (ParseResult, error) {
 		parser.GetInterpreter().SetPredictionMode(antlr.PredictionModeLL)
 		tree = parser.Input()
 
-		// Check for parse errors after LL retry
-		if len(errListener.errors) > 0 {
-			return ParseResult{}, fmt.Errorf("failed to parse sequence %q: %w", input, errListener.errors[0])
+		if len(parseErrs.errors) > 0 {
+			return ParseResult{}, fmt.Errorf("failed to parse sequence %q: %w", input, parseErrs.errors[0])
 		}
 	}
 
@@ -142,6 +145,7 @@ func (v *fileSeqVisitor) VisitSequence(ctx *SequenceContext) interface{} {
 	// Post-process: move leading dot from frame range to basename
 	// (see parse_postprocess.go Special Case 3 for detailed explanation)
 	moveLeadingDotFromFrameRange(&v.result)
+	splitDecimalStepFromFrameRange(&v.result)
 
 	// Extract padding (grammar already parsed it)
 	if padCtx := ctx.Padding(0); padCtx != nil {
@@ -164,7 +168,7 @@ func (v *fileSeqVisitor) VisitSingleFrame(ctx *SingleFrameContext) interface{} {
 	}
 
 	// Extract basename (grammar already parsed it)
-	if basenameCtx := ctx.Basename(); basenameCtx != nil {
+	if basenameCtx := ctx.FrameBasename(); basenameCtx != nil {
 		v.result.Basename = basenameCtx.GetText()
 	}
 
@@ -197,7 +201,7 @@ func (v *fileSeqVisitor) VisitPatternOnly(ctx *PatternOnlyContext) interface{} {
 	}
 
 	// Extract basename
-	if basenameCtx := ctx.Basename(); basenameCtx != nil {
+	if basenameCtx := ctx.PatBasename(); basenameCtx != nil {
 		v.result.Basename = basenameCtx.GetText()
 	}
 

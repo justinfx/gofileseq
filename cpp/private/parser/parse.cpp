@@ -59,6 +59,8 @@ public:
             result.extension = ext.str();
         }
 
+        moveLeadingDotFromFrameRange(result);
+        splitDecimalStepFromFrameRange(result);
         return nullptr;
     }
 
@@ -72,8 +74,8 @@ public:
         }
 
         // Extract basename (optional)
-        if (ctx->basename()) {
-            result.basename = ctx->basename()->getText();
+        if (ctx->patBasename()) {
+            result.basename = ctx->patBasename()->getText();
         }
 
         // Check for unsupported subframe syntax (Python-only feature)
@@ -97,6 +99,7 @@ public:
             result.extension = ext.str();
         }
 
+        extractDigitsFromExtensionToken(result);
         return nullptr;
     }
 
@@ -110,8 +113,8 @@ public:
         }
 
         // Extract basename
-        if (ctx->basename()) {
-            result.basename = ctx->basename()->getText();
+        if (ctx->frameBasename()) {
+            result.basename = ctx->frameBasename()->getText();
         }
 
         // Extract frame number
@@ -128,6 +131,8 @@ public:
             result.extension = ext.str();
         }
 
+        moveLeadingDotFromFrameRange(result);
+        handleMultipleDotNumTokens(result);
         return nullptr;
     }
 
@@ -186,8 +191,13 @@ bool parseFileSequence(ParseResult& result, const std::string& path) {
         // Parse the input
         fileseqParser::InputContext* tree = parser.input();
 
+        // LL prediction cannot repair a lexer error, so reject without retrying
+        if (lexer.getNumberOfSyntaxErrors() > 0) {
+            return false;
+        }
+
         // If SLL failed, retry with LL prediction mode (slower but more thorough)
-        if (lexer.getNumberOfSyntaxErrors() > 0 || parser.getNumberOfSyntaxErrors() > 0) {
+        if (parser.getNumberOfSyntaxErrors() > 0) {
             // Reset for retry
             input.seek(0);
             lexer.setInputStream(&input);
@@ -216,9 +226,6 @@ bool parseFileSequence(ParseResult& result, const std::string& path) {
 
         // Get the result
         result = visitor.result;
-
-        // Apply post-processing for the 3 special cases
-        postProcessParseResult(result);
 
         return true;
 

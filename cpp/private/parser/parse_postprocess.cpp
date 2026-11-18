@@ -72,16 +72,12 @@ void moveLeadingDotFromFrameRange(ParseResult& result) {
     }
 }
 
-
-void postProcessParseResult(ParseResult& result) {
-    // Apply all special case handlers in order
-    // Order matters - these are applied sequentially
-
-    // MUST run first - removes leading dot from frame range before other handlers use it
-    moveLeadingDotFromFrameRange(result);
-
-    handleMultipleDotNumTokens(result);
-    extractDigitsFromExtensionToken(result);
+void splitDecimalStepFromFrameRange(ParseResult& result) {
+    std::string::size_type i = result.frameRange.rfind('.');
+    if (i != std::string::npos) {
+        result.basename += result.frameRange.substr(0, i + 1);
+        result.frameRange = result.frameRange.substr(i + 1);
+    }
 }
 
 } // namespace internal

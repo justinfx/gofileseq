@@ -47,6 +47,14 @@ func (v *BasefileseqVisitor) VisitBasename(ctx *BasenameContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BasefileseqVisitor) VisitPatBasename(ctx *PatBasenameContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BasefileseqVisitor) VisitFrameBasename(ctx *FrameBasenameContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BasefileseqVisitor) VisitPlainBasename(ctx *PlainBasenameContext) interface{} {
 	return v.VisitChildren(ctx)
 }

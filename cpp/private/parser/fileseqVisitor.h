@@ -40,6 +40,10 @@ public:
 
     virtual antlrcpp::Any visitBasename(fileseqParser::BasenameContext *context) = 0;
 
+    virtual antlrcpp::Any visitPatBasename(fileseqParser::PatBasenameContext *context) = 0;
+
+    virtual antlrcpp::Any visitFrameBasename(fileseqParser::FrameBasenameContext *context) = 0;
+
     virtual antlrcpp::Any visitPlainBasename(fileseqParser::PlainBasenameContext *context) = 0;
 
     virtual antlrcpp::Any visitFrameRange(fileseqParser::FrameRangeContext *context) = 0;
